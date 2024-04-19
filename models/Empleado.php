@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '../../../Config/Database.php';
+require __DIR__ . '../../Config/Database.php';
 use Config\Database;
 
 class Empleado {
