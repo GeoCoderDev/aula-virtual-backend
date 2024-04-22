@@ -1,0 +1,43 @@
+<?php
+
+// Incluye los archivos de controladores
+require __DIR__."../../../controllers/empleado_controller.php";
+
+// Rutas para el módulo de empleados
+Flight::group("/api/empleados", function(){
+    
+    Flight::route('GET ', function(){
+        $controller = new EmpleadoController();
+        echo $controller->getAll();
+
+    });
+
+    Flight::route('GET /@id', function($id){
+        $controller = new EmpleadoController();
+        echo $controller->getById($id);
+    });
+
+
+    Flight::route('POST ', function() {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Headers: Content-Type");
+        $controller = new EmpleadoController();
+        $data = Flight::request()->data->getData();
+        echo $controller->create($data);    
+    });
+
+    Flight::route('DELETE /@id', function($id) {
+        header("Access-Control-Allow-Origin: *");
+        $controller = new EmpleadoController();
+        echo $controller->delete($id);    
+    });
+
+    Flight::route('PUT /@id', function($id) {
+        header("Access-Control-Allow-Origin: *");
+        $controller = new EmpleadoController();
+        $data = Flight::request()->data->getData();
+        echo $controller->update($id, $data);
+    });
+    
+});
+
