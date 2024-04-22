@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '../../Config/Database.php';
+require_once __DIR__ . '../../Config/Database.php';
 use Config\Database;
 
 class Empleado {
@@ -8,6 +8,7 @@ class Empleado {
 
     public function __construct() {
         $this->conn = Database::getConnection();
+
     }
 
     public function getAll() {
