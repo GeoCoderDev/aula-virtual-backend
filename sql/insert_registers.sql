@@ -8,10 +8,14 @@ INSERT INTO T_Superadmin (Nombre_Usuario, Contraseña) VALUES
 ('TWYrUXNHT0YwVU94dmZGQ09jeGJpdz09', 'SmJ4UkkzU3ZDNkdnSVVXWFlMa2M2dz09'),
 ('ajNzZHo3bmpZdXJrVGZuZmp0a0FTZz09', 'UDg3WjhWd0dTcXNCS3l4clVKL09Sdz09');
 
+
+-- 1 REGISTRO administrador_1 y password1
+-- 2 REGISTRO administrador_2 y password2
+
 -- Registros para la tabla T_Admins
 INSERT INTO T_Administradores (Nombre_Usuario, Contraseña) VALUES
-('admin1', 'password1'),
-('admin2', 'password2');
+('YkVzVzlJTGNnK3hZTmorei9PV2Zodz09', 'QUwvWkowZTNzcU9xTUtybm9JczFLdz09'),
+('c1FYeVpLdlBOYWUyVk5td05sOWdXdz09', 'djdVZVorOE43Ui9kKzdrUHI2K09vZz09');
 
 
 -- Registros para la tabla T_Usuarios

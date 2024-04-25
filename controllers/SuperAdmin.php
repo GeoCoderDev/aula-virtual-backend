@@ -12,6 +12,30 @@ class SuperadminController {
     }
 
     /**
+     * Esta función devuelve un array o false
+     * array si se enviaron las credenciales correctas, este array contendra los datos del  superadmin logueado
+     * false si las credenciales son incorrectas
+     * @param [type] $data
+     * @return bool|array
+     */
+    public function validateIdAndUsername($data){
+
+        $id_superadmin = $data->superadminID;
+        $username = $data->username;
+
+
+        $superadmin = new Superadmin();
+        $superadminFinded = $superadmin->getById($id_superadmin);
+
+        if(!$superadminFinded){
+            if($superadminFinded["Nombre_Usuario"]==$username) return $superadminFinded;
+        }
+        
+        return $superadminFinded;
+
+    }
+
+    /**
      * Esta funcion devuelve 1 o 2 o un array
      * 1 si se enviaron datos incompletos
      * 2 si se enviaron credenciales incorrectas
@@ -39,6 +63,8 @@ class SuperadminController {
         return 2;// Credenciales inválidas
         
     }
+
+    
 
     public function getAll() {
         $superadminModel = new Superadmin();

@@ -1,8 +1,10 @@
 <?php
 
-require __DIR__."/../functions/totalTimeInSeconds.php";
+require_once __DIR__."/../functions/totalTimeInSeconds.php";
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\Key;
 
  // El token expirará en 1 dia
 define("EXPIRATION_TIME_TOKEN_SUPERADMIN", totalTimeInSeconds(1,0,0,0));
@@ -30,11 +32,16 @@ function generateSuperadminJWT($superadminID, $username) {
     return $jwt;
 }
 
-function  decodeSuperAdminJWT($token){
+function decodeSuperAdminJWT($token){
     global $JWT_KEY_SUPERADMIN;
 
-    $jwt = JWT::decode($token, $JWT_KEY_SUPERADMIN);
-
-    return $jwt;
-
+    try {
+        $decoded = JWT::decode($token, new Key($JWT_KEY_SUPERADMIN, "HS256"));
+        return $decoded;
+    } catch (ExpiredException $e) {
+        Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
+    } catch (Exception $e) {
+        // También puedes enviar una respuesta de error al cliente
+        Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
+    }
 }

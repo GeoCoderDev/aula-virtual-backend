@@ -27,13 +27,13 @@ class EmpleadoController {
         $sueldo = $data['sueldo'] ?? null;
         
         if (!$nombre || !$sueldo) {
-            return json_encode(["message" => "Nombre y sueldo son obligatorios"]);
+            return json_encode(["message" => "Nombre y sueldo son obligatorios"]);            
         }
 
         $empleadoModel = new Empleado();
         $empleadoId = $empleadoModel->create($nombre, $sueldo);
         
-        return json_encode(["message" => "Empleado creado con ID: $empleadoId"]);
+        return json_encode(["message" => "Empleado creado", "id" => $empleadoId]);
     }
 
     public function update($id, $data) {
@@ -64,5 +64,6 @@ class EmpleadoController {
             return json_encode(["message" => "No se encontró ningún empleado con el ID proporcionado"]);
         }
     }
+    
 }
 ?>

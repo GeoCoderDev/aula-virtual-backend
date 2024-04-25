@@ -1,33 +1,38 @@
 <?php
 
-require __DIR__ . '../../Models/Admin.php';
+require_once __DIR__ . '../../Models/Admin.php';
+require_once __DIR__."/../lib/helpers/encriptations/adminEncriptation.php";
 
 class AdminController {
 
     public function getById($id) {
         $adminModel = new Admin();
         $admin = $adminModel->getById($id);
-        return json_encode($admin);
+        return $admin;
     }
 
     public function getAll() {
         $adminModel = new Admin();
         $admins = $adminModel->getAll();
-        return json_encode($admins);
+        return $admins;
     }
 
+
     public function create($data) {
-        $nombreUsuario = $data['nombreUsuario'] ?? null;
-        $contrasena = $data['contrasena'] ?? null;
-        
-        if (!$nombreUsuario || !$contrasena) {
-            return json_encode(["message" => "Nombre de usuario y contraseña son obligatorios"]);
+        $username = $data['username'] ?? null;
+        $password = $data['password'] ?? null;
+
+        if (!$username || !$password) {
+            return Flight::json(["message" => "username y password son obligatorios"], 400);
         }
 
+        $encriptedUsername = encryptAdminUsername($username);
+        $encriptedPassword = encryptAdminUsername($password);
+
         $adminModel = new Admin();
-        $adminId = $adminModel->create($nombreUsuario, $contrasena);
+        $adminId = $adminModel->create($encriptedUsername, $encriptedPassword);
         
-        return json_encode(["message" => "Admin creado con ID: $adminId"]);
+        return Flight::json(["message" => "Admin creado", "id"=>$adminId], 201);
     }
 
     public function updateUsername($id, $data) {

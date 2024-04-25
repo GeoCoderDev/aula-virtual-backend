@@ -23,7 +23,6 @@ Flight::group("/api/empleados", function(){
 
     Flight::route('POST ', function() {
         header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Headers: Content-Type"); //no necesario a mi parecer
         $controller = new EmpleadoController();
         $data = Flight::request()->data->getData();
         echo $controller->create($data);    
