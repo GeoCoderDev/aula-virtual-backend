@@ -31,10 +31,5 @@ class SuperadminAuthenticated {
             return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"]));            
         }
     }
-    
 
-    /*public function after($params) {
-        Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["password"=>23464644545]));
-        Flight::json(Flight::request()->data->getData(), 200);
-    }*/
 }

@@ -11,13 +11,19 @@ class Admin {
     }
 
     public function getAll() {
-        $stmt = $this->conn->query("SELECT * FROM T_Administradores");
+        $stmt = $this->conn->query("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM T_Administradores WHERE Id_Admin = :id");
+        $stmt = $this->conn->prepare("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE Id_Admin = :id");
         $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getByUsername($username) {
+        $stmt = $this->conn->prepare("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE Nombre_Usuario = :username");
+        $stmt->execute(['username' => $username]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -38,4 +44,11 @@ class Admin {
         $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
         return $stmt->rowCount();
     }
+
+    public function delete($id) {
+        $stmt = $this->conn->prepare("DELETE FROM T_Administradores WHERE Id_Admin = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->rowCount();
+    }
+
 }

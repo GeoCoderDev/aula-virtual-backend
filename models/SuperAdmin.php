@@ -25,9 +25,7 @@ class Superadmin {
         $stmt = $this->conn->prepare("SELECT * FROM T_Superadmin WHERE Nombre_Usuario = :username");
         $stmt->execute(['username' => $username]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    
+    }    
 
     public function create($nombreUsuario, $contrasena) {
         $stmt = $this->conn->prepare("INSERT INTO T_Superadmin (Nombre_Usuario, Contraseña) VALUES (:nombreUsuario, :contrasena)");
