@@ -32,7 +32,7 @@ function getPhpFiles($dir) {
 }
 
 // Ruta al directorio
-$directory = __DIR__ . "./routes/";
+$directory = __DIR__ . "/routes/";
 
 // Obtiene la lista de archivos PHP en el directorio y sus subcarpetas
 $files = getPhpFiles($directory);
@@ -54,7 +54,6 @@ Flight::route('*', function () {
 // Finalmente, se inicia la API con el framework.
 Flight::start();
 
-
-
-
 ?>
+
+
