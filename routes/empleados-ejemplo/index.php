@@ -17,7 +17,7 @@ Flight::group("/api/empleados", function(){
     });
 
 
-    Flight::route('GET /asd/@nombre', function($nombre){
+    Flight::route('GET /name/@nombre', function($nombre){
         $controller = new EmpleadoController();
         echo $controller->getEmpleadoByName($nombre);
     });
