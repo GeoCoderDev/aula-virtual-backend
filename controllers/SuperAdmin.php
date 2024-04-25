@@ -11,14 +11,20 @@ class SuperadminController {
         return json_encode($superadmin);
     }
 
+    /**
+     * Esta funcion devuelve 1 o 2 o un array
+     * 1 si se enviaron datos incompletos
+     * 2 si se enviaron credenciales incorrectas
+     * array si se enviaron las credenciales correctas, este array contendra los datos del  superadmin logueado
+     * @param array $data
+     * @return int|array
+     */
     public function validateSuperadmin($data) {
 
         $username = $data['username'] ?? null;
         $password = $data['password'] ?? null;
         
-        if (!$username || !$password) {
-            return json_encode(["message" => "username y password son obligatorios"]);
-        }
+        if (!$username || !$password) return 1;
 
         $username_encripted = encryptSuperadminUsername($username);
 
@@ -30,7 +36,8 @@ class SuperadminController {
             if($superadmin_password_decripted==$password) return $superadminFinded;
         }
 
-        return json_encode(["message" => "Superadministrador no logeado"]);
+        return 2;// Credenciales inválidas
+        
     }
 
     public function getAll() {
@@ -64,9 +71,9 @@ class SuperadminController {
         $rowCount = $superadminModel->updateUsername($id, $newUsername);
         
         if ($rowCount > 0) {
-            return json_encode(["message" => "Nombre de usuario actualizado"]);
+            return ["message" => "Nombre de usuario actualizado"];
         } else {
-            return json_encode(["message" => "No se encontró ningún superadmin con el ID proporcionado"]);
+            return ["message" => "No se encontró ningún superadmin con el ID proporcionado"];
         }
     }
 
@@ -74,16 +81,16 @@ class SuperadminController {
         $newPassword = $data['newPassword'] ?? null;
 
         if (!$newPassword) {
-            return json_encode(["message" => "Nueva contraseña es obligatoria"]);
+            return ["message" => "Nueva contraseña es obligatoria"];
         }
 
         $superadminModel = new Superadmin();
         $rowCount = $superadminModel->updatePassword($id, $newPassword);
         
         if ($rowCount > 0) {
-            return json_encode(["message" => "Contraseña actualizada"]);
+            return ["message" => "Contraseña actualizada"];
         } else {
-            return json_encode(["message" => "No se encontró ningún superadmin con el ID proporcionado"]);
+            return ["message" => "No se encontró ningún superadmin con el ID proporcionado"];
         }
     }
 

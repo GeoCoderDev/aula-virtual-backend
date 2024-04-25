@@ -1,6 +1,7 @@
 
---1 REGISTRO ---> superadmin_dir y password1
---2 REGISTRO ---> superadmin_secr y password2
+use virtual_classroom_b;
+-- 1 REGISTRO superadmin_dir y password1
+-- 2 REGISTRO superadmin_secr y password2
 
 -- Registros para la tabla T_Superadmin
 INSERT INTO T_Superadmin (Nombre_Usuario, Contraseña) VALUES
@@ -8,13 +9,13 @@ INSERT INTO T_Superadmin (Nombre_Usuario, Contraseña) VALUES
 ('ajNzZHo3bmpZdXJrVGZuZmp0a0FTZz09', 'UDg3WjhWd0dTcXNCS3l4clVKL09Sdz09');
 
 -- Registros para la tabla T_Admins
-INSERT INTO T_Admins (Nombre_Usuario, Contraseña) VALUES
+INSERT INTO T_Administradores (Nombre_Usuario, Contraseña) VALUES
 ('admin1', 'password1'),
 ('admin2', 'password2');
 
 
--- Registros para la tabla T_Users
-INSERT INTO T_Users (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Dirección_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3)
+-- Registros para la tabla T_Usuarios
+INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Dirección_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3)
 VALUES 
 ('Juan', 'Perez', '1995-03-15', 'juanperez', 'contraseña1', 'Av. Lima 123', 'María Perez', 'Madre', '987654321', 'foto1.jpg'),
 ('Maria', 'Gomez', '1997-09-20', 'mariagomez', 'contraseña2', 'Jr. Arequipa 456', 'Carlos Gomez', 'Padre', '999888777', 'foto2.jpg'),
@@ -27,8 +28,8 @@ VALUES
 ('Diego', 'Morales', '1992-07-30', 'diegomorales', 'contraseña9', 'Av. Trujillo 909', 'Ana Morales', 'Madre', '444333222', 'foto9.jpg'),
 ('Jorge', 'Castillo', '1994-04-18', 'jorgecastillo', 'contraseña10', 'Jr. Tacna 111', 'Carla Castillo', 'Madre', '888777666', 'foto10.jpg');
 
--- Registros para la tabla T_Teachers
-INSERT INTO T_Teachers (DNI_Teacher, Id_User)
+-- Registros para la tabla T_Profesores
+INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario)
 VALUES 
 ('12345678', 6),
 ('87654321', 7),
@@ -36,8 +37,8 @@ VALUES
 ('23456789', 9),
 ('34567890', 10);
 
--- Registros para la tabla T_Classrooms
-INSERT INTO T_Classrooms (Grado, Seccion)
+-- Registros para la tabla T_Aulas
+INSERT INTO T_Aulas (Grado, Seccion)
 VALUES 
 ('1', 'A'),
 ('1', 'B'),
@@ -45,8 +46,8 @@ VALUES
 ('2', 'B'),
 ('3', 'A');
 
--- Registros para la tabla T_Students
-INSERT INTO T_Students (DNI_Student, Id_User, Id_Classroom)
+-- Registros para la tabla T_Estudiantes
+INSERT INTO T_Estudiantes (DNI_Estudiante, Id_Usuario, Id_Aula)
 VALUES 
 ('11111111', 1, 1),
 ('22222222', 2, 2),
@@ -55,8 +56,8 @@ VALUES
 ('55555555', 5, 5);
 
 
--- Registros para la tabla T_Courses
-INSERT INTO T_Courses (Nombre)
+-- Registros para la tabla T_Cursos
+INSERT INTO T_Cursos (Nombre)
 VALUES 
 ('Matemáticas'),
 ('Ciencias'),
@@ -64,8 +65,8 @@ VALUES
 ('Lenguaje'),
 ('Educación Física');
 
--- Registros para la tabla T_Courses_Classroom
-INSERT INTO T_Courses_Classroom (Id_Course, Id_Classroom)
+-- Registros para la tabla T_Cursos_Aula
+INSERT INTO T_Cursos_Aula (Id_Curso, Id_Aula)
 VALUES 
 (1, 1),
 (2, 1),
@@ -73,11 +74,15 @@ VALUES
 (4, 2),
 (5, 3);
 
--- Registros para la tabla T_Topics
-INSERT INTO T_Topics (Nom_Tema, Id_Course_Classroom, Num_Orden)
+-- Registros para la tabla T_Temas
+INSERT INTO T_Temas (Nombre_Tema, Id_Curso_Aula, Num_Orden)
 VALUES 
 ('Álgebra', 1, 1),
 ('Geometría', 1, 2),
 ('Química Orgánica', 2, 1),
 ('Física Moderna', 2, 2),
 ('Revolución Francesa', 3, 1);
+
+
+
+
