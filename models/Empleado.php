@@ -8,7 +8,6 @@ class Empleado {
 
     public function __construct() {
         $this->conn = Database::getConnection();
-
     }
 
     public function getAll() {
@@ -19,6 +18,13 @@ class Empleado {
     public function getById($id) {
         $stmt = $this->conn->prepare("SELECT * FROM empleado WHERE id = :id");
         $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getByIdAndName($id, $nombre){
+        $stmt = $this->conn->prepare('SELECT * FROM empleado WHERE id = :yu AND nombre = :hjk');
+        $stmt->execute(['yu'=> $id,'hjk'=> $nombre]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -40,3 +46,4 @@ class Empleado {
         return $stmt->rowCount();
     }
 }
+

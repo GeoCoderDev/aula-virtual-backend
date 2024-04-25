@@ -1,7 +1,6 @@
 <?php
 
 
-
 $Encript_key_username_admin = $_ENV["ENCRIPT_KEY_USERNAME_ADMIN"];
 $Encript_key_password_superadmin = $_ENV["ENCRIPT_KEY_PASSWORD_ADMIN"];
 

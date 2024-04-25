@@ -9,7 +9,6 @@ Flight::group("/api/empleados", function(){
     Flight::route('GET ', function(){
         $controller = new EmpleadoController();
         echo $controller->getAll();
-
     });
 
     Flight::route('GET /@id', function($id){
@@ -17,6 +16,10 @@ Flight::group("/api/empleados", function(){
         echo $controller->getById($id);
     });
 
+    Flight::route('GET /@id/@nombre', function($id,$nombre){
+        $controller = new EmpleadoController();
+        echo $controller->getEmpleadoByIdAndName($id, $nombre);
+    });
 
     Flight::route('POST ', function() {
         header("Access-Control-Allow-Origin: *");
