@@ -22,6 +22,12 @@ class EmpleadoController {
         return json_encode($empleado);
     }
 
+    public function getEmpleadoByName($nombre){
+        $empleadoModel = new Empleado();
+        $empleado = $empleadoModel->getByName($nombre);
+        return json_encode($empleado);
+    }
+
     public function create($data) {
         $nombre = $data['nombre'] ?? null;
         $sueldo = $data['sueldo'] ?? null;

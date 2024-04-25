@@ -28,6 +28,15 @@ class Empleado {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getByName($nombre){
+        $stmt = $this->conn->prepare('SELECT * FROM empleado WHERE nombre = :hjk');
+        $stmt->execute(['hjk'=> $nombre]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+
     public function create($nombre, $sueldo) {
         $stmt = $this->conn->prepare("INSERT INTO empleado (nombre, sueldo) VALUES (:nombre, :sueldo)");
         $stmt->execute(['nombre' => $nombre, 'sueldo' => $sueldo]);
