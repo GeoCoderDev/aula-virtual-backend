@@ -53,7 +53,4 @@ Flight::route('*', function () {
 
 // Finalmente, se inicia la API con el framework.
 Flight::start();
-//GUEVARA CABRO
 ?>
-
-
