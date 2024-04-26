@@ -22,6 +22,60 @@ class AdminController {
         return $admin;
     }
 
+
+    /**
+     * Esta función devuelve un array o false
+     * array si se enviaron las credenciales correctas, este array contendra los datos del  superadmin logueado
+     * false si las credenciales son incorrectas
+     * @param [type] $data
+     * @return bool|array
+     */
+    public function validateIdAndUsername($data){
+
+        $id_admin = $data->adminID;
+        $username = $data->username;
+
+
+        $admin = new Admin();
+        $adminFinded = $admin->getById($id_admin);
+
+        if(!$adminFinded){
+            if($adminFinded["Nombre_Usuario"]==$username) return $adminFinded;
+        }
+
+        return $adminFinded;
+
+    }
+
+    /**
+     * Esta funcion devuelve 1 o 2 o un array
+     * 1 si se enviaron datos incompletos
+     * 2 si se enviaron credenciales incorrectas
+     * array si se enviaron las credenciales correctas, este array contendra los datos del  superadmin logueado
+     * @param array $data
+     * @return int|array
+     */
+    public function validateAdmin($data) {
+
+        $username = $data['username'] ?? null;
+        $password = $data['password'] ?? null;
+
+        if (!$username || !$password) return 1;
+
+        $username_encripted = encryptAdminUsername($username);
+
+        $admin = new Admin();
+        $adminFinded = $admin->getByUsername($username_encripted);        
+
+        if ($adminFinded) {
+            $admin_password_decripted = decryptAdminPassword($adminFinded["Contraseña"]);
+            if($admin_password_decripted==$password) return $adminFinded;
+        }
+
+        return 2;// Credenciales inválidas
+
+    }
+
     public function create($data) {
         $username = $data['username'] ?? null;
         $password = $data['password'] ?? null;
@@ -36,7 +90,7 @@ class AdminController {
 
         if (!$adminsSameUsername) {
             $encriptedUsername = encryptAdminUsername($username);
-            $encriptedPassword = encryptAdminUsername($password);
+            $encriptedPassword = encryptAdminPassword($password);
 
 
             $adminId = $adminModel->create($encriptedUsername, $encriptedPassword);

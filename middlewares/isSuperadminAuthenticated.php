@@ -5,6 +5,12 @@ require_once __DIR__."/../lib/helpers/JWT/JWT_Superadmin.php";
 
 class SuperadminAuthenticated {
 
+    private $nextIsAdminMiddleware;
+
+    public function __construct($nextIsAdminMiddleware = false) {
+        $this->nextIsAdminMiddleware = $nextIsAdminMiddleware;
+    }
+
     public function before($params) {        
         
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
@@ -12,11 +18,18 @@ class SuperadminAuthenticated {
         $token = getallheaders()["Authorization"] ?? null;
 
         
-        if(!$token){ 
-            return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"])); 
+        if(!$token){            
+            
+            if(!$this->nextIsAdminMiddleware){
+                Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"])); 
+            }
+
+            return;
         } 
 
-        $jwtData = decodeSuperAdminJWT($token); 
+        $jwtData = decodeSuperAdminJWT($token, $this->nextIsAdminMiddleware); 
+
+        if(is_null($jwtData)) return;                  
         
         $controller = new SuperadminController(); 
         $validateResponse = $controller->validateIdAndUsername($jwtData->data); 
@@ -28,7 +41,12 @@ class SuperadminAuthenticated {
             Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Superadmin"=>$superadminID, "Nombre_Usuario"=>$username]));
 
          } else { 
-            return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"]));            
+
+            if(!$this->nextIsAdminMiddleware){
+                Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"]));
+            }
+            
+            return ;            
         }
     }
 

@@ -65,7 +65,6 @@ class SuperadminController {
     }
 
     
-
     public function getAll() {
         $superadminModel = new Superadmin();
         $superadmins = $superadminModel->getAll();

@@ -14,8 +14,8 @@ INSERT INTO T_Superadmin (Nombre_Usuario, Contraseña) VALUES
 
 -- Registros para la tabla T_Admins
 INSERT INTO T_Administradores (Nombre_Usuario, Contraseña) VALUES
-('YkVzVzlJTGNnK3hZTmorei9PV2Zodz09', 'QUwvWkowZTNzcU9xTUtybm9JczFLdz09'),
-('c1FYeVpLdlBOYWUyVk5td05sOWdXdz09', 'djdVZVorOE43Ui9kKzdrUHI2K09vZz09');
+('YkVzVzlJTGNnK3hZTmorei9PV2Zodz09', 'SmJ4UkkzU3ZDNkdnSVVXWFlMa2M2dz09'),
+('c1FYeVpLdlBOYWUyVk5td05sOWdXdz09', 'UDg3WjhWd0dTcXNCS3l4clVKL09Sdz09');
 
 
 -- Registros para la tabla T_Usuarios

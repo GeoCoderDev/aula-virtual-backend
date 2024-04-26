@@ -16,13 +16,13 @@ class Admin {
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE Id_Admin = :id");
+        $stmt = $this->conn->prepare("SELECT * FROM T_Administradores WHERE Id_Admin = :id");
         $stmt->execute(['id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getByUsername($username) {
-        $stmt = $this->conn->prepare("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE Nombre_Usuario = :username");
+        $stmt = $this->conn->prepare("SELECT * FROM T_Administradores WHERE Nombre_Usuario = :username");
         $stmt->execute(['username' => $username]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }

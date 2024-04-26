@@ -10,7 +10,7 @@ define("ALLOWED_ORIGINS", "*");
 
 // Manejo del Preflight para poder hacer solicitudes HTTP desde Navegadores
 Flight::route('OPTIONS *', function() {
-    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
     header('Access-Control-Allow-Headers: Authorization, Content-Type');
     header("Access-Control-Allow-Methods: POST, DELETE, PUT, GET, OPTIONS");
     echo "";

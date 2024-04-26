@@ -36,7 +36,7 @@ Flight::group("/api/admins",  function(){
         $controller->updatePassword($id,$data);
     });
 
-    Flight::route("DELETE ",function ($id){
+    Flight::route("DELETE /@id",function ($id){
         $controller = new AdminController();      
         $controller->delete($id);
     });
