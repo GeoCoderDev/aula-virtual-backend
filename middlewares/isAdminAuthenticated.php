@@ -27,7 +27,7 @@ class AdminAuthenticated {
             $adminID = $validateResponse["Id_Admin"]; 
             $username = $validateResponse['Nombre_Usuario']; 
             
-            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Admin"=>$adminID, "Nombre_Usuario"=>$username]));
+            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Admin"=>$adminID, "Nombre_Usuario_Admin"=>$username]));
 
          } else { 
             return Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));            

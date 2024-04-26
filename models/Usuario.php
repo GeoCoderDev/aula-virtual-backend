@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '../../Config/Database.php';
+require_once __DIR__ . '/../Config/Database.php'; // Corregí la ruta del archivo de configuración de la base de datos
 use Config\Database;
 
 class Usuario {
@@ -34,23 +34,30 @@ class Usuario {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function create($Nombres, $Apellidos, $Fecha_Nacimiento, $Nombre_Usuario, $Contraseña_Usuario, $Dirección_Domicilio, $Nombre_Contacto_Emergencia, $Parentezco_Contacto_Emergencia, $Telefono_Contacto_Emergencia, $Foto_Perfil_Key_S3)
+    public function create($Nombres, $Apellidos, $Fecha_Nacimiento, $Nombre_Usuario, $passwordEncripted, $Direccion_Domicilio, $Nombre_Contacto_Emergencia, $Parentezco_Contacto_Emergencia, $Telefono_Contacto_Emergencia, $Foto_Perfil_Key_S3)
     {
-        $stmt = $this->conn->prepare("INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Dirección_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3) VALUES (:Nombres, :Apellidos, :Fecha_Nacimiento, :Nombre_Usuario, :Contraseña_Usuario, :Dirección_Domicilio, :Nombre_Contacto_Emergencia, :Parentezco_Contacto_Emergencia, :Telefono_Contacto_Emergencia, :Foto_Perfil_Key_S3)");
-        $stmt->execute([
+        $stmt = $this->conn->prepare("INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Direccion_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3) VALUES (:Nombres, :Apellidos, :Fecha_Nacimiento, :Nombre_Usuario, :passwordEncripted, :Direccion_Domicilio, :Nombre_Contacto_Emergencia, :Parentezco_Contacto_Emergencia, :Telefono_Contacto_Emergencia, :Foto_Perfil_Key_S3)");
+
+        $success = $stmt->execute([
             'Nombres' => $Nombres,
             'Apellidos' => $Apellidos,
             'Fecha_Nacimiento' => $Fecha_Nacimiento,
             'Nombre_Usuario' => $Nombre_Usuario,
-            'Contraseña_Usuario' => $Contraseña_Usuario,
-            'Dirección_Domicilio' => $Dirección_Domicilio,
+            'passwordEncripted' => $passwordEncripted,
+            'Direccion_Domicilio' => $Direccion_Domicilio,
             'Nombre_Contacto_Emergencia' => $Nombre_Contacto_Emergencia,
             'Parentezco_Contacto_Emergencia' => $Parentezco_Contacto_Emergencia,
             'Telefono_Contacto_Emergencia' => $Telefono_Contacto_Emergencia,
             'Foto_Perfil_Key_S3' => $Foto_Perfil_Key_S3
         ]);
-        return $this->conn->lastInsertId();
+
+        if ($success) {
+            return $this->conn->lastInsertId();
+        } else {
+            return false;
+        }
     }
+
 
     public function update($Id_Usuario, $data)
     {

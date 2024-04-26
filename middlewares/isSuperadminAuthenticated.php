@@ -38,7 +38,7 @@ class SuperadminAuthenticated {
             $superadminID = $validateResponse["Id_Superadmin"]; 
             $username = $validateResponse['Nombre_Usuario']; 
             
-            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Superadmin"=>$superadminID, "Nombre_Usuario"=>$username]));
+            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Superadmin"=>$superadminID, "Nombre_Usuario_Superadmin"=>$username]));
 
          } else { 
 

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS T_Usuarios (
     Fecha_Nacimiento DATE,
     Nombre_Usuario VARCHAR(255) NOT NULL,
     Contraseña_Usuario VARCHAR(255) NOT NULL,
-    Dirección_Domicilio VARCHAR(255),
+    Direccion_Domicilio VARCHAR(255),
     Nombre_Contacto_Emergencia VARCHAR(255),
     Parentezco_Contacto_Emergencia VARCHAR(255),
     Telefono_Contacto_Emergencia VARCHAR(20),

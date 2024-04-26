@@ -19,7 +19,7 @@ INSERT INTO T_Administradores (Nombre_Usuario, Contraseña) VALUES
 
 
 -- Registros para la tabla T_Usuarios
-INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Dirección_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3)
+INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Direccion_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3)
 VALUES 
 ('Juan', 'Perez', '1995-03-15', 'juanperez', 'contraseña1', 'Av. Lima 123', 'María Perez', 'Madre', '987654321', 'foto1.jpg'),
 ('Maria', 'Gomez', '1997-09-20', 'mariagomez', 'contraseña2', 'Jr. Arequipa 456', 'Carlos Gomez', 'Padre', '999888777', 'foto2.jpg'),

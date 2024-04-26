@@ -1,6 +1,7 @@
 <?php
-require_once __DIR__ . '../../Models/Profesor.php';
-require_once __DIR__.'/Usuario.php';
+require_once __DIR__ . '/../models/Profesor.php';
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 
 class ProfesorController
 {
@@ -20,43 +21,51 @@ class ProfesorController
 
     public function create($data)
     {
-        $DNI_Profesor = $data['DNI_Profesor'] ?? null;
-        $Nombres = $data['Nombres'] ?? null;
-        $Apellidos = $data['Apellidos'] ?? null;
-        $Fecha_Nacimiento = $data['Fecha_Nacimiento'] ?? null;
-        $Nombre_Usuario = $data['Nombre_Usuario'] ?? null;
-        $Contraseña_Usuario = $data['Contraseña_Usuario'] ?? null;
-        $Dirección_Domicilio = $data['Dirección_Domicilio'] ?? null;
-        $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'] ?? null;
-        $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'] ?? null;
-        $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'] ?? null;
-        $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'] ?? null;
-
-        if (!$DNI_Profesor || !$Nombres || !$Apellidos || !$Fecha_Nacimiento || !$Nombre_Usuario || !$Contraseña_Usuario || !$Dirección_Domicilio || !$Nombre_Contacto_Emergencia || !$Parentezco_Contacto_Emergencia || !$Telefono_Contacto_Emergencia || !$Foto_Perfil_Key_S3) {
-            return Flight::json(["message" => "Faltan campos obligatorios"], 401);
+        // Definir los campos requeridos
+        $requiredFields = ['DNI_Profesor', 'Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia', 'Foto_Perfil_Key_S3'];
+        
+        // Verificar si todos los campos requeridos están presentes en $data
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                // Devolver una respuesta JSON indicando el campo que falta
+                return json_encode(["message" => "Falta el campo obligatorio: $field"]);
+            }
         }
+
+        // Si todos los campos requeridos están presentes, continuar con la lógica para insertar en la base de datos
+        $DNI_Profesor = $data['DNI_Profesor'];
+        $Nombres = $data['Nombres'];
+        $Apellidos = $data['Apellidos'];
+        $Fecha_Nacimiento = $data['Fecha_Nacimiento'];
+        $Nombre_Usuario = $data['Nombre_Usuario'];
+        $Contraseña_Usuario = $data['Contraseña_Usuario'];
+        $Direccion_Domicilio = $data['Direccion_Domicilio'];
+        $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
+        $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
+        $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
+        $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'];
 
         $profesorModel = new Profesor();
         $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
 
         if ($existingProfesor) {
-            return Flight::json(["message" => "Ya existe un profesor con ese DNI"], 409);
+            return json_encode(["message" => "Ya existe un profesor con ese DNI"], 409);
         }
 
-        $usuarioController = new UsuarioController();
-        $existingUsuario = $usuarioController->getByUsername($Nombre_Usuario);
+        $usuarioModelo = new Usuario(); // Corregí la instancia de Usuario
+        $existingUsuario = $usuarioModelo->getByUsername($Nombre_Usuario);
 
         if ($existingUsuario) {
-            return Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
+            return json_encode(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
         }
 
-        $Id_Usuario = $usuarioController->create(
+        $Id_Usuario = $usuarioModelo->create(
             $Nombres,
             $Apellidos,
             $Fecha_Nacimiento,
             $Nombre_Usuario,
-            $Contraseña_Usuario,
-            $Dirección_Domicilio,
+            encryptUserPassword($Contraseña_Usuario),
+            $Direccion_Domicilio,
             $Nombre_Contacto_Emergencia,
             $Parentezco_Contacto_Emergencia,
             $Telefono_Contacto_Emergencia,
@@ -64,14 +73,14 @@ class ProfesorController
         );
 
         if ($Id_Usuario) {
-            $rowCount = $profesorModel->create($DNI_Profesor, $Id_Usuario);
-            if ($rowCount > 0) {
-                return Flight::json(["message" => "Profesor creado"]);
+            $success = $profesorModel->create($DNI_Profesor, $Id_Usuario);
+            if ($success) {
+                return json_encode(["message" => "Profesor creado"]);
             } else {
-                return Flight::json(["message" => "Error al crear el profesor"], 500);
+                return json_encode(["message" => "Error al crear el profesor"], 500);
             }
         } else {
-            return Flight::json(["message" => "Error al crear el usuario"], 500);
+            return json_encode(["message" => "Error al crear el usuario"], 500);
         }
     }
 

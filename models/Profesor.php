@@ -28,9 +28,10 @@ class Profesor{
 
     public function create($dni, $userId) {
         $stmt = $this->conn->prepare("INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario) VALUES (:dni, :userId)");
-        $stmt->execute(['dni' => $dni, 'userId' => $userId]);
-        return $this->conn->lastInsertId();
+        $success = $stmt->execute(['dni' => $dni, 'userId' => $userId]);
+        return $success;
     }
+
 
     public function update($dni, $userId) {
         $stmt = $this->conn->prepare("UPDATE T_Profesores SET Id_Usuario = :userId WHERE DNI_Profesor = :dni");
