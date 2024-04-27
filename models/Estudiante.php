@@ -24,6 +24,22 @@ class Estudiante
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+
+
+    public function getByUserId($Id_Usuario)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM T_Estudiantes WHERE Id_Usuario = :Id_Usuario");
+        $stmt->execute(['Id_Usuario' => $Id_Usuario]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getByUsername($username) {
+    $stmt = $this->conn->prepare("SELECT * FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE U.Nombre_Usuario = :username");
+    $stmt->execute(['username' => $username]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
         $stmt = $this->conn->prepare("INSERT INTO T_Estudiantes (DNI_Estudiante, Id_Usuario, Id_Aula) VALUES (:DNI_Estudiante, :Id_Usuario, :Id_Aula)");
