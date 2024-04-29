@@ -13,32 +13,29 @@ class Estudiante
 
     public function getAll()
     {
-        $stmt = $this->conn->query("SELECT * FROM T_Estudiantes");
+        $stmt = $this->conn->query("SELECT E.*, U.* FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getByDNI($DNI_Estudiante)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM T_Estudiantes WHERE DNI_Estudiante = :DNI_Estudiante");
+        $stmt = $this->conn->prepare("SELECT E.*, U.* FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.DNI_Estudiante = :DNI_Estudiante");
         $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-
-
     public function getByUserId($Id_Usuario)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM T_Estudiantes WHERE Id_Usuario = :Id_Usuario");
+        $stmt = $this->conn->prepare("SELECT E.*, U.* FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.Id_Usuario = :Id_Usuario");
         $stmt->execute(['Id_Usuario' => $Id_Usuario]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getByUsername($username) {
-    $stmt = $this->conn->prepare("SELECT * FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE U.Nombre_Usuario = :username");
-    $stmt->execute(['username' => $username]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
+        $stmt = $this->conn->prepare("SELECT E.*, U.* FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE U.Nombre_Usuario = :username");
+        $stmt->execute(['username' => $username]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
@@ -61,3 +58,4 @@ class Estudiante
         return $stmt->rowCount();
     }
 }
+?>

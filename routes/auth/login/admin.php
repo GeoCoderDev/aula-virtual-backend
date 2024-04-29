@@ -22,7 +22,7 @@ Flight::route("POST /api/auth/admin/login", function(){
         $token = generateAdminJWT($adminID, $username);
 
         // Devolver el token JWT en la respuesta
-        Flight::json(["message" => "Administrador autenticado", "token" => $token], 200);
+        Flight::json(["message" => "Administrador autenticado", "token" => $token, "rol" => "admin"], 200);
     } else {
         if($validateResponse==1){
             Flight::json(["message" => "Nombre de usuario y contraseña son obligatorios"], 400);

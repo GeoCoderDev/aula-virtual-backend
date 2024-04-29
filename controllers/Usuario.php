@@ -80,22 +80,22 @@ class UsuarioController {
 
     public function getUserRoleByUserId($userId) {
         $profesorModel = new Profesor();
-        $estudianteModel = new Estudiante();
-
+        
         // Verificar si el usuario es un profesor
         $profesor = $profesorModel->getByUserId($userId);
         if ($profesor) {
-            return "Profesor";
+            return "teacher";
         }
-
+        
+        $estudianteModel = new Estudiante();
         // Verificar si el usuario es un estudiante
         $estudiante = $estudianteModel->getByUserId($userId);
         if ($estudiante) {
-            return "Estudiante";
+            return "student";
         }
 
         // Si no es profesor ni estudiante, no tiene un rol específico
-        return "Ningún rol";
+        return null;
     }
 
         // Método para obtener el rol de usuario por nombre de usuario
@@ -112,60 +112,44 @@ class UsuarioController {
 
 
 
-    function validateUser($data) {
-        $username = $data['username'] ?? null;
-        $password = $data['password'] ?? null;
+    public function validateUser($data) {
+    $username = $data['username'] ?? null;
+    $password = $data['password'] ?? null;
 
-        if (!$username || !$password) {
-            return 1; // Datos incompletos
-        }
-
-        $userRole = $this->getUserRoleByUsername($username);
-
-        if ($userRole === "Profesor") {
-            $profesorModel = new Profesor();
-            $profesor = $profesorModel->getByUsername($username);
-            if ($profesor) {
-
-
-                //PROFESOR NO TIENE CONTRASEÑA CUANDO SE TRAE
-                $decriptedPassword = decryptUserPassword($profesor['Contraseña']);
-
-
-
-                // Verificar las credenciales del profesor
-                if ($decriptedPassword === $password) {
-                    // Credenciales correctas, generar JWT para profesor
-                    return generateTeacherJWT($profesor['DNI_Profesor'], $username);
-                } else {
-                    return 2; // Credenciales incorrectas
-                }
-            }
-        } else if ($userRole === "Estudiante") {
-
-            $estudianteModel = new Estudiante();
-
-            $estudiante = $estudianteModel->getByUsername($username);
-
-
-            //ESTUDIANTE NO TIENE CONTRASEÑA CUANDO SE TRAE
-            if ($estudiante) {
-                $decriptedPassword = decryptUserPassword($estudiante['Contraseña']);
-
-
-
-                // Verificar las credenciales del estudiante
-                if ($decriptedPassword === $password) {
-                    // Credenciales correctas, generar JWT para estudiante
-                    return generateStudentJWT($estudiante['DNI_Estudiante'], $username);
-                } else {
-                    return 2; // Credenciales incorrectas
-                }
-            }
-        }
-
-        return 2; // Credenciales incorrectas
+    if (!$username || !$password) {
+        return 1; // Datos incompletos
     }
+
+    $userRole = $this->getUserRoleByUsername($username);
+
+    if ($userRole === "teacher") {
+        $profesorModel = new Profesor();
+        $profesor = $profesorModel->getByUsername($username);
+        if ($profesor) {
+            $decriptedPassword = decryptUserPassword($profesor['Contraseña_Usuario']);
+            if ($decriptedPassword === $password) {
+                // Credenciales correctas, generar JWT para profesor
+                return ["token" => generateTeacherJWT($profesor['DNI_Profesor'], $username), "rol" => "teacher"];
+            } else {
+                return 2; // Credenciales incorrectas
+            }
+        }
+    } else if ($userRole === "student") {
+        $estudianteModel = new Estudiante();
+        $estudiante = $estudianteModel->getByUsername($username);
+        if ($estudiante) {
+            $decriptedPassword = decryptUserPassword($estudiante['Contraseña_Usuario']);
+            if ($decriptedPassword === $password) {
+                // Credenciales correctas, generar JWT para estudiante
+                return ["token" => generateStudentJWT($estudiante['DNI_Estudiante'], $username), "rol" => "student"];
+            } else {
+                return 2; // Credenciales incorrectas
+            }
+        }
+    }
+
+    return 2; // Credenciales incorrectas
+}
 
 
 }
