@@ -20,18 +20,15 @@ class SuperadminController {
      */
     public function validateIdAndUsername($data){
 
-        $id_superadmin = $data->superadminID;
-        $username = $data->username;
-
-
         $superadmin = new Superadmin();
-        $superadminFinded = $superadmin->getById($id_superadmin);
+        $superadminFinded = $superadmin->getById($data->Id_Superadmin);
 
-        if(!$superadminFinded){
-            if($superadminFinded["Nombre_Usuario"]==$username) return $superadminFinded;
+        if($superadminFinded && $superadminFinded["Nombre_Usuario"]==$data->Username_Superadmin){
+            return $superadminFinded;
+ 
         }
         
-        return $superadminFinded;
+        return false;
 
     }
 

@@ -22,8 +22,8 @@ function generateSuperadminJWT($superadminID, $username) {
         'iat' => $issuedAt,
         'exp' => $expirationTime,
         'data' => [
-            'superadminID' => $superadminID,
-            'username' => $username
+            'Id_Superadmin' => $superadminID,
+            'Username_Superadmin' => $username
         ]
     ];
 
@@ -32,21 +32,19 @@ function generateSuperadminJWT($superadminID, $username) {
     return $jwt;
 }
 
-function decodeSuperAdminJWT($token, $nextIsAdminMiddleware){
+function decodeSuperAdminJWT($token){
     global $JWT_KEY_SUPERADMIN;
 
     try {
         $decoded = JWT::decode($token, new Key($JWT_KEY_SUPERADMIN, "HS256"));
         return $decoded;
     } catch (ExpiredException $e) {
-        if(!$nextIsAdminMiddleware) Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
-        else return null;
+        Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
 
     } catch (Exception $e) {
         // También puedes enviar una respuesta de error al cliente
-        if(!$nextIsAdminMiddleware)
         Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
-        else return null;
+
 
     }
 }

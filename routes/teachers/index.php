@@ -22,4 +22,4 @@ Flight::group("/api/teachers",  function(){
 
     });
 
-}, [new SuperadminAuthenticated(true), new AdminAuthenticated()]);
+}, [new AdminAuthenticated(true), new SuperadminAuthenticated()]);

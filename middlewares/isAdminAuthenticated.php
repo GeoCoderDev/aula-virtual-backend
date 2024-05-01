@@ -5,9 +5,13 @@ require_once __DIR__."/../lib/helpers/JWT/JWT_Admin.php";
 
 class AdminAuthenticated {
 
-    public function before($params) {   
-        
-        if (array_key_exists("Id_Superadmin", Flight::request()->data->getData())) return;
+    private $nextIsSuperadminMiddleware;
+
+    public function __construct($nextIsSuperadminMiddleware = false) {
+        $this->nextIsSuperadminMiddleware = $nextIsSuperadminMiddleware;
+    }
+
+    public function before($params) {           
         
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
         header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -15,11 +19,16 @@ class AdminAuthenticated {
         $token = getallheaders()["Authorization"] ?? null;
 
         if(!$token){ 
-            return Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"])); 
+            if($this->nextIsSuperadminMiddleware)
+            Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"])); 
+            
+            return;
         } 
 
-        $jwtData = decodeAdminJWT($token); 
-        
+        $jwtData = decodeAdminJWT($token, $this->nextIsSuperadminMiddleware); 
+
+        if(is_null($jwtData)) return;  
+
         $controller = new AdminController(); 
         $validateResponse = $controller->validateIdAndUsername($jwtData->data); 
                 
@@ -27,7 +36,7 @@ class AdminAuthenticated {
             $adminID = $validateResponse["Id_Admin"]; 
             $username = $validateResponse['Nombre_Usuario']; 
             
-            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Admin"=>$adminID, "Nombre_Usuario_Admin"=>$username]));
+            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Admin"=>$adminID, "Nombre_Usuario"=>$username]));
 
          } else { 
             return Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));            

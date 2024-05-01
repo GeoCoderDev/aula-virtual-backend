@@ -5,6 +5,7 @@ require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 
 class EstudianteController
 {
+    
     public function getAll()
     {
         $estudianteModel = new Estudiante();
@@ -17,6 +18,17 @@ class EstudianteController
         $estudianteModel = new Estudiante();
         $estudiante = $estudianteModel->getByDNI($DNI_Estudiante);
         return json_encode($estudiante);
+    }
+
+    public function validateDNIAndUsername($data) {
+    $estudianteModel = new Estudiante();
+    $estudianteFinded = $estudianteModel->getByDNI($data->DNI_Estudiante);
+
+    if ($estudianteFinded && $estudianteFinded["Nombre_Usuario"]==$data->Username_Estudiante) {
+        return $estudianteFinded;      
+    }
+
+    return false;
     }
 
     public function create($data)
@@ -84,6 +96,14 @@ class EstudianteController
             return json_encode(["message" => "Error al crear el usuario"], 500);
         }
     }
+
+    public function getCursosByDNI($DNI_Estudiante)
+    {
+        $estudianteModel = new Estudiante();
+        $cursos = $estudianteModel->getCursosByDNI($DNI_Estudiante);
+        return $cursos;
+    }
+
 
     public function update($DNI_Estudiante, $data)
     {

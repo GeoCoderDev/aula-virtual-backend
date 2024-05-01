@@ -31,19 +31,16 @@ class AdminController {
      * @return bool|array
      */
     public function validateIdAndUsername($data){
-
-        $id_admin = $data->adminID;
-        $username = $data->username;
-
-
+        
         $admin = new Admin();
-        $adminFinded = $admin->getById($id_admin);
+        $adminFinded = $admin->getById($data["Id_Admin"]);
 
-        if(!$adminFinded){
-            if($adminFinded["Nombre_Usuario"]==$username) return $adminFinded;
+        if($adminFinded && $adminFinded["Nombre_Usuario"]==$data->Username_Admin){
+
+            return $adminFinded;
         }
 
-        return $adminFinded;
+        return false;
 
     }
 

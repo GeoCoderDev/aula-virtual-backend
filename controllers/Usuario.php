@@ -124,7 +124,7 @@ class UsuarioController {
 
     if ($userRole === "teacher") {
         $profesorModel = new Profesor();
-        $profesor = $profesorModel->getByUsername($username);
+        $profesor = $profesorModel->getByUsername($username,true);
         if ($profesor) {
             $decriptedPassword = decryptUserPassword($profesor['Contraseña_Usuario']);
             if ($decriptedPassword === $password) {
@@ -136,7 +136,7 @@ class UsuarioController {
         }
     } else if ($userRole === "student") {
         $estudianteModel = new Estudiante();
-        $estudiante = $estudianteModel->getByUsername($username);
+        $estudiante = $estudianteModel->getByUsername($username, true);
         if ($estudiante) {
             $decriptedPassword = decryptUserPassword($estudiante['Contraseña_Usuario']);
             if ($decriptedPassword === $password) {

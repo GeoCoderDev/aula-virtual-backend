@@ -21,8 +21,8 @@ function generateTeacherJWT($teacherID, $username) {
         'iat' => $issuedAt,
         'exp' => $expirationTime,
         'data' => [
-            'teacherID' => $teacherID,
-            'username' => $username
+            'DNI_Profesor' => $teacherID,
+            'Username_Profesor' => $username
         ]
     ];
 

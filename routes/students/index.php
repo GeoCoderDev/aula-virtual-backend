@@ -21,4 +21,4 @@ Flight::group("/api/students",  function(){
 
     });
 
-}, [new SuperadminAuthenticated(true), new AdminAuthenticated()]);
+}, [ new AdminAuthenticated(true), new SuperadminAuthenticated()]);

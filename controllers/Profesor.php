@@ -19,6 +19,18 @@ class ProfesorController
         return json_encode($profesor);
     }
 
+    public function validateDNIAndUsername($data) {
+        $profesorModel = new Profesor();
+        $profesorFinded = $profesorModel->getByDNI($data->DNI_Profesor);
+
+        if ($profesorFinded && $profesorFinded["Nombre_Usuario"]==$data->Username_Profesor) {
+            return $profesorFinded;                    
+        }
+
+        return false; // No se encontró el profesor o no coincide el ID y el nombre de usuario
+        
+    }
+
     public function create($data)
     {
         // Definir los campos requeridos
@@ -52,14 +64,14 @@ class ProfesorController
             return json_encode(["message" => "Ya existe un profesor con ese DNI"], 409);
         }
 
-        $usuarioModelo = new Usuario(); // Corregí la instancia de Usuario
-        $existingUsuario = $usuarioModelo->getByUsername($Nombre_Usuario);
+        $usuarioModel = new Usuario();
+        $existingUsuario = $usuarioModel->getByUsername($Nombre_Usuario);
 
         if ($existingUsuario) {
             return json_encode(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
         }
 
-        $Id_Usuario = $usuarioModelo->create(
+        $Id_Usuario = $usuarioModel->create(
             $Nombres,
             $Apellidos,
             $Fecha_Nacimiento,
@@ -82,6 +94,25 @@ class ProfesorController
         } else {
             return json_encode(["message" => "Error al crear el usuario"], 500);
         }
+    }
+
+    /**
+     * Esta funcion devuelve la lista de curso que enseña un profesor sin considerar el grado o seccion, y sin repetir 
+     *
+     * @param [type] $DNI_Profesor
+     * @return array
+    */
+    public function getCursosByDNI($DNI_Profesor)
+    {
+        $profesorModel = new Profesor();
+        $cursos = $profesorModel->getCursosByDNI($DNI_Profesor);
+        return $cursos;
+    }
+
+    public function getAsignacionesByDNI($DNI_Profesor){
+        $profesorModel = new Profesor();
+        $asignations = $profesorModel->getAsignacionesByDNI($DNI_Profesor);
+        return $asignations;
     }
 
     public function update($DNI_Profesor, $data)

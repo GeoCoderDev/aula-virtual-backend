@@ -21,16 +21,16 @@ INSERT INTO T_Administradores (Nombre_Usuario, Contraseña) VALUES
 -- Registros para la tabla T_Usuarios
 INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Direccion_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3)
 VALUES 
-('Juan', 'Perez', '1995-03-15', 'juanperez', 'contraseña1', 'Av. Lima 123', 'María Perez', 'Madre', '987654321', 'foto1.jpg'),
-('Maria', 'Gomez', '1997-09-20', 'mariagomez', 'contraseña2', 'Jr. Arequipa 456', 'Carlos Gomez', 'Padre', '999888777', 'foto2.jpg'),
-('Pedro', 'Martinez', '1999-11-10', 'pedromartinez', 'contraseña3', 'Calle Tacna 789', 'Ana Martinez', 'Hermana', '666555444', 'foto3.jpg'),
-('Luis', 'Gonzalez', '2000-02-05', 'luisgonzalez', 'contraseña4', 'Pje. Huancayo 101', 'Elena Gonzalez', 'Madre', '333222111', 'foto4.jpg'),
-('Ana', 'Rodriguez', '1998-07-08', 'anarodriguez', 'contraseña5', 'Av. Cusco 202', 'Raul Rodriguez', 'Padre', '111000999', 'foto5.jpg'),
-('Carlos', 'Hernandez', '1985-06-10', 'carloshernandez', 'contraseña6', 'Av. Arequipa 303', 'Laura Hernandez', 'Esposa', '555444333', 'foto6.jpg'),
-('Laura', 'Gutierrez', '1988-12-25', 'lauragutierrez', 'contraseña7', 'Jr. Puno 505', 'Diego Gutierrez', 'Esposo', '222111000', 'foto7.jpg'),
-('Elena', 'Alvarez', '1990-09-01', 'elenaalvarez', 'contraseña8', 'Calle Moquegua 707', 'Jorge Alvarez', 'Padre', '777666555', 'foto8.jpg'),
-('Diego', 'Morales', '1992-07-30', 'diegomorales', 'contraseña9', 'Av. Trujillo 909', 'Ana Morales', 'Madre', '444333222', 'foto9.jpg'),
-('Jorge', 'Castillo', '1994-04-18', 'jorgecastillo', 'contraseña10', 'Jr. Tacna 111', 'Carla Castillo', 'Madre', '888777666', 'foto10.jpg');
+('Juan', 'Perez', '1995-03-15', 'juanperez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Av. Lima 123', 'María Perez', 'Madre', '987654321', 'foto1.jpg'),
+('Maria', 'Gomez', '1997-09-20', 'mariagomez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Jr. Arequipa 456', 'Carlos Gomez', 'Padre', '999888777', 'foto2.jpg'),
+('Pedro', 'Martinez', '1999-11-10', 'pedromartinez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Calle Tacna 789', 'Ana Martinez', 'Hermana', '666555444', 'foto3.jpg'),
+('Luis', 'Gonzalez', '2000-02-05', 'luisgonzalez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Pje. Huancayo 101', 'Elena Gonzalez', 'Madre', '333222111', 'foto4.jpg'),
+('Ana', 'Rodriguez', '1998-07-08', 'anarodriguez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Av. Cusco 202', 'Raul Rodriguez', 'Padre', '111000999', 'foto5.jpg'),
+('Carlos', 'Hernandez', '1985-06-10', 'carloshernandez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Av. Arequipa 303', 'Laura Hernandez', 'Esposa', '555444333', 'foto6.jpg'),
+('Laura', 'Gutierrez', '1988-12-25', 'lauragutierrez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Jr. Puno 505', 'Diego Gutierrez', 'Esposo', '222111000', 'foto7.jpg'),
+('Elena', 'Alvarez', '1990-09-01', 'elenaalvarez', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Calle Moquegua 707', 'Jorge Alvarez', 'Padre', '777666555', 'foto8.jpg'),
+('Diego', 'Morales', '1992-07-30', 'diegomorales', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Av. Trujillo 909', 'Ana Morales', 'Madre', '444333222', 'foto9.jpg'),
+('Jorge', 'Castillo', '1994-04-18', 'jorgecastillo', 'dnNvZG56OWhCU3FVdXlwRmNhVFhHUT09', 'Jr. Tacna 111', 'Carla Castillo', 'Madre', '888777666', 'foto10.jpg');
 
 -- Registros para la tabla T_Profesores
 INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario)
@@ -87,6 +87,33 @@ VALUES
 ('Física Moderna', 2, 2),
 ('Revolución Francesa', 3, 1);
 
+-- Registros para la tabla T_Horario_Curso_Aula
+INSERT INTO T_Horario_Curso_Aula (Id_Curso_Aula, Dia_Semana, Hora_Inicio, Cant_Horas_Academicas)
+VALUES
+(1, 'Lunes', '08:00:00', 2),
+(1, 'Miércoles', '10:00:00', 2),
+(2, 'Martes', '09:00:00', 2),
+(2, 'Jueves', '11:00:00', 2),
+(3, 'Lunes', '08:00:00', 2),
+(3, 'Miércoles', '10:00:00', 2),
+(4, 'Martes', '09:00:00', 2),
+(4, 'Jueves', '11:00:00', 2),
+(5, 'Viernes', '08:00:00', 2),
+(5, 'Viernes', '10:00:00', 2);
+
+-- Registros para la tabla T_Asignaciones
+INSERT INTO T_Asignaciones (DNI_Profesor, Id_Horario_Curso_Aula)
+VALUES
+('12345678', 1),
+('12345678', 2),
+('87654321', 3),
+('87654321', 4),
+('98765432', 5),
+('98765432', 6),
+('23456789', 7),
+('23456789', 8),
+('34567890', 9),
+('34567890', 10);
 
 
 
