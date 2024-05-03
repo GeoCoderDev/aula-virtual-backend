@@ -5,21 +5,22 @@ require_once __DIR__."/../lib/helpers/encriptations/adminEncriptation.php";
 
 class AdminController {
     
-    public function getAll() {
+    public function getAll($limit = 200, $startFrom = 0) {
         $adminModel = new Admin();
-        $admins = $adminModel->getAll();
-
-        foreach ($admins as $key=>$admin) {
-            $admin["Nombre_Usuario"] = decryptAdminUsername($admin["Nombre_Usuario"]);
-            $admins[$key] = $admin;
-        }
-
+        $admins = $adminModel->getAll($limit, $startFrom);
         return $admins;
     }
+
     public function getById($id) {
         $adminModel = new Admin();
         $admin = $adminModel->getById($id);
         return $admin;
+    }
+
+    public function getAdminCount() {
+        $adminModel = new Admin();
+        $count = $adminModel->getAdminCount();
+        return $count;
     }
 
 

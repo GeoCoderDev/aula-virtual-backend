@@ -10,10 +10,37 @@ class Admin {
         $this->conn = Database::getConnection();
     }
 
-    public function getAll() {
-        $stmt = $this->conn->query("SELECT Id_Admin, Nombre_Usuario FROM T_Administradores");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function getAll($limit = 200, $startFrom = 0) {
+        $query = "SELECT Id_Admin, Nombre_Usuario FROM T_Administradores";
+
+        if ($limit !== null) {
+            $query .= " LIMIT :startFrom,:limit";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        if ($limit !== null) {
+            $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($admins as $key => $admin) {
+            $admin["Nombre_Usuario"] = decryptAdminUsername($admin["Nombre_Usuario"]);
+            $admins[$key] = $admin;
+        }
+
+        return $admins;
     }
+
+    public function getAdminCount() {
+        $stmt = $this->conn->query("SELECT COUNT(*) AS count FROM T_Administradores");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'];
+    }
+
 
     public function getById($id) {
         $stmt = $this->conn->prepare("SELECT * FROM T_Administradores WHERE Id_Admin = :id");

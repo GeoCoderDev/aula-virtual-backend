@@ -6,13 +6,17 @@ require_once __DIR__ . "/../../controllers/Estudiante.php";
 
 Flight::group("/api/students",  function(){
 
-    Flight::route("GET ", function() {
 
-        header("Access-Control-Allow-Origin: *");
-        header('Access-Control-Allow-Headers: Authorization, Content-Type');
-    // Obtener los parámetros de consulta de la URL
+
+    Flight::route("GET ", function() {
+        // Obtener los parámetros de consulta de la URL
         $startFrom = Flight::request()->query['startFrom'] ?? 0;
         $limit = Flight::request()->query['limit'] ?? 200;
+        $dni = Flight::request()->query['dni'] ?? null;
+        $nombre = Flight::request()->query['nombre'] ?? null;
+        $apellidos = Flight::request()->query['apellidos'] ?? null;
+        $grado = Flight::request()->query['grado'] ?? null;
+        $seccion = Flight::request()->query['seccion'] ?? null;
 
         // Convertir a entero si es una cadena
         $startFrom = intval($startFrom);
@@ -20,7 +24,14 @@ Flight::group("/api/students",  function(){
 
         $controller = new EstudianteController();
         // Pasar los parámetros a tu método getAll
-        Flight::json($controller->getAll(false, $limit, $startFrom), 200);
+        Flight::json($controller->getAll(false, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion), 200);
+    });
+
+
+
+    Flight::route("GET /count", function(){
+        $controller = new EstudianteController();
+        Flight::json(["count"=>$controller->getStudentCount()], 200);
     });
 
 

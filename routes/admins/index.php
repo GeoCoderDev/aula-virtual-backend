@@ -7,11 +7,25 @@ require_once __DIR__."/../../controllers/Admin.php";
 Flight::group("/api/admins",  function(){
 
     Flight::route("GET ", function(){
+        // Obtener los parámetros de consulta de la URL
+        $startFrom = Flight::request()->query['startFrom'] ?? 0;
+        $limit = Flight::request()->query['limit'] ?? 200;
+
+        // Convertir a entero si es una cadena
+        $startFrom = intval($startFrom);
+        $limit = intval($limit);
 
         $controller = new AdminController();
-        Flight::json($controller->getAll(),200);
-
+        // Pasar los parámetros a tu método getAll
+        Flight::json($controller->getAll($limit, $startFrom), 200);
     });
+    
+    Flight::route("GET /count", function(){
+        $controller = new AdminController();
+        Flight::json(["count" => $controller->getAdminCount()], 200);
+    });
+
+
 
     //Enviar en el cuerpo, username y password
     Flight::route("POST ", function(){

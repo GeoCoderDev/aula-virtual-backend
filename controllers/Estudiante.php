@@ -6,12 +6,20 @@ require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 class EstudianteController
 {
     
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0)
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null)
     {
         $estudianteModel = new Estudiante();
-        $estudiantes = $estudianteModel->getAll($includePassword, $limit , $startFrom);
+        $estudiantes = $estudianteModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion);
         return $estudiantes;
     }
+
+
+    public function getStudentCount() {
+        $estudianteModel = new Estudiante();
+        $count = $estudianteModel->getStudentCount();
+        return $count;
+    }
+
 
     public function getByDNI($DNI_Estudiante)
     {
