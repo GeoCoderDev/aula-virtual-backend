@@ -33,7 +33,7 @@ class AdminController {
     public function validateIdAndUsername($data){
         
         $admin = new Admin();
-        $adminFinded = $admin->getById($data["Id_Admin"]);
+        $adminFinded = $admin->getById($data->Id_Admin);
 
         if($adminFinded && $adminFinded["Nombre_Usuario"]==$data->Username_Admin){
 
