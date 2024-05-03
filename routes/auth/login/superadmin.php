@@ -22,12 +22,12 @@ Flight::route("POST /api/auth/superadmin/login", function(){
         $token = generateSuperadminJWT($superadminID, $username);
 
         // Devolver el token JWT en la respuesta
-        Flight::json(["message" => "Superadministrador logeado", "token" => $token, "rol" => "superadmin"],200);
+        Flight::json(["message" => "Superadministrador logeado", "token" => $token, "role" => "superadmin"],200);
     } else {
         if($validateResponse==1){
             Flight::json(["message" => "username y password son obligatorios"],400);
         }else{
-            Flight::json(['message' => 'Credenciales inválidas'], 401);
+            Flight::json(['message' => 'Nombre de Usuario y/o Contraseña incorrectos'], 401);
         }
     }
 
