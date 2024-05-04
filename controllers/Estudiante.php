@@ -14,9 +14,10 @@ class EstudianteController
     }
 
 
-    public function getStudentCount() {
+    public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null) {
         $estudianteModel = new Estudiante();
-        $count = $estudianteModel->getStudentCount();
+        // Pasar los parámetros de consulta al modelo para obtener el conteo de estudiantes
+        $count = $estudianteModel->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion);
         return $count;
     }
 

@@ -17,6 +17,14 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getSectionsByGrade($Grado)
+    {
+        $stmt = $this->conn->prepare("SELECT DISTINCT Seccion FROM T_Aulas WHERE Grado = :Grado");
+        $stmt->execute(['Grado' => $Grado]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+
     public function getById($Id_Aula)
     {
         $stmt = $this->conn->prepare("SELECT * FROM T_Aulas WHERE Id_Aula = :Id_Aula");

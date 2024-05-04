@@ -68,12 +68,50 @@ class Estudiante
     }
 
 
-    public function getStudentCount() {
-        $stmt = $this->conn->query("SELECT COUNT(*) AS count FROM T_Estudiantes");
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'];
-    }
+    public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null) {
+        // Construye la consulta base para contar estudiantes
+        $query = "SELECT COUNT(*) as count FROM T_Estudiantes";
 
+        // Agrega la unión con la tabla de Aulas para aplicar los filtros de grado y sección
+        $query .= " INNER JOIN T_Aulas ON T_Estudiantes.Id_Aula = T_Aulas.Id_Aula";
+
+        // Agrega la unión con la tabla de Usuarios para aplicar los filtros de nombre y apellidos
+        $query .= " INNER JOIN T_Usuarios ON T_Estudiantes.Id_Usuario = T_Usuarios.Id_Usuario";
+
+        // Prepara un array para almacenar las condiciones de filtro
+        $conditions = [];
+
+        // Agrega las condiciones de filtro según los parámetros proporcionados
+        if ($dni !== null) {
+            $conditions[] = "T_Estudiantes.DNI_Estudiante LIKE '%$dni%'";
+        }
+        if ($nombre !== null) {
+            $conditions[] = "T_Usuarios.Nombres LIKE '%$nombre%'";
+        }
+        if ($apellidos !== null) {
+            $conditions[] = "T_Usuarios.Apellidos LIKE '%$apellidos%'";
+        }
+        if ($grado !== null) {
+            $conditions[] = "T_Aulas.Grado LIKE '%$grado%'";
+        }
+        if ($seccion !== null) {
+            $conditions[] = "T_Aulas.Seccion LIKE '%$seccion%'";
+        }
+
+        // Si hay condiciones de filtro, agregalas a la consulta
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        // Ejecuta la consulta y obtén el resultado
+        $stmt = $this->conn->query($query);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Extrae el conteo de la fila de resultado
+        $count = $result['count'];
+
+        return $count;
+    }
     public function getByDNI($DNI_Estudiante, $includePassword = false)
     {
         if ($includePassword) {
