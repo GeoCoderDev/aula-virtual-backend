@@ -5,7 +5,7 @@ require __DIR__."../../../controllers/empleado_controller.php";
 
 // Rutas para el módulo de empleados
 Flight::group("/api/empleados", function(){
-    
+        
     Flight::route('GET ', function(){
         $controller = new EmpleadoController();
         echo $controller->getAll();
@@ -18,18 +18,17 @@ Flight::group("/api/empleados", function(){
 
 
     Flight::route('GET /name/@nombre', function($nombre){
+
         $controller = new EmpleadoController();
         echo $controller->getEmpleadoByName($nombre);
+
     });
 
     Flight::route('GET /@id/@nombre', function($id,$nombre){
         $controller = new EmpleadoController();
         echo $controller->getEmpleadoByIdAndName($id, $nombre);
     });
-
     
-
-
     Flight::route('POST ', function() {
         header("Access-Control-Allow-Origin: *");
         $controller = new EmpleadoController();

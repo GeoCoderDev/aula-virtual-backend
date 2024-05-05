@@ -10,22 +10,24 @@ Flight::group("/api/admins",  function(){
         // Obtener los parámetros de consulta de la URL
         $startFrom = Flight::request()->query['startFrom'] ?? 0;
         $limit = Flight::request()->query['limit'] ?? 200;
+        $username = Flight::request()->query['username'] ?? '';
 
         // Convertir a entero si es una cadena
         $startFrom = intval($startFrom);
         $limit = intval($limit);
 
         $controller = new AdminController();
-        // Pasar los parámetros a tu método getAll
-        Flight::json($controller->getAll($limit, $startFrom), 200);
+
+        if($startFrom==0){
+            Flight::json(["count" => $controller->getAdminCount(), "results"=>$controller->getAll($limit, $startFrom, $username)], 200);
+        }else{
+    
+            // Pasar los parámetros a tu método getAll
+            Flight::json(["results"=>$controller->getAll($limit, $startFrom, $username)], 200);
+
+        }
     });
     
-    Flight::route("GET /count", function(){
-        $controller = new AdminController();
-        Flight::json(["count" => $controller->getAdminCount()], 200);
-    });
-
-
 
     //Enviar en el cuerpo, username y password
     Flight::route("POST ", function(){

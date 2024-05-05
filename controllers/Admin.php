@@ -5,9 +5,10 @@ require_once __DIR__."/../lib/helpers/encriptations/adminEncriptation.php";
 
 class AdminController {
     
-    public function getAll($limit = 200, $startFrom = 0) {
+    public function getAll($limit = 200, $startFrom = 0, $username) {
         $adminModel = new Admin();
-        $admins = $adminModel->getAll($limit, $startFrom);
+
+        $admins = $adminModel->getAll($limit, $startFrom, $username);
         return $admins;
     }
 
@@ -60,10 +61,10 @@ class AdminController {
 
         if (!$username || !$password) return 1;
 
-        $username_encripted = encryptAdminUsername($username);
+
 
         $admin = new Admin();
-        $adminFinded = $admin->getByUsername($username_encripted);        
+        $adminFinded = $admin->getByUsername($username);        
 
         if ($adminFinded) {
             $admin_password_decripted = decryptAdminPassword($adminFinded["Contraseña"]);
@@ -83,33 +84,32 @@ class AdminController {
         }
 
         $adminModel = new Admin();        
-        $encriptedUsername = encryptAdminUsername($username);
-        $adminsSameUsername = $adminModel->getByUsername($encriptedUsername);
+
+        $adminsSameUsername = $adminModel->getByUsername($username);
 
         if (!$adminsSameUsername) {
-            $encriptedUsername = encryptAdminUsername($username);
+
             $encriptedPassword = encryptAdminPassword($password);
 
-
-            $adminId = $adminModel->create($encriptedUsername, $encriptedPassword);
+            $adminId = $adminModel->create($username, $encriptedPassword);
             
             return Flight::json(["message" => "Admin creado", "id"=>$adminId], 201);
         }
 
-        return  Flight::json(['message' => 'Ya existe un administrador con este username'],  409);
+        return  Flight::json(['message' => 'Ya existe un administrador con ese username'],  409);
     }
 
     public function updateUsername($id, $data) {
-        $newUsername = $data['newUsername'] ?? null;
+        $username = $data['username'] ?? null;
 
-        if (!$newUsername) {
+        if (!$username) {
             return Flight::json(["message" => "Nuevo nombre de usuario es obligatorio"] , 400);
         }
 
         $adminModel = new Admin();
 
-        $encriptedNewUsername = encryptAdminUsername($newUsername);
-        $rowCount = $adminModel->updateUsername($id, $encriptedNewUsername);
+
+        $rowCount = $adminModel->updateUsername($id, $username);
         
         if ($rowCount > 0) {
             return Flight::json(["message" => "Nombre de usuario actualizado"], 200);

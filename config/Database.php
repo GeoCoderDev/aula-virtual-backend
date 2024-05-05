@@ -6,7 +6,6 @@ use PDOException;
 
 class Database {
 
-
     public static function getConnection() {
         $host = $_ENV["MYSQL_DB_HOST"];
         $port = $_ENV["MYSQL_DB_PORT"];

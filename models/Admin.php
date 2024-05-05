@@ -10,30 +10,36 @@ class Admin {
         $this->conn = Database::getConnection();
     }
 
-    public function getAll($limit = 200, $startFrom = 0) {
-        $query = "SELECT Id_Admin, Nombre_Usuario FROM T_Administradores";
+    public function getAll($limit = 200, $startFrom = 0, $username = '')
+{
+    $query = "SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE 1=1";
 
-        if ($limit !== null) {
-            $query .= " LIMIT :startFrom,:limit";
-        }
-
-        $stmt = $this->conn->prepare($query);
-
-        if ($limit !== null) {
-            $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        }
-
-        $stmt->execute();
-        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($admins as $key => $admin) {
-            $admin["Nombre_Usuario"] = decryptAdminUsername($admin["Nombre_Usuario"]);
-            $admins[$key] = $admin;
-        }
-
-        return $admins;
+    // Agregar condición de búsqueda si se proporciona un nombre de usuario
+    if (!empty($username)) {
+        $query .= " AND Nombre_Usuario LIKE :username";
     }
+
+    // Agregar límite y offset
+    $query .= " LIMIT :startFrom, :limit";
+
+    $stmt = $this->conn->prepare($query);
+
+    // Vincular parámetros si se proporciona un nombre de usuario
+    if (!empty($username)) {
+        $usernameParam = "%" . $username . "%";
+        $stmt->bindValue(':username', $usernameParam, PDO::PARAM_STR);
+    }
+
+    $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+    $stmt->execute();
+    $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return $admins;
+}
+
+
 
     public function getAdminCount() {
         $stmt = $this->conn->query("SELECT COUNT(*) AS count FROM T_Administradores");
