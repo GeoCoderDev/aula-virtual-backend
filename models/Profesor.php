@@ -10,15 +10,83 @@ class Profesor{
         $this->conn = Database::getConnection();
     }
 
-    public function getAll($includePassword = false)
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null)
     {
         if ($includePassword) {
-            $stmt = $this->conn->query("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario");
+            $query = "SELECT P.DNI_Profesor, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
         } else {
-            $stmt = $this->conn->query("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario");
+            $query = "SELECT P.DNI_Profesor, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
         }
+
+        // Agregar condiciones según los parámetros de búsqueda
+        if ($dni !== null) {
+            $query .= " AND P.DNI_Profesor LIKE :dni";
+        }
+        if ($nombre !== null) {
+            $query .= " AND U.Nombres LIKE :nombre";
+        }
+        if ($apellidos !== null) {
+            $query .= " AND U.Apellidos LIKE :apellidos";
+        }
+
+        // Agregar límite y offset
+        $query .= " LIMIT :startFrom, :limit";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular los parámetros
+        if ($dni !== null) {
+            $stmt->bindValue(':dni', $dni . '%', PDO::PARAM_STR);
+        }
+        if ($nombre !== null) {
+            $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
+        }
+        if ($apellidos !== null) {
+            $stmt->bindValue(':apellidos', '%' . $apellidos . '%', PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    public function getProfessorCount($dni = null, $nombre = null, $apellidos = null) {
+        $query = "SELECT COUNT(*) AS count FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
+
+        // Agregar condiciones según los parámetros de consulta
+        if ($dni !== null) {
+            $query .= " AND P.DNI_Profesor LIKE :dni";
+        }
+        if ($nombre !== null) {
+            $query .= " AND U.Nombres LIKE :nombre";
+        }
+        if ($apellidos !== null) {
+            $query .= " AND U.Apellidos LIKE :apellidos";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular los parámetros
+        if ($dni !== null) {
+            $stmt->bindValue(':dni', $dni . '%', PDO::PARAM_STR);
+        }
+        if ($nombre !== null) {
+            $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
+        }
+        if ($apellidos !== null) {
+            $stmt->bindValue(':apellidos', '%' . $apellidos . '%', PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['count'];
+    }
+
+
 
     public function getByUserId($userId, $includePassword = false)
     {
