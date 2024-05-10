@@ -38,23 +38,6 @@ Flight::group("/api/students",  function(){
 
     });
 
-    /*Flight::route("GET /count", function(){
-    // Obtener los parámetros de consulta de la URL
-    $dni = Flight::request()->query['dni'] ?? null;
-    $nombre = Flight::request()->query['nombre'] ?? null;
-    $apellidos = Flight::request()->query['apellidos'] ?? null;
-    $grado = Flight::request()->query['grado'] ?? null;
-    $seccion = Flight::request()->query['seccion'] ?? null;
-
-    $controller = new EstudianteController();
-    // Obtener el conteo de estudiantes usando los mismos parámetros de consulta
-    $count = $controller->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion);
-
-    // Devolver el conteo como respuesta JSON
-    Flight::json(["count" => $count], 200);
-});*/
-
-
 
     Flight::route("POST ", function(){
 

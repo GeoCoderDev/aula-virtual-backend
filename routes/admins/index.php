@@ -30,8 +30,7 @@ Flight::group("/api/admins",  function(){
     
 
     //Enviar en el cuerpo, username y password
-    Flight::route("POST ", function(){
-                
+    Flight::route("POST ", function(){                
         $data = Flight::request()->data->getData();        
         $controller = new AdminController();
         $controller->create($data);

@@ -119,7 +119,7 @@ class AdminController {
     }
 
     public function updatePassword($id, $data) {
-        $newPassword = $data['newPassword'] ?? null;
+        $newPassword = $data['password'] ?? null;
 
         if (!$newPassword) {
             return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
