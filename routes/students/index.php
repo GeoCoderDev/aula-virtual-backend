@@ -43,7 +43,7 @@ Flight::group("/api/students",  function(){
 
         $data = Flight::request()->data->getData();
         $controller = new EstudianteController();
-        Flight::json($controller->create($data), 200);
+        $controller->create($data);
 
     });
 
