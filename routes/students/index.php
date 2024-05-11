@@ -47,4 +47,21 @@ Flight::group("/api/students",  function(){
 
     });
 
+    Flight::route("PUT /@DNI", function($DNI){
+
+        $data = Flight::request()->data->getData();
+        $controller = new EstudianteController();
+        $controller->update($DNI,$data);
+
+    });
+
+    Flight::route("DELETE /@DNI", function($DNI){
+
+        $data = Flight::request()->data->getData();
+        $controller = new EstudianteController();
+        $controller->delete($DNI);
+
+    });
+
+
 }, [ new AdminAuthenticated(true), new SuperadminAuthenticated()]);
