@@ -128,14 +128,13 @@ class Profesor{
 
     public function update($dni, $userId) {
         $stmt = $this->conn->prepare("UPDATE T_Profesores SET Id_Usuario = :userId WHERE DNI_Profesor = :dni");
-        $stmt->execute(['dni' => $dni, 'userId' => $userId]);
-        return $stmt->rowCount();
+        return $stmt->execute(['dni' => $dni, 'userId' => $userId]);        
     }
 
     public function delete($dni) {
         $stmt = $this->conn->prepare("DELETE FROM T_Profesores WHERE DNI_Profesor = :dni");
-        $stmt->execute(['dni' => $dni]);
-        return $stmt->rowCount();
+        return $stmt->execute(['dni' => $dni]);
+        
     }
 
 

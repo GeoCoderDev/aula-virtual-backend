@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/Profesor.php';
-require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/Usuario.php';
 require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 
 class ProfesorController
@@ -42,66 +42,32 @@ class ProfesorController
 
     public function create($data)
     {
-        // Definir los campos requeridos
-        $requiredFields = ['DNI_Profesor', 'Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia', 'Foto_Perfil_Key_S3'];
-        
-        // Verificar si todos los campos requeridos están presentes en $data
-        foreach ($requiredFields as $field) {
-            if (!isset($data[$field])) {
-                // Devolver una respuesta JSON indicando el campo que falta
-                return json_encode(["message" => "Falta el campo obligatorio: $field"]);
-            }
-        }
+       // Verificar si todos los campos requeridos están presentes en $data
+       if(!areFieldsComplete($data,  ['DNI_Profesor'])) return;   
 
         // Si todos los campos requeridos están presentes, continuar con la lógica para insertar en la base de datos
         $DNI_Profesor = $data['DNI_Profesor'];
-        $Nombres = $data['Nombres'];
-        $Apellidos = $data['Apellidos'];
-        $Fecha_Nacimiento = $data['Fecha_Nacimiento'];
-        $Nombre_Usuario = $data['Nombre_Usuario'];
-        $Contraseña_Usuario = $data['Contraseña_Usuario'];
-        $Direccion_Domicilio = $data['Direccion_Domicilio'];
-        $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
-        $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
-        $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
-        $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'];
+       
 
         $profesorModel = new Profesor();
         $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
 
         if ($existingProfesor) {
-            return json_encode(["message" => "Ya existe un profesor con ese DNI"], 409);
+            Flight::json(["message" => "Ya existe un profesor con ese DNI"], 409);
+            return;
+
         }
 
-        $usuarioModel = new Usuario();
-        $existingUsuario = $usuarioModel->getByUsername($Nombre_Usuario);
-
-        if ($existingUsuario) {
-            return json_encode(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
-        }
-
-        $Id_Usuario = $usuarioModel->create(
-            $Nombres,
-            $Apellidos,
-            $Fecha_Nacimiento,
-            $Nombre_Usuario,
-            encryptUserPassword($Contraseña_Usuario),
-            $Direccion_Domicilio,
-            $Nombre_Contacto_Emergencia,
-            $Parentezco_Contacto_Emergencia,
-            $Telefono_Contacto_Emergencia,
-            $Foto_Perfil_Key_S3
-        );
+        $userController = new UsuarioController();
+        $Id_Usuario = $userController->create($data, $DNI_Profesor);
 
         if ($Id_Usuario) {
             $success = $profesorModel->create($DNI_Profesor, $Id_Usuario);
             if ($success) {
-                return json_encode(["message" => "Profesor creado"]);
+                Flight::json(["message" => "Profesor creado"], 201);
             } else {
-                return json_encode(["message" => "Error al crear el profesor"], 500);
+                Flight::json(["message" => "Error al crear el profesor"], 500);
             }
-        } else {
-            return json_encode(["message" => "Error al crear el usuario"], 500);
         }
     }
 

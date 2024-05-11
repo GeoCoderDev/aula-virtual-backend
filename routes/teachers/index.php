@@ -33,7 +33,18 @@ Flight::group("/api/teachers",  function(){
     Flight::route("POST ", function(){
         $data = Flight::request()->data->getData();
         $controller = new ProfesorController();
-        Flight::json($controller->create($data), 200); // Agregué un retorno aquí
+        $controller->create($data);
+    });
+
+    Flight::route("PUT /@DNI", function($DNI){
+        $data = Flight::request()->data->getData();
+        $controller = new ProfesorController();
+        $controller->update($DNI, $data);
+    });
+
+    Flight::route("DELETE /@DNI", function($DNI){
+        $controller = new ProfesorController();
+        $controller->delete($DNI);
     });
 
 }, [new AdminAuthenticated(true), new SuperadminAuthenticated()]);

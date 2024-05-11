@@ -30,7 +30,7 @@ class UsuarioController {
         return json_encode($usuario);
     }
 
-    public function create($data, $DNI_Estudiante) {
+    public function create($data, $DNI) {
 
         // Verificar si todos los campos requeridos están presentes en $data
         if(!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) return;
@@ -60,7 +60,7 @@ class UsuarioController {
                 return;
             }
 
-            $Foto_Perfil_Key_S3 = generateProfilePhotoKeyS3($Nombre_Usuario, $DNI_Estudiante, $extension);
+            $Foto_Perfil_Key_S3 = generateProfilePhotoKeyS3($Nombre_Usuario, $DNI, $extension);
             
             // Creando un cliente de S3
             $s3Manager = new S3Manager();
