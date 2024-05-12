@@ -1,21 +1,29 @@
 <?php
+
 require_once __DIR__."/./Usuario.php";
+require_once __DIR__."/../Config/S3Manager.php"; // Agrega la ruta correcta al archivo S3Manager.php
+require_once __DIR__.'/../lib/helpers/functions/totalTimeInSeconds.php';
 
 use Config\Database;
+use Config\S3Manager; // Asegúrate de agregar el uso de S3Manager aquí
+
+define("DURATION_PERFIL_PHOTO_TEACHER", totalTimeInSeconds(1,0,0,0));
 
 class Profesor{
     private $conn;
+    private $s3Manager; // Agrega una propiedad para el S3Manager
 
     public function __construct() {
         $this->conn = Database::getConnection();
+        $this->s3Manager = new S3Manager(); // Inicializa el S3Manager en el constructor
     }
 
     public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null)
     {
         if ($includePassword) {
-            $query = "SELECT P.DNI_Profesor, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
+            $query = "SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
         } else {
-            $query = "SELECT P.DNI_Profesor, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
+            $query = "SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
         }
 
         // Agregar condiciones según los parámetros de búsqueda
@@ -49,7 +57,14 @@ class Profesor{
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $professors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Agregar la URL del objeto S3 al resultado
+        foreach ($professors as &$professor) {
+            $professor['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($professor['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_TEACHER);
+        }
+
+        return $professors;
     }
 
 
@@ -86,18 +101,25 @@ class Profesor{
         return $result['count'];
     }
 
-
-
     public function getByUserId($userId, $includePassword = false)
-    {
-        if ($includePassword) {
-            $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.Id_Usuario = :userId");
-        } else {
-            $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.Id_Usuario = :userId");
-        }
-        $stmt->execute(['userId' => $userId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+{
+    if ($includePassword) {
+        $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.Id_Usuario = :userId");
+    } else {
+        $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.Id_Usuario = :userId");
     }
+    $stmt->execute(['userId' => $userId]);
+    $professor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Verificar si se encontró algún profesor antes de intentar acceder a la URL de la foto de perfil
+    if ($professor) {
+        // Agrega la URL del objeto S3 al resultado
+        $professor['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($professor['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_TEACHER);
+    }
+
+    return $professor;
+}
+
 
     public function getByUsername($username, $includePassword = false) {
         if ($includePassword) {
@@ -106,19 +128,33 @@ class Profesor{
             $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE U.Nombre_Usuario = :username");
         }
         $stmt->execute(['username' => $username]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $professor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Agrega la URL del objeto S3 al resultado
+        $professor['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($professor['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_TEACHER);
+
+        return $professor;
     }
 
     public function getByDNI($dni, $includePassword = false)
-    {
-        if ($includePassword) {
-            $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.DNI_Profesor = :dni");
-        } else {
-            $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.DNI_Profesor = :dni");
-        }
-        $stmt->execute(['dni' => $dni]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+{
+    if ($includePassword) {
+        $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.DNI_Profesor = :dni");
+    } else {
+        $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE P.DNI_Profesor = :dni");
     }
+    $stmt->execute(['dni' => $dni]);
+    $professor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Verificar si se encontró algún profesor antes de intentar acceder a la URL de la foto de perfil
+    if ($professor) {
+        // Agrega la URL del objeto S3 al resultado
+        $professor['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($professor['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_TEACHER);
+    }
+
+    return $professor;
+}
+
 
     public function create($dni, $userId) {
         $stmt = $this->conn->prepare("INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario) VALUES (:dni, :userId)");

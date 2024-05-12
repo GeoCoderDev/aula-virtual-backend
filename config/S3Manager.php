@@ -43,19 +43,34 @@ class S3Manager
         }
     }
 
-    public function getObjectUrl($key)
+    public function getObjectUrl($key, $expiration = null)
     {
         $bucketName = $_ENV["AWS_BUCKET_NAME"];
 
         try {
-            // Obtiene la URL del objeto en el bucket
-            $result = $this->s3->getObjectUrl($bucketName, $key);
+            if ($expiration !== null) {
+                // Genera una URL pre-firmada con una duración específica
+                $command = $this->s3->getCommand('GetObject', [
+                    'Bucket' => $bucketName,
+                    'Key' => $key
+                ]);
 
-            return $result;
+                // Establece la duración de la URL pre-firmada
+                $request = $this->s3->createPresignedRequest($command, "+{$expiration} seconds");
+
+                // Obtiene la URL pre-firmada
+                $presignedUrl = (string) $request->getUri();
+            } else {
+                // Obtiene la URL del objeto en el bucket
+                $presignedUrl = $this->s3->getObjectUrl($bucketName, $key);
+            }
+
+            return $presignedUrl;
         } catch (AwsException $e) {
             return false;
         }
     }
+
 
     public function uploadFile($filePath, $key)
     {

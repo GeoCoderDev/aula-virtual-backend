@@ -19,13 +19,11 @@ class ProfesorController
         return $count;
     }
 
-
-
     public function getByDNI($DNI_Profesor)
     {
         $profesorModel = new Profesor();
         $profesor = $profesorModel->getByDNI($DNI_Profesor);
-        return json_encode($profesor);
+        return $profesor;
     }
 
     public function validateDNIAndUsername($data) {
@@ -55,7 +53,6 @@ class ProfesorController
         if ($existingProfesor) {
             Flight::json(["message" => "Ya existe un profesor con ese DNI"], 409);
             return;
-
         }
 
         $userController = new UsuarioController();
@@ -91,31 +88,57 @@ class ProfesorController
     }
 
     public function update($DNI_Profesor, $data)
+    
     {
-        $Id_Usuario = $data['Id_Usuario'] ?? null;
-        if (!$Id_Usuario) {
-            return json_encode(["message" => "Id_Usuario debe ser proporcionado para actualizar"]);
+        // Verificar si el estudiante existe
+        $profesorModel = new Profesor();
+        $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
+
+        if (!$existingProfesor) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
         }
 
-        $profesorModel = new Profesor();
-        $rowCount = $profesorModel->update($DNI_Profesor, $Id_Usuario);
+        $userController = new UsuarioController();
 
-        if ($rowCount > 0) {
-            return json_encode(["message" => "Profesor actualizado"]);
-        } else {
-            return json_encode(["message" => "No se encontró ningún profesor con el DNI proporcionado"]);
+        $data['Foto_Perfil_Key_S3'] = $existingProfesor['Foto_Perfil_Key_S3'];
+
+        $successUpdateUser = $userController->update($existingProfesor['Id_Usuario'], $data, $DNI_Profesor);
+
+        if ($successUpdateUser) {        
+            Flight::json(["message" => "Usuario actualizado correctamente"], 200);
+        }else{
+            Flight::json(["message" => "Error al actualizar el usuario"], 500);
         }
     }
 
     public function delete($DNI_Profesor)
     {
         $profesorModel = new Profesor();
-        $rowCount = $profesorModel->delete($DNI_Profesor);
 
-        if ($rowCount > 0) {
-            return json_encode(["message" => "Profesor eliminado"]);
+        $profesor = $profesorModel->getByDNI($DNI_Profesor);
+
+        if (!$profesor) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
+        }
+
+        // Eliminar el registro del estudiante
+        $successDeleteTeacher = $profesorModel->delete($DNI_Profesor);
+
+        if ($successDeleteTeacher) {
+
+            // Eliminar el usuario correspondiente
+            $usuarioModel = new UsuarioController();
+            $userDeletedSuccess = $usuarioModel->delete($profesor['Id_Usuario']);
+            if(!$userDeletedSuccess){
+                Flight::json(["message" => "No se pudo eliminar el usuario"], 500);
+                return;
+            }
+
+            Flight::json(["message" => "Profesor eliminado"], 200);
         } else {
-            return json_encode(["message" => "No se encontró ningún profesor con el DNI proporcionado"]);
+            Flight::json(["message" => "No se pudo eliminar el profesor"], 500);
         }
     }
 }

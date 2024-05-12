@@ -26,15 +26,13 @@ Flight::group("/api/admins",  function(){
             Flight::json(["results"=>$controller->getAll($limit, $startFrom, $username)], 200);
 
         }
-    });
-    
+    });    
 
     //Enviar en el cuerpo, username y password
     Flight::route("POST ", function(){                
         $data = Flight::request()->data->getData();        
         $controller = new AdminController();
-        $controller->create($data);
-        
+        $controller->create($data);        
     });
 
     //Enviar newUsername en el cuerpo

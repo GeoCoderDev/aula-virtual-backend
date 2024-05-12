@@ -26,9 +26,5 @@ Flight::group("/api/myCourses",  function(){
     });
 
 
-    /*Flight::route("POST ", function(){
-
-
-    });*/
 
 }, [new StudentAuthenticated(true), new TeacherAuthenticated()]);

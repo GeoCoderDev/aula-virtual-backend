@@ -19,6 +19,7 @@ class AdminAuthenticated {
         $token = getallheaders()["Authorization"] ?? null;
 
         if(!$token){ 
+            
             if($this->nextIsSuperadminMiddleware)
             Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"])); 
             

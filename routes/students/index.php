@@ -31,11 +31,8 @@ Flight::group("/api/students",  function(){
             Flight::json(["results" => $results, "count"=>$count], 200);
 
         }else{
-
-            Flight::json(["results" => $results], 200);         
-                           
+            Flight::json(["results" => $results], 200);                                    
         }        
-
     });
 
 

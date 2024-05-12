@@ -44,7 +44,5 @@ function decodeSuperAdminJWT($token){
     } catch (Exception $e) {
         // También puedes enviar una respuesta de error al cliente
         Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
-
-
     }
 }

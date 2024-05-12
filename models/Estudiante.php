@@ -1,14 +1,20 @@
 <?php
 require_once __DIR__ . '../../Config/Database.php';
+require_once __DIR__.'/../lib/helpers/functions/totalTimeInSeconds.php';
 use Config\Database;
+use Config\S3Manager;
+
+define("DURATION_PERFIL_PHOTO_STUDENT", totalTimeInSeconds(1,0,0,0));
 
 class Estudiante
 {
     private $conn;
+    private $s3Manager;
 
     public function __construct()
     {
         $this->conn = Database::getConnection();
+        $this->s3Manager = new S3Manager();
     }
 
     public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null)
@@ -33,7 +39,7 @@ class Estudiante
             $query .= " AND A.Grado = :grado";
         }
 
-        if( $seccion !== null){
+        if ($seccion !== null) {
             $query .= " AND A.Seccion = :seccion";
         }
 
@@ -56,7 +62,7 @@ class Estudiante
             $stmt->bindValue(':grado', $grado, PDO::PARAM_STR);
         }
 
-        if($seccion !== null){
+        if ($seccion !== null) {
             $stmt->bindValue(':seccion', $seccion, PDO::PARAM_STR);
         }
 
@@ -64,18 +70,36 @@ class Estudiante
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Itera sobre los estudiantes para agregar la URL del objeto S3
+        foreach ($students as &$student) {
+            $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'],DURATION_PERFIL_PHOTO_STUDENT );
+        }
+
+        return $students;
     }
 
-    public function getByDNI($DNI_Estudiante, $includePassword = false)
+    public function getByDNI($dni, $includePassword = false)
     {
         if ($includePassword) {
-            $stmt = $this->conn->prepare("SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE E.DNI_Estudiante = :DNI_Estudiante");
+            $stmt = $this->conn->prepare("SELECT E.DNI_Estudiante, U.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.DNI_Estudiante = :dni");
         } else {
-            $stmt = $this->conn->prepare("SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE E.DNI_Estudiante = :DNI_Estudiante");
+            $stmt = $this->conn->prepare("SELECT E.DNI_Estudiante, U.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.DNI_Estudiante = :dni");
         }
-        $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute(['dni' => $dni]);
+        
+        // Verificar si la consulta devolvió resultados
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($student === false) {
+            // Retornar un valor indicativo de que no se encontraron resultados
+            return null;
+        }
+        
+        // Agrega la URL del objeto S3 al resultado
+        $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
+
+        return $student;
     }
 
     public function getByUserId($Id_Usuario, $includePassword = false)
@@ -86,8 +110,14 @@ class Estudiante
             $stmt = $this->conn->prepare("SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE E.Id_Usuario = :Id_Usuario");
         }
         $stmt->execute(['Id_Usuario' => $Id_Usuario]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Agrega la URL del objeto S3 al resultado
+        $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
+
+        return $student;
     }
+
 
     public function getByUsername($username, $includePassword = false) {
         if ($includePassword) {
@@ -96,8 +126,14 @@ class Estudiante
             $stmt = $this->conn->prepare("SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE U.Nombre_Usuario = :username");
         }
         $stmt->execute(['username' => $username]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Agrega la URL del objeto S3 al resultado
+        $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3']);
+
+        return $student;
     }
+
 
 
     public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null) {

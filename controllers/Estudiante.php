@@ -1,5 +1,5 @@
 <?php
-use Config\S3Manager;
+
 require_once __DIR__ . '/../models/Estudiante.php';
 require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 require_once __DIR__.'/../config/S3Manager.php';
@@ -150,31 +150,31 @@ class EstudianteController
 
 
     public function delete($DNI_Estudiante)
-{
-    $estudianteModel = new Estudiante();
-    $estudiante = $estudianteModel->getByDNI($DNI_Estudiante, true);
+    {
+        $estudianteModel = new Estudiante();
+        $estudiante = $estudianteModel->getByDNI($DNI_Estudiante);
 
-    if (!$estudiante) {
-        Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
-        return;
-    }
-
-    // Eliminar el registro del estudiante
-    $successDeleteStudent = $estudianteModel->delete($DNI_Estudiante);
-
-    if ($successDeleteStudent) {
-
-        // Eliminar el usuario correspondiente
-        $usuarioModel = new UsuarioController();
-        $userDeletedSuccess = $usuarioModel->delete($estudiante['Id_Usuario']);
-        if(!$userDeletedSuccess){
-            Flight::json(["message" => "No se pudo eliminar el usuario"], 500);
+        if (!$estudiante) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
             return;
         }
 
-        Flight::json(["message" => "Estudiante eliminado"], 200);
-    } else {
-        Flight::json(["message" => "No se pudo eliminar el estudiante"], 500);
+        // Eliminar el registro del estudiante
+        $successDeleteStudent = $estudianteModel->delete($DNI_Estudiante);
+
+        if ($successDeleteStudent) {
+
+            // Eliminar el usuario correspondiente
+            $usuarioModel = new UsuarioController();
+            $userDeletedSuccess = $usuarioModel->delete($estudiante['Id_Usuario']);
+            if(!$userDeletedSuccess){
+                Flight::json(["message" => "No se pudo eliminar el usuario"], 500);
+                return;
+            }
+
+            Flight::json(["message" => "Estudiante eliminado"], 200);
+        } else {
+            Flight::json(["message" => "No se pudo eliminar el estudiante"], 500);
+        }
     }
-}
 }
