@@ -73,8 +73,8 @@ class Admin {
 
     public function updatePassword($id, $newPassword) {
         $stmt = $this->conn->prepare("UPDATE T_Administradores SET Contraseña = :newPassword WHERE Id_Admin = :id");
-        $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
-        return $stmt->rowCount();
+        return $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
+
     }
 
     public function delete($id) {

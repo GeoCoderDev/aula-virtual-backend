@@ -195,9 +195,9 @@ class AdminController {
     
         $adminModel = new Admin();
         $encriptedNewPassword = encryptAdminPassword($newPassword);
-        $rowCount = $adminModel->updatePassword($adminID, $encriptedNewPassword);
+        $updateSuccess = $adminModel->updatePassword($adminID, $encriptedNewPassword);
         
-        if ($rowCount > 0) {
+        if ($updateSuccess) {
             return Flight::json(["message" => "Contraseña actualizada"], 200);
         } else {
             return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
