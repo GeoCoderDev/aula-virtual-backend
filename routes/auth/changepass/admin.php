@@ -24,7 +24,7 @@ Flight::route("PUT /api/auth/admin/me/password", function() {
         Flight::json(["message" => "Contraseña actualizada correctamente para el administrador $username"], 200);
     } else {
         // Si la actualización de la contraseña falla, devolver un mensaje de error
-        Flight::json(['message' => 'No se pudo actualizar la contraseña del administrador'], 500);
+        Flight::json(['message' => 'No se pudo actualizar la contraseña del administrador'], 500);//HOLI
     }
 });
 
