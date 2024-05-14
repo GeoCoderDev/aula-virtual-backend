@@ -10,8 +10,7 @@ class Admin {
         $this->conn = Database::getConnection();
     }
 
-    public function getAll($limit = 200, $startFrom = 0, $username = '')
-{
+    public function getAll($limit = 200, $startFrom = 0, $username = ''){
     $query = "SELECT Id_Admin, Nombre_Usuario FROM T_Administradores WHERE 1=1";
 
     // Agregar condición de búsqueda si se proporciona un nombre de usuario
@@ -37,7 +36,7 @@ class Admin {
     $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     return $admins;
-}
+    } //Corregí la llave mal colocada
 
 
 

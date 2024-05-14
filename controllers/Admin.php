@@ -118,23 +118,93 @@ class AdminController {
         }
     }
 
-    public function updatePassword($id, $data) {
-        $newPassword = $data['password'] ?? null;
+    // public function updatePassword($id, $data) {
+    //     $newPassword = $data['password'] ?? null;
 
+    //     if (!$newPassword) {
+    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
+    //     }
+
+    //     $adminModel = new Admin();
+    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
+    //     $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
+        
+    //     if ($rowCount > 0) {
+    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
+    //     } else {
+    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
+    //     }
+    // }
+
+    // public function updatePassword($id, $data) {
+    //     $newPassword = $data['Contraseña'] ?? null;
+    
+    //     if (!$newPassword) {
+    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
+    //     }
+    
+    //     $adminModel = new Admin();
+    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
+    //     $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
+        
+    //     if ($rowCount > 0) {
+    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
+    //     } else {
+    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
+    //     }
+    // }
+    
+    // public function updatePassword($data) {
+    //     $newPassword = $data['Contraseña'] ?? null;
+        
+    //     if (!$newPassword) {
+    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+    //     }
+        
+    //     // El ID del administrador debería estar disponible a través del middleware de autenticación
+    //     $adminID = Flight::request()->data->getData()['Id_Admin'] ?? null;
+    
+    //     if (!$adminID) {
+    //         return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
+    //     }
+    
+    //     $adminModel = new Admin();
+    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
+    //     $rowCount = $adminModel->updatePassword($adminID, $encriptedNewPassword);
+        
+    //     if ($rowCount > 0) {
+    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
+    //     } else {
+    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
+    //     }
+    // }
+
+    public function updatePassword($data) {
+        $newPassword = $data['Contraseña'] ?? null;
+        
         if (!$newPassword) {
-            return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
+            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
         }
-
+        
+        // El ID del administrador debería estar disponible a través del middleware de autenticación
+        $adminID = Flight::request()->data->getData()['Id_Admin'] ?? null;
+    
+        if (!$adminID) {
+            return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
+        }
+    
         $adminModel = new Admin();
         $encriptedNewPassword = encryptAdminPassword($newPassword);
-        $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
+        $rowCount = $adminModel->updatePassword($adminID, $encriptedNewPassword);
         
         if ($rowCount > 0) {
             return Flight::json(["message" => "Contraseña actualizada"], 200);
         } else {
-            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
+            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
         }
     }
+    
+    
 
     public function delete($id) {
         $adminModel = new Admin();

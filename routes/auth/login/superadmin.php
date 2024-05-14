@@ -32,3 +32,5 @@ Flight::route("POST /api/auth/superadmin/login", function(){
     }
 
 });
+// Agregué el cierre de php
+?> 
