@@ -8,7 +8,7 @@ $dotenv->load();
 
 define("ALLOWED_ORIGINS", "*");
 
-// Manejo del Preflight para poder hacer solicitudes HTTP desde Navegadores
+// Manejo del Preflight para poder hacer solicitudes HTTP desde Navegadores-
 Flight::route('OPTIONS *', function() {
     header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
     header('Access-Control-Allow-Headers: Authorization, Content-Type');
