@@ -48,9 +48,10 @@ foreach ($files as $file) {
 //Ruta por defecto
 Flight::route('*', function () {
     // Ruta al directorio raíz
-    echo "404";
+    Flight::json(["message"=>"Recurso no encontrado"], 404);
 });
 
-// Finalmente, se inicia la API con el framework.
+// Finalmente, se inicia la | con el framework.
 Flight::start();
+
 ?>

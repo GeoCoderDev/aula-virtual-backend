@@ -33,6 +33,7 @@ Flight::group("/api/students",  function(){
         }else{
             Flight::json(["results" => $results], 200);                                    
         }        
+        
     });
 
 

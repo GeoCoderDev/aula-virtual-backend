@@ -134,8 +134,6 @@ class Estudiante
         return $student;
     }
 
-
-
     public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null) {
         // Construye la consulta base para contar estudiantes
         $query = "SELECT COUNT(*) as count FROM T_Estudiantes";

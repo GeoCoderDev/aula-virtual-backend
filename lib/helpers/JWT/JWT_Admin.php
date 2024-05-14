@@ -48,3 +48,4 @@ function decodeAdminJWT($token, $nextIsSuperadminMiddleware) {
         else return null;
     }
 }
+?>
