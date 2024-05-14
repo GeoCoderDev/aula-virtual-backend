@@ -88,13 +88,13 @@ public function getCursosCount($nombre = null, $grados = null)
     }
 
     public function getCursosConGrados()
-{
-    $stmt = $this->conn->prepare("SELECT DISTINCT C.Nombre AS Nombre_Curso, GROUP_CONCAT(DISTINCT A.Grado) AS Grados FROM T_Cursos AS C INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula GROUP BY C.Nombre");
-    $stmt->execute();
-    $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    {
+        $stmt = $this->conn->prepare("SELECT DISTINCT C.Nombre AS Nombre_Curso, GROUP_CONCAT(DISTINCT A.Grado) AS Grados FROM T_Cursos AS C INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula GROUP BY C.Nombre");
+        $stmt->execute();
+        $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    return $cursos;
-}
+        return $cursos;
+    }
 
 
     public function create($Nombre)
