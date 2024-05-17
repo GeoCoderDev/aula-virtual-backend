@@ -13,6 +13,7 @@ Flight::group("/api/teachers",  function(){
         $dni = Flight::request()->query['dni'] ?? null;
         $nombre = Flight::request()->query['nombre'] ?? null;
         $apellidos = Flight::request()->query['apellidos'] ?? null;
+        $estado = Flight::request()->query['estado'] ?? null; // Nuevo: agregar estado
 
         // Convertir a entero si es una cadena
         $startFrom = intval($startFrom);
@@ -20,10 +21,10 @@ Flight::group("/api/teachers",  function(){
 
         $controller = new ProfesorController();
 
-        $results = $controller->getAll(false, $limit, $startFrom, $dni, $nombre, $apellidos);
+        $results = $controller->getAll(false, $limit, $startFrom, $dni, $nombre, $apellidos, $estado); // Pasar el estado a la función getAll
 
         if($startFrom==0){            
-            Flight::json(["results"=>$results, "count"=>$controller->getProfessorCount($dni,$nombre,$apellidos)], 200);
+            Flight::json(["results"=>$results, "count"=>$controller->getProfessorCount($dni,$nombre,$apellidos, $estado)], 200);
         }else{
             Flight::json(["results"=>$results], 200);
         }

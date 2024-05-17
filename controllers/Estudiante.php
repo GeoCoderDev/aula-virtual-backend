@@ -9,21 +9,20 @@ require_once __DIR__.'/Usuario.php';
 class EstudianteController
 {
     
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null)
-    {
-        $estudianteModel = new Estudiante();
-        $estudiantes = $estudianteModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion);
-        return $estudiantes;
-    }
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null, $estado = null) // Agrega el nuevo parámetro de consulta
+{
+    $estudianteModel = new Estudiante();
+    $estudiantes = $estudianteModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion, $estado); // Pasa el nuevo parámetro de consulta
+    return $estudiantes;
+}
 
 
-    public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null) {
+    public function getStudentCount($dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null, $estado = null) {
         $estudianteModel = new Estudiante();
         // Pasar los parámetros de consulta al modelo para obtener el conteo de estudiantes
-        $count = $estudianteModel->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion);
+        $count = $estudianteModel->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion, $estado);
         return $count;
     }
-
 
     public function getByDNI($DNI_Estudiante)
     {

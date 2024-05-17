@@ -5,19 +5,21 @@ require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 
 class ProfesorController
 {
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null)
+
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
     {
         $profesorModel = new Profesor();
-        $profesores = $profesorModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos);
+        $profesores = $profesorModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $estado);
         return $profesores;
     }
 
-    public function getProfessorCount($dni = null, $nombre = null, $apellidos = null) {
+    public function getProfessorCount($dni = null, $nombre = null, $apellidos = null, $estado = null) {
         $profesorModel = new Profesor();
         // Pasar los parámetros de consulta al modelo para obtener el conteo de profesores
-        $count = $profesorModel->getProfessorCount($dni, $nombre, $apellidos);
+        $count = $profesorModel->getProfessorCount($dni, $nombre, $apellidos, $estado);
         return $count;
     }
+
 
     public function getByDNI($DNI_Profesor)
     {

@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+//constant
 define("ALLOWED_ORIGINS", "*");
 
 // Manejo del Preflight para poder hacer solicitudes HTTP desde Navegadores
@@ -32,7 +33,7 @@ function getPhpFiles($dir) {
 }
 
 // Ruta al directorio
-$directory = __DIR__ . "/routes/";
+$directory = __DIR__ . "/routes/"; //endpoints
 
 // Obtiene la lista de archivos PHP en el directorio y sus subcarpetas
 $files = getPhpFiles($directory);

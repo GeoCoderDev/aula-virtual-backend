@@ -15,6 +15,7 @@ Flight::group("/api/students",  function(){
         $apellidos = Flight::request()->query['apellidos'] ?? null;
         $grado = Flight::request()->query['grado'] ?? null;
         $seccion = Flight::request()->query['seccion'] ?? null;
+        $estado = Flight::request()->query['estado'] ?? null; // Nuevo parámetro de consulta
 
         // Convertir a entero si es una cadena
         $startFrom = intval($startFrom);
@@ -22,15 +23,15 @@ Flight::group("/api/students",  function(){
 
         $controller = new EstudianteController();
 
-        $results = $controller->getAll(false, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion);
+        $results = $controller->getAll(false, $limit, $startFrom, $dni, $nombre, $apellidos, $grado, $seccion, $estado); // Pasa el nuevo parámetro de consulta
 
         if($startFrom==0){
 
-            $count = $controller->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion);
+            $count = $controller->getStudentCount($dni, $nombre, $apellidos, $grado, $seccion, $estado); // Pasa el nuevo parámetro de consulta
 
             Flight::json(["results" => $results, "count"=>$count], 200);
 
-        }else{
+        } else {
             Flight::json(["results" => $results], 200);                                    
         }        
         

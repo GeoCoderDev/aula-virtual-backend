@@ -58,7 +58,6 @@ class Usuario {
         }
     }
 
-
     public function update(
     $Id_Usuario,
     $Nombres,
@@ -71,47 +70,45 @@ class Usuario {
     $Parentezco_Contacto_Emergencia,
     $Telefono_Contacto_Emergencia,
     $Foto_Perfil_Key_S3 = null
-) {
-    // Construir la consulta SQL para la actualización
-    $query = "UPDATE T_Usuarios SET ";
-    $query .= "Nombres = :nombres, ";
-    $query .= "Apellidos = :apellidos, ";
-    $query .= "Fecha_Nacimiento = :fecha_nacimiento, ";
-    $query .= "Nombre_Usuario = :nombre_usuario, ";
-    $query .= "Contraseña_Usuario = :contrasena_usuario, ";
-    $query .= "Direccion_Domicilio = :direccion_domicilio, ";
-    $query .= "Nombre_Contacto_Emergencia = :nombre_contacto_emergencia, ";
-    $query .= "Parentezco_Contacto_Emergencia = :parentezco_contacto_emergencia, ";
-    $query .= "Telefono_Contacto_Emergencia = :telefono_contacto_emergencia, ";
-    $query .= "Foto_Perfil_Key_S3 = :foto_perfil_key_s3 ";
-    $query .= "WHERE Id_Usuario = :id_usuario";
+    ) {
+        // Construir la consulta SQL para la actualización
+        $query = "UPDATE T_Usuarios SET ";
+        $query .= "Nombres = :nombres, ";
+        $query .= "Apellidos = :apellidos, ";
+        $query .= "Fecha_Nacimiento = :fecha_nacimiento, ";
+        $query .= "Nombre_Usuario = :nombre_usuario, ";
+        $query .= "Contraseña_Usuario = :contrasena_usuario, ";
+        $query .= "Direccion_Domicilio = :direccion_domicilio, ";
+        $query .= "Nombre_Contacto_Emergencia = :nombre_contacto_emergencia, ";
+        $query .= "Parentezco_Contacto_Emergencia = :parentezco_contacto_emergencia, ";
+        $query .= "Telefono_Contacto_Emergencia = :telefono_contacto_emergencia, ";
+        $query .= "Foto_Perfil_Key_S3 = :foto_perfil_key_s3 ";
+        $query .= "WHERE Id_Usuario = :id_usuario";
 
-    // Preparar la consulta
-    $stmt = $this->conn->prepare($query);
+        // Preparar la consulta
+        $stmt = $this->conn->prepare($query);
 
-    $stmt->bindParam(':nombres', $Nombres);
-    $stmt->bindParam(':apellidos', $Apellidos);
-    $stmt->bindParam(':fecha_nacimiento', $Fecha_Nacimiento);
-    $stmt->bindParam(':nombre_usuario', $Nombre_Usuario);
-    $stmt->bindParam(':contrasena_usuario', $Contraseña_Usuario);
-    $stmt->bindParam(':direccion_domicilio', $Direccion_Domicilio);
-    $stmt->bindParam(':nombre_contacto_emergencia', $Nombre_Contacto_Emergencia);
-    $stmt->bindParam(':parentezco_contacto_emergencia', $Parentezco_Contacto_Emergencia);
-    $stmt->bindParam(':telefono_contacto_emergencia', $Telefono_Contacto_Emergencia);
-    $stmt->bindParam(':id_usuario', $Id_Usuario);
+        $stmt->bindParam(':nombres', $Nombres);
+        $stmt->bindParam(':apellidos', $Apellidos);
+        $stmt->bindParam(':fecha_nacimiento', $Fecha_Nacimiento);
+        $stmt->bindParam(':nombre_usuario', $Nombre_Usuario);
+        $stmt->bindParam(':contrasena_usuario', $Contraseña_Usuario);
+        $stmt->bindParam(':direccion_domicilio', $Direccion_Domicilio);
+        $stmt->bindParam(':nombre_contacto_emergencia', $Nombre_Contacto_Emergencia);
+        $stmt->bindParam(':parentezco_contacto_emergencia', $Parentezco_Contacto_Emergencia);
+        $stmt->bindParam(':telefono_contacto_emergencia', $Telefono_Contacto_Emergencia);
+        $stmt->bindParam(':id_usuario', $Id_Usuario);
 
-    // Asignar el valor de Foto_Perfil_Key_S3 teniendo en cuenta la posibilidad de que sea null
-    if ($Foto_Perfil_Key_S3 === null) {
-        $stmt->bindValue(':foto_perfil_key_s3', null, PDO::PARAM_NULL);
-    } else {
-        $stmt->bindParam(':foto_perfil_key_s3', $Foto_Perfil_Key_S3);
+        // Asignar el valor de Foto_Perfil_Key_S3 teniendo en cuenta la posibilidad de que sea null
+        if ($Foto_Perfil_Key_S3 === null) {
+            $stmt->bindValue(':foto_perfil_key_s3', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':foto_perfil_key_s3', $Foto_Perfil_Key_S3);
+        }
+
+        // Ejecutar la consulta
+        return $stmt->execute();
     }
-
-    // Ejecutar la consulta
-    return $stmt->execute();
-}
-
-
 
 
     public function delete($Id_Usuario)
