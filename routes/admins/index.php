@@ -24,7 +24,6 @@ Flight::group("/api/admins",  function(){
     
             // Pasar los parámetros a tu método getAll
             Flight::json(["results"=>$controller->getAll($limit, $startFrom, $username)], 200);
-
         }
     });    
 
