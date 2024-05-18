@@ -67,8 +67,8 @@ class Admin {
 
     public function updateUsername($id, $newUsername) {
         $stmt = $this->conn->prepare("UPDATE T_Administradores SET Nombre_Usuario = :newUsername WHERE Id_Admin = :id");
-        $stmt->execute(['id' => $id, 'newUsername' => $newUsername]);
-        return $stmt->rowCount();
+        return $stmt->execute(['id' => $id, 'newUsername' => $newUsername]);
+
     }
 
     public function updatePassword($id, $newPassword) {

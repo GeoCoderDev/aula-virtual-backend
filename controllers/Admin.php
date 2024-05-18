@@ -100,18 +100,24 @@ class AdminController {
     }
 
     public function updateUsername($id, $data) {
-        $username = $data['username'] ?? null;
+        $newUsername = $data['newUsername'] ?? null;
 
-        if (!$username) {
+        if (!$newUsername) {
             return Flight::json(["message" => "Nuevo nombre de usuario es obligatorio"] , 400);
         }
 
         $adminModel = new Admin();
 
 
-        $rowCount = $adminModel->updateUsername($id, $username);
+        // Verificar si el nuevo nombre de usuario ya está en uso
+        $existingAdmin = $adminModel->getByUsername($newUsername);
+        if ($existingAdmin && $existingAdmin['Id_Admin'] !== $id) {
+            return Flight::json(["message" => "El nuevo nombre de usuario ya está en uso"], 400);
+        }
+
+        $updateSuccess = $adminModel->updateUsername($id, $newUsername);
         
-        if ($rowCount > 0) {
+        if ($updateSuccess) {
             return Flight::json(["message" => "Nombre de usuario actualizado"], 200);
         } else {
             return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
@@ -179,7 +185,7 @@ class AdminController {
     //     }
     // }
 
-    public function updatePassword($data) {
+    public function updatePasswordByMe($data) {
         $newPassword = $data['Contraseña'] ?? null;
         
         if (!$newPassword) {
@@ -204,7 +210,10 @@ class AdminController {
         }
     }
     
-    
+    public function updatePassword($id, $data) {
+        
+    }
+
 
     public function delete($id) {
         $adminModel = new Admin();
