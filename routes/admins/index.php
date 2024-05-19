@@ -34,6 +34,12 @@ Flight::group("/api/admins",  function(){
         $controller->create($data);        
     });
 
+    Flight::route("POST /multiple", function(){
+        $data = Flight::request()->data->getData();        
+        $controller = new AdminController();
+        $controller->multipleCreate($data);  
+    });
+
     //Enviar newUsername en el cuerpo
     Flight::route("PUT /updateUsername/@id",function ($id){
         $data = Flight::request()->data->getData();        

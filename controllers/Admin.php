@@ -76,8 +76,8 @@ class AdminController {
     }
 
     public function create($data) {
-        $username = $data['username'] ?? null;
-        $password = $data['password'] ?? null;
+        $username = $data['Nombre_Usuario'] ?? null;
+        $password = $data['Contraseña'] ?? null;
 
         if (!$username || !$password) {
             return Flight::json(["message" => "username y password son obligatorios"], 400);
@@ -93,11 +93,65 @@ class AdminController {
 
             $adminId = $adminModel->create($username, $encriptedPassword);
             
-            return Flight::json(["message" => "Admin creado", "id"=>$adminId], 201);
+            return Flight::json(["message" => "Administrador creado", "id"=>$adminId], 201);
         }
 
         return  Flight::json(['message' => 'Ya existe un administrador con ese username'],  409);
     }
+
+    public function multipleCreate($data) {
+    $alerts = [];
+
+    if (!isset($data['adminValues']) || !is_array($data['adminValues'])) {
+        return Flight::json(["message" => "No se encontraron datos de administradores para crear"], 400);
+    }
+
+    $adminModel = new Admin();
+
+    foreach ($data['adminValues'] as $index => $adminData) {
+        $username = $adminData[0] ?? null;
+        $password = $adminData[1] ?? null;
+
+        if (!$username || !$password) {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": Nombre de usuario y contraseña son obligatorios"
+            ];
+            continue;
+        }
+
+        $existingAdmin = $adminModel->getByUsername($username);
+        if ($existingAdmin) {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": Ya existe un administrador con el nombre de usuario '$username'"
+            ];
+            continue;
+        }
+
+        // Aquí puedes agregar más validaciones según tus necesidades
+
+        // Crear el administrador si pasa todas las validaciones
+        $encriptedPassword = encryptAdminPassword($password);
+        $adminId = $adminModel->create($username, $encriptedPassword);
+        
+        if ($adminId) {
+            $alerts[] = [
+                'type' => 'success',
+                'content' => "Fila " . ($index + 1) . ": Administrador creado exitosamente"
+            ];
+        } else {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": No se pudo crear el administrador. Por favor, inténtalo de nuevo"
+            ];
+        }
+    }
+
+    return Flight::json(["message" => "Creación de administradores completada", "alerts" => $alerts], 200);
+}
+
+
 
     public function updateUsername($id, $data) {
         $newUsername = $data['newUsername'] ?? null;
