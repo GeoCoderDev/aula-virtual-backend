@@ -88,6 +88,61 @@ class EstudianteController
         }
     }
 
+    public function multipleCreate($data) {
+    $alerts = [];
+
+    // Verificar si se proporcionaron datos de estudiantes para crear
+    if (!isset($data['studentValues']) || !is_array($data['studentValues'])) {
+        Flight::json(["message" => "No se encontraron datos de estudiantes para crear"], 400);
+        return;
+    }
+
+    $estudianteModel = new Estudiante();
+
+    foreach ($data['studentValues'] as $index => $studentData) {
+        $dni = $studentData[0] ?? null;
+        $grado = $studentData[1] ?? null;
+        $seccion = $studentData[2] ?? null;
+
+        // Verificar si se proporcionaron todos los datos necesarios
+        if (!$dni || !$grado || !$seccion) {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": DNI, grado y sección son obligatorios"
+            ];
+            continue;
+        }
+
+        // Verificar si ya existe un estudiante con el mismo DNI
+        $existingStudent = $estudianteModel->getByDNI($dni);
+        if ($existingStudent) {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": Ya existe un estudiante con el DNI '$dni'"
+            ];
+            continue;
+        }
+
+        // Aquí puedes agregar más validaciones según tus necesidades
+
+        // Crear al estudiante si pasa todas las validaciones
+        $success = $estudianteModel->create($dni, $grado, $seccion);
+        if ($success) {
+            $alerts[] = [
+                'type' => 'success',
+                'content' => "Fila " . ($index + 1) . ": Estudiante creado exitosamente"
+            ];
+        } else {
+            $alerts[] = [
+                'type' => 'critical',
+                'content' => "Fila " . ($index + 1) . ": No se pudo crear al estudiante. Por favor, inténtalo de nuevo"
+            ];
+        }
+    }
+
+    Flight::json(["message" => "Creación de estudiantes completada", "alerts" => $alerts], 200);
+}
+
 
     public function update($DNI_Estudiante, $data) {
 

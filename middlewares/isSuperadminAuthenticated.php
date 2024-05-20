@@ -28,11 +28,9 @@ class SuperadminAuthenticated {
         if(is_array($validateResponse)){ // Obtener el superadminID y el nombre de usuario 
             $superadminID = $validateResponse["Id_Superadmin"]; 
             $username = $validateResponse['Nombre_Usuario']; 
-            
             Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["Id_Superadmin"=>$superadminID, "Nombre_Usuario_Superadmin"=>$username]));
 
          } else { 
-
 
             return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"]));
         
