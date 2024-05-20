@@ -30,11 +30,140 @@ class UsuarioController {
         return json_encode($usuario);
     }
 
-    public function create($data, $DNI) {
+    public function create($data, $DNI,  $returnAlerts=false,$rowIndex=null) {
+
+        $otherAlerts = [];
+        // Verificar si todos los campos requeridos están presentes en $data
+        if (!$returnAlerts) {
+            if (!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) {
+                return;
+            }
+        } else {
+            // Verificar si el array tiene exactamente 9 elementos
+            if (count($data) !== 9) {
+                global $otherAlerts;
+                $otherAlerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila ".($rowIndex+1).": Faltan datos..."
+                ];
+                return $otherAlerts;
+            }
+
+            // Verificar que cada elemento del array no sea nulo o indefinido
+            $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
+
+            foreach ($data as $index => $value) {
+                if (!isset($value) || $value === null || $value === '') {
+                    $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
+                    $field = $requiredFields[$index];
+                    global $otherAlerts;
+                    $otherAlerts[] = [
+                        'type' => 'critical',
+                        'content' => "Fila " . ($rowIndex + 1) . ": Falta el campo obligatorio: $field"
+                    ];
+                    return $otherAlerts;
+                }
+            }            
+        }
+    
+        $Nombres = $data[$returnAlerts?0:'Nombres'] ?? null;
+        $Apellidos = $data[$returnAlerts?1:'Apellidos'] ?? null;
+        $Fecha_Nacimiento = $data[$returnAlerts?2:'Fecha_Nacimiento']?? null;
+        $Nombre_Usuario = $data[$returnAlerts?3:'Nombre_Usuario'];
+        $Contraseña_Usuario = $data[$returnAlerts?4:'Contraseña_Usuario']?? null;
+        $Direccion_Domicilio = $data[$returnAlerts?5:'Direccion_Domicilio']?? null;
+        $Nombre_Contacto_Emergencia = $data[$returnAlerts?6:'Nombre_Contacto_Emergencia']?? null;
+        $Parentezco_Contacto_Emergencia = $data[$returnAlerts?7:'Parentezco_Contacto_Emergencia']?? null;
+        $Telefono_Contacto_Emergencia = $data[$returnAlerts?8:'Telefono_Contacto_Emergencia']?? null;
+        $Foto_Perfil_Key_S3 = null;
+
+        // Verificar si se ha enviado la foto de perfil(Esto solo se podra desde un formulario)
+        if(isset($_FILES['Foto_Perfil']) && $_FILES['Foto_Perfil']['error'] === UPLOAD_ERR_OK) {
+            // Obtener la información de la foto de perfil
+            $fotoPerfil = $_FILES['Foto_Perfil'];
+            $extension = pathinfo($fotoPerfil['name'], PATHINFO_EXTENSION); // Obtener la extensión del archivo
+
+            // Validar la extensión del archivo
+            $allowedExtensions = ['jpg', 'jpeg', 'png']; // Extensiones permitidas
+            if (!in_array(strtolower($extension), $allowedExtensions)) {
+                Flight::json(["message" => "La extensión del archivo de la foto de perfil no es válida. Solo se permiten archivos jpg, jpeg y png."], 400);
+                return;
+            }
+
+            $Foto_Perfil_Key_S3 = generateProfilePhotoKeyS3($Nombre_Usuario, $DNI, $extension);
+            
+            // Creando un cliente de S3
+            $s3Manager = new S3Manager();
+
+            // Ruta temporal del archivo
+            $tempFilePath = $fotoPerfil['tmp_name'];
+
+            // Subir el archivo al bucket de S3
+            $uploadResult = $s3Manager->uploadFile($tempFilePath, $Foto_Perfil_Key_S3);
+
+            if(!$uploadResult) {
+                Flight::json(["message" => "Error al subir la foto de perfil"], 500);
+                return;
+            }       
+        }
+
+        $usuarioModelo = new Usuario();
+        $existingUsuario = $usuarioModelo->getByUsername($Nombre_Usuario);
+
+        if ($existingUsuario) {
+
+            if($returnAlerts){
+                global $otherAlerts;
+                $otherAlerts[] = [
+                        'type' => 'critical',
+                        'content' => "Fila ".($rowIndex+1).": Ya existe un usuario con ese nombre de usuario"
+                    ];
+                return $otherAlerts;
+            }else{
+                
+                Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
+            }
+
+            return;
+        }
+
+        $Id_Usuario = $usuarioModelo->create(
+            $Nombres,
+            $Apellidos,
+            $Fecha_Nacimiento,
+            $Nombre_Usuario,
+            encryptUserPassword($Contraseña_Usuario),
+            $Direccion_Domicilio,
+            $Nombre_Contacto_Emergencia,
+            $Parentezco_Contacto_Emergencia,
+            $Telefono_Contacto_Emergencia,
+            $Foto_Perfil_Key_S3
+        );
+
+        if (!$Id_Usuario) {
+
+            if($returnAlerts){
+                global $otherAlerts;
+                $otherAlerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila ".($rowIndex+1).": No se pudo crear el Usuario"
+                ];
+                return $otherAlerts;
+            }else{
+                
+                Flight::json(["message" => "No se pudo crear el usuario"], 409);
+            }
+
+            return;
+        }
+
+        return $Id_Usuario;
+    }
+
+
+    public function createFromArray($data, $DNI) {
 
         // Verificar si todos los campos requeridos están presentes en $data
-        if(!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) return;
-
         $Nombres = $data['Nombres'];
         $Apellidos = $data['Apellidos'];
         $Fecha_Nacimiento = $data['Fecha_Nacimiento'];
@@ -100,7 +229,8 @@ class UsuarioController {
 
 
         return $Id_Usuario;
-    }
+        }
+
 
     public function update($id, $data, $DNI_Estudiante) {
 

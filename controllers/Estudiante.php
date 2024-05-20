@@ -89,110 +89,124 @@ class EstudianteController
     }
 
     public function multipleCreate($data) {
-    $alerts = [];
+        $alerts = [];
 
-    // Verificar si se proporcionaron datos de estudiantes para crear
-    if (!isset($data['studentValues']) || !is_array($data['studentValues'])) {
-        Flight::json(["message" => "No se encontraron datos de estudiantes para crear"], 400);
-        return;
-    }
-
-    $estudianteModel = new Estudiante();
-
-    foreach ($data['studentValues'] as $index => $studentData) {
-        $dni = $studentData[0] ?? null;
-        $grado = $studentData[1] ?? null;
-        $seccion = $studentData[2] ?? null;
-
-        // Verificar si se proporcionaron todos los datos necesarios
-        if (!$dni || !$grado || !$seccion) {
-            $alerts[] = [
-                'type' => 'critical',
-                'content' => "Fila " . ($index + 1) . ": DNI, grado y sección son obligatorios"
-            ];
-            continue;
+        if (!isset($data['studentValues']) || !is_array($data['studentValues'])) {
+            return Flight::json(["message" => "No se encontraron datos de estudiantes para crear"], 400);
         }
 
-        // Verificar si ya existe un estudiante con el mismo DNI
-        $existingStudent = $estudianteModel->getByDNI($dni);
-        if ($existingStudent) {
-            $alerts[] = [
-                'type' => 'critical',
-                'content' => "Fila " . ($index + 1) . ": Ya existe un estudiante con el DNI '$dni'"
-            ];
-            continue;
-        }
-
-        // Aquí puedes agregar más validaciones según tus necesidades
-
-        // Crear al estudiante si pasa todas las validaciones
-        $success = $estudianteModel->create($dni, $grado, $seccion);
-        if ($success) {
-            $alerts[] = [
-                'type' => 'success',
-                'content' => "Fila " . ($index + 1) . ": Estudiante creado exitosamente"
-            ];
-        } else {
-            $alerts[] = [
-                'type' => 'critical',
-                'content' => "Fila " . ($index + 1) . ": No se pudo crear al estudiante. Por favor, inténtalo de nuevo"
-            ];
-        }
-    }
-
-    Flight::json(["message" => "Creación de estudiantes completada", "alerts" => $alerts], 200);
-}
-
-
-    public function update($DNI_Estudiante, $data) {
-
-
-        // Verificar si todos los campos requeridos están presentes en $data
-        if(!areFieldsComplete($data,  [ 'Grado', 'Seccion'])) return;    
-
-        // Verificar si el estudiante existe
         $estudianteModel = new Estudiante();
-        $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
-
-        if (!$existingEstudiante) {
-            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
-            return;
-        }
-
-        $Grado = $data['Grado'];
-        $Seccion = $data['Seccion'];
-
         $aulaController = new AulaController();
-
-        // Obtener el ID del aula correspondiente al grado y la sección
-        $aula = $aulaController->getByGradoSeccion($Grado, $Seccion);
-
-        if (!$aula) {
-            Flight::json(["message" => "No se encontró el aula correspondiente al grado $Grado y la sección $Seccion"], 404);
-            return;
-        }
-
-        $Id_Aula = $aula['Id_Aula'];
-
         $userController = new UsuarioController();
 
-        $data['Foto_Perfil_Key_S3'] = $existingEstudiante['Foto_Perfil_Key_S3'];
+        foreach ($data['studentValues'] as $index => $studentData) {
+            $DNI_Estudiante = $studentData[0] ?? null;
+            $Grado = $studentData[1] ?? null;
+            $Seccion = $studentData[2] ?? null;
 
-        $successUpdateUser = $userController->update($existingEstudiante['Id_Usuario'], $data, $DNI_Estudiante);
-
-        if ($successUpdateUser) {
-            $success = $estudianteModel->update($DNI_Estudiante, $existingEstudiante['Id_Usuario'], $Id_Aula);
-            if ($success) {
-                Flight::json(["message" => "Usuario actualizado correctamente"], 200);
-            } else {
-                Flight::json(["message" => "Error al actualizar el estudiante"], 500);
+            if (!$DNI_Estudiante || !$Grado || !$Seccion) {
+                $alerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila " . ($index + 1) . ": DNI, Grado y Sección son obligatorios"
+                ];
+                continue;
             }
-        }else{
-            Flight::json(["message" => "Error al actualizar el usuario"], 500);
+
+            $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
+            if ($existingEstudiante) {
+                $alerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila " . ($index + 1) . ": Ya existe un estudiante con el DNI '$DNI_Estudiante'"
+                ];
+                continue;
+            }
+
+            $aula = $aulaController->getByGradoSeccion($Grado, $Seccion);
+            if (!$aula) {
+                $alerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila " . ($index + 1) . ": No se encontró el aula correspondiente al grado $Grado y la sección $Seccion"
+                ];
+                continue;
+            }
+
+            $Id_Aula = $aula['Id_Aula'];
+
+            // Crear usuario
+            $usuarioIdOrAlerts = $userController->create(array_slice($studentData, 3), $DNI_Estudiante, true, $index);
+
+            if (!is_array($usuarioIdOrAlerts)) {
+                // Crear estudiante
+                $success = $estudianteModel->create($DNI_Estudiante, $usuarioIdOrAlerts, $Id_Aula);
+                if ($success) {
+                    $alerts[] = [
+                        'type' => 'success',
+                        'content' => "Fila " . ($index + 1) . ": Estudiante creado exitosamente"
+                    ];
+                } else {
+                    $alerts[] = [
+                        'type' => 'critical',
+                        'content' => "Fila " . ($index + 1) . ": No se pudo crear el estudiante. Por favor, inténtalo de nuevo"
+                    ];
+                }
+            }else{
+                $alerts = array_merge($alerts, $usuarioIdOrAlerts);
+            }
         }
 
-
+        return Flight::json(["message" => "Creación de estudiantes completada", "alerts" => $alerts], 200);
     }
+
+
+        public function update($DNI_Estudiante, $data) {
+
+
+            // Verificar si todos los campos requeridos están presentes en $data
+            if(!areFieldsComplete($data,  [ 'Grado', 'Seccion'])) return;    
+
+            // Verificar si el estudiante existe
+            $estudianteModel = new Estudiante();
+            $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
+
+            if (!$existingEstudiante) {
+                Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+                return;
+            }
+
+            $Grado = $data['Grado'];
+            $Seccion = $data['Seccion'];
+
+            $aulaController = new AulaController();
+
+            // Obtener el ID del aula correspondiente al grado y la sección
+            $aula = $aulaController->getByGradoSeccion($Grado, $Seccion);
+
+            if (!$aula) {
+                Flight::json(["message" => "No se encontró el aula correspondiente al grado $Grado y la sección $Seccion"], 404);
+                return;
+            }
+
+            $Id_Aula = $aula['Id_Aula'];
+
+            $userController = new UsuarioController();
+
+            $data['Foto_Perfil_Key_S3'] = $existingEstudiante['Foto_Perfil_Key_S3'];
+
+            $successUpdateUser = $userController->update($existingEstudiante['Id_Usuario'], $data, $DNI_Estudiante);
+
+            if ($successUpdateUser) {
+                $success = $estudianteModel->update($DNI_Estudiante, $existingEstudiante['Id_Usuario'], $Id_Aula);
+                if ($success) {
+                    Flight::json(["message" => "Usuario actualizado correctamente"], 200);
+                } else {
+                    Flight::json(["message" => "Error al actualizar el estudiante"], 500);
+                }
+            }else{
+                Flight::json(["message" => "Error al actualizar el usuario"], 500);
+            }
+
+
+        }
 
 
     public function getCursosByDNI($DNI_Estudiante)

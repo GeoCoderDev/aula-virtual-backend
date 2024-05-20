@@ -197,8 +197,7 @@ class Estudiante
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
         $stmt = $this->conn->prepare("INSERT INTO T_Estudiantes (DNI_Estudiante, Id_Usuario, Id_Aula) VALUES (:DNI_Estudiante, :Id_Usuario, :Id_Aula)");
-        $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante, 'Id_Usuario' => $Id_Usuario, 'Id_Aula' => $Id_Aula]);
-        return $stmt->rowCount();
+        return $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante, 'Id_Usuario' => $Id_Usuario, 'Id_Aula' => $Id_Aula]);        
     }
 
     public function getCursosByDNI($DNI_Estudiante)

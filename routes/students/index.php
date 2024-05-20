@@ -39,7 +39,6 @@ Flight::group("/api/students",  function(){
 
 
     Flight::route("POST ", function(){
-        $rawRequest = Flight::request()->data;
         $data = Flight::request()->data->getData();        
         $controller = new EstudianteController();
         $controller->create($data);
