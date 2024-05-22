@@ -28,7 +28,12 @@ class EstudianteController
     {
         $estudianteModel = new Estudiante();
         $estudiante = $estudianteModel->getByDNI($DNI_Estudiante);
-        return json_encode($estudiante);
+
+        if(!$estudiante){
+            Flight::json(["message"=>"No existe el estudiante con $DNI_Estudiante"],404);
+        }else{
+            Flight::json($estudiante,200);
+        }
     }
 
     public function validateDNIAndUsername($data) {

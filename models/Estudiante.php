@@ -89,19 +89,15 @@ class Estudiante
     public function getByDNI($dni, $includePassword = false)
     {
         if ($includePassword) {
-            $stmt = $this->conn->prepare("SELECT E.DNI_Estudiante, U.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.DNI_Estudiante = :dni");
+            $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE E.DNI_Estudiante = :dni";
         } else {
-            $stmt = $this->conn->prepare("SELECT E.DNI_Estudiante, U.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario WHERE E.DNI_Estudiante = :dni");
+            $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE E.DNI_Estudiante = :dni";
         }
+
+        $stmt = $this->conn->prepare($query);
         $stmt->execute(['dni' => $dni]);
-        
-        // Verificar si la consulta devolvió resultados
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($student === false) {
-            // Retornar un valor indicativo de que no se encontraron resultados
-            return null;
-        }
-        
+
         // Agrega la URL del objeto S3 al resultado si 'Foto_Perfil_Key_S3' no es nulo
         if ($student['Foto_Perfil_Key_S3'] !== null) {
             $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
@@ -109,7 +105,6 @@ class Estudiante
 
         return $student;
     }
-
     public function getByUserId($Id_Usuario, $includePassword = false)
     {
         if ($includePassword) {

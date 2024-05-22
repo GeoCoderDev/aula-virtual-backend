@@ -37,6 +37,12 @@ Flight::group("/api/students",  function(){
         
     });
 
+    Flight::route("GET /@DNI", function($DNI){
+
+        $controller = new EstudianteController();
+        $controller->getByDNI($DNI);
+
+    });
 
     Flight::route("POST ", function(){
         $data = Flight::request()->data->getData();        
