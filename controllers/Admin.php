@@ -239,7 +239,7 @@ class AdminController {
     //     }
     // }
 
-    public function updatePasswordByMe($data) {
+    public function updatePassword($data) {
         $newPassword = $data['Contraseña'] ?? null;
         
         if (!$newPassword) {
@@ -264,23 +264,23 @@ class AdminController {
         }
     }
     
-    public function updatePassword($id, $data) {
-        $newPassword = $data['password'] ?? null;
+    // public function updatePassword($id, $data) {
+    //     $newPassword = $data['password'] ?? null;
 
-        if (!$newPassword) {
-            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
-        }
+    //     if (!$newPassword) {
+    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+    //     }
 
-        $adminModel = new Admin();
-        $encriptedNewPassword = encryptAdminPassword($newPassword);
-        $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
+    //     $adminModel = new Admin();
+    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
+    //     $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
         
-        if ($rowCount > 0) {
-            return Flight::json(["message" => "Contraseña actualizada"], 200);
-        } else {
-            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
-        }
-    }
+    //     if ($rowCount > 0) {
+    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
+    //     } else {
+    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
+    //     }
+    // }
 
 
 

@@ -41,7 +41,7 @@ class Superadmin {
 
     public function updatePassword($id, $newPassword) {
         $stmt = $this->conn->prepare("UPDATE T_Superadmin SET Contraseña = :newPassword WHERE Id_Superadmin = :id");
-        $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
-        return $stmt->rowCount();
+        return $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
+       
     }
 }

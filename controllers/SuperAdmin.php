@@ -99,22 +99,32 @@ class SuperadminController {
         }
     }
 
-    public function updatePassword($id, $data) {
-        $newPassword = $data['newPassword'] ?? null;
+    public function updatePassword($data) {
+        $newPassword = $data['Contraseña'] ?? null;
 
         if (!$newPassword) {
-            return ["message" => "Nueva contraseña es obligatoria"];
+            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+        }
+
+        // El ID del supeadministrador debería estar disponible a través del middleware de autenticación
+        $superadminID = Flight::request()->data->getData()['Id_Superadmin'] ?? null;
+
+        if (!$superadminID) {
+            return Flight::json(["message" => "ID de superadministrador no encontrado en la solicitud"], 400);
         }
 
         $superadminModel = new Superadmin();
-        $rowCount = $superadminModel->updatePassword($id, $newPassword);
+        $encriptedNewPassword = encryptSuperadminPassword($newPassword);
+        $updateSuccess = $superadminModel->updatePassword($superadminID, $encriptedNewPassword);
         
-        if ($rowCount > 0) {
-            return ["message" => "Contraseña actualizada"];
+        if ($updateSuccess) {
+            return Flight::json(["message" => "Contraseña actualizada"], 200);
         } else {
-            return ["message" => "No se encontró ningún superadmin con el ID proporcionado"];
+            return Flight::json(["message" => "No se encontró ningún superadmin con el ID proporcionado"], 404);
         }
     }
+
+    
 
     // Puedes agregar más métodos según sea necesario
 }
