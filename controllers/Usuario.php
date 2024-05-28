@@ -235,13 +235,12 @@ class UsuarioController {
     public function update($id, $data, $DNI_Estudiante) {
 
         // Verificar si todos los campos requeridos están presentes en $data
-        if(!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) return;
+        if(!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) return;
 
         $Nombres = $data['Nombres'];
         $Apellidos = $data['Apellidos'];
         $Fecha_Nacimiento = $data['Fecha_Nacimiento'];
         $Nombre_Usuario = $data['Nombre_Usuario'];
-        $Contraseña_Usuario = $data['Contraseña_Usuario'];
         $Direccion_Domicilio = $data['Direccion_Domicilio'];
         $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
         $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
@@ -298,7 +297,6 @@ class UsuarioController {
             $Apellidos,
             $Fecha_Nacimiento,
             $Nombre_Usuario,
-            $Contraseña_Usuario,
             $Direccion_Domicilio,
             $Nombre_Contacto_Emergencia,
             $Parentezco_Contacto_Emergencia,
@@ -373,6 +371,32 @@ class UsuarioController {
         }
 
         return $this->getUserRoleByUserId($usuario['Id_Usuario']);
+    }
+
+
+    public function updatePasswordByMe($data) {
+        $newPassword = $data['Contraseña_Usuario'] ?? null;
+        
+        if (!$newPassword) {
+            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+        }
+        
+        // El ID del administrador debería estar disponible a través del middleware de autenticación
+        $usuarioID = Flight::request()->data->getData()['Id_Usuario'] ?? null;
+    
+        if (!$usuarioID) {
+            return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
+        }
+    
+        $usuarioModel = new Usuario();
+        $encriptedNewPassword = encryptUserPassword($newPassword);
+        $updateSuccess = $usuarioModel->updatePassword($usuarioID, $encriptedNewPassword);
+        
+        if ($updateSuccess) {
+            return Flight::json(["message" => "Contraseña actualizada"], 200);
+        } else {
+            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
+        }
     }
 
 

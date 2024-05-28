@@ -6,6 +6,7 @@ require_once __DIR__.'/../../controllers/Curso.php';
 Flight::group("/api/courses", function (){
 
     Flight::route('GET ', function(){
+        
         $nombre = Flight::request()->query['nombre'] ?? null;
         $grados = Flight::request()->query['grados'] ?? null;
         $startFrom = Flight::request()->query['startFrom'] ?? 0;

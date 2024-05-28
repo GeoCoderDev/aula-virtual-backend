@@ -99,7 +99,7 @@ class Estudiante
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Agrega la URL del objeto S3 al resultado si 'Foto_Perfil_Key_S3' no es nulo
-        if ($student['Foto_Perfil_Key_S3'] !== null) {
+        if ($student && $student['Foto_Perfil_Key_S3'] !== null) {
             $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
         }
 
@@ -116,7 +116,7 @@ class Estudiante
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Agrega la URL del objeto S3 al resultado si 'Foto_Perfil_Key_S3' no es nulo
-        if ($student['Foto_Perfil_Key_S3'] !== null) {
+        if ($student && $student['Foto_Perfil_Key_S3'] !== null) {
             $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
         }
 
@@ -134,7 +134,7 @@ class Estudiante
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Agrega la URL del objeto S3 al resultado si 'Foto_Perfil_Key_S3' no es nulo
-        if ($student['Foto_Perfil_Key_S3'] !== null) {
+        if ($student && $student['Foto_Perfil_Key_S3'] !== null) {
             $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3']);
         }
 

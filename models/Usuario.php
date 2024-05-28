@@ -64,7 +64,6 @@ class Usuario {
     $Apellidos,
     $Fecha_Nacimiento,
     $Nombre_Usuario,
-    $Contraseña_Usuario,
     $Direccion_Domicilio,
     $Nombre_Contacto_Emergencia,
     $Parentezco_Contacto_Emergencia,
@@ -77,7 +76,6 @@ class Usuario {
         $query .= "Apellidos = :apellidos, ";
         $query .= "Fecha_Nacimiento = :fecha_nacimiento, ";
         $query .= "Nombre_Usuario = :nombre_usuario, ";
-        $query .= "Contraseña_Usuario = :contrasena_usuario, ";
         $query .= "Direccion_Domicilio = :direccion_domicilio, ";
         $query .= "Nombre_Contacto_Emergencia = :nombre_contacto_emergencia, ";
         $query .= "Parentezco_Contacto_Emergencia = :parentezco_contacto_emergencia, ";
@@ -92,7 +90,6 @@ class Usuario {
         $stmt->bindParam(':apellidos', $Apellidos);
         $stmt->bindParam(':fecha_nacimiento', $Fecha_Nacimiento);
         $stmt->bindParam(':nombre_usuario', $Nombre_Usuario);
-        $stmt->bindParam(':contrasena_usuario', $Contraseña_Usuario);
         $stmt->bindParam(':direccion_domicilio', $Direccion_Domicilio);
         $stmt->bindParam(':nombre_contacto_emergencia', $Nombre_Contacto_Emergencia);
         $stmt->bindParam(':parentezco_contacto_emergencia', $Parentezco_Contacto_Emergencia);
@@ -117,6 +114,14 @@ class Usuario {
         return $stmt->execute(['Id_Usuario' => $Id_Usuario]);
         
     }
+
+    public function updatePassword($id, $newPassword) {
+        $stmt = $this->conn->prepare("UPDATE T_Usuarios SET Contraseña_Usuario = :newPassword WHERE Id_Usuario = :id");
+        return $stmt->execute(['id' => $id, 'newPassword' => $newPassword]);
+
+    }
+
+
 }
 
 ?>

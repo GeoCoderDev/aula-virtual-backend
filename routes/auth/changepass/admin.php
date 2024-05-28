@@ -15,7 +15,7 @@ Flight::group("/api/auth/admin/me/password", function() {
         $data = Flight::request()->data->getData();
     
         // Llamar al método updatePassword() del controlador AdminController con los datos de la nueva contraseña
-        $controller->updatePassword($data);    
+        $controller->updatePasswordByMe($data);    
         
     });
 
