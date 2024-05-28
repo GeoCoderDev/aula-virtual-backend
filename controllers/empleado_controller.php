@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '../../Models/Empleado.php';
+require __DIR__ . '/../models/Empleado.php';
 
 class EmpleadoController {
 

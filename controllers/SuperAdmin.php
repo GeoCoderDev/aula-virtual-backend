@@ -1,7 +1,7 @@
 <?php
 
-require __DIR__ . '/../Models/Superadmin.php';
-require __DIR__ .'/../lib/helpers/encriptations/superadminEncriptation.php';
+require __DIR__ . '/../models/SuperAdmin.php';
+require __DIR__ . '/../lib/helpers/encriptations/superadminEncriptation.php';
 
 class SuperadminController {
 

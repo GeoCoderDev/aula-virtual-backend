@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__."/./Usuario.php";
-require_once __DIR__."/../Config/S3Manager.php"; // Agrega la ruta correcta al archivo S3Manager.php
+require_once __DIR__."/../config/S3Manager.php"; // Agrega la ruta correcta al archivo S3Manager.php
 require_once __DIR__.'/../lib/helpers/functions/totalTimeInSeconds.php';
 
 use Config\Database;

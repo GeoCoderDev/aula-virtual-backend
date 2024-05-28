@@ -2,7 +2,7 @@
 
 use Config\S3Manager;
 
-require_once __DIR__ . '/../Models/Usuario.php';
+require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ .'/../lib/helpers/JWT/JWT_Teacher.php';
 require_once __DIR__ .'/../lib/helpers/JWT/JWT_Student.php';
 require_once __DIR__ .'/../lib/helpers/encriptations/userEncriptation.php';

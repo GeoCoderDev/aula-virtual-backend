@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '../../Config/Database.php';
+require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__.'/../lib/helpers/functions/totalTimeInSeconds.php';
 use Config\Database;
 use Config\S3Manager;

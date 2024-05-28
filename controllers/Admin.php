@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '../../Models/Admin.php';
-require_once __DIR__."/../lib/helpers/encriptations/adminEncriptation.php";
+require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__.'/../lib/helpers/encriptations/adminEncriptation.php';
 
 class AdminController {
     

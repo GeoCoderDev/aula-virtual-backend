@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../Config/Database.php'; // Corregí la ruta del archivo de configuración de la base de datos
+require_once __DIR__ . '/../config/Database.php'; // Corregí la ruta del archivo de configuración de la base de datos
 use Config\Database;
 
 class Usuario {
