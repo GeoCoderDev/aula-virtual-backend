@@ -178,91 +178,44 @@ class AdminController {
         }
     }
 
-    // public function updatePassword($id, $data) {
-    //     $newPassword = $data['password'] ?? null;
-
-    //     if (!$newPassword) {
-    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
-    //     }
-
-    //     $adminModel = new Admin();
-    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
-    //     $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
-        
-    //     if ($rowCount > 0) {
-    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
-    //     } else {
-    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
-    //     }
-    // }
-
-    // public function updatePassword($id, $data) {
-    //     $newPassword = $data['Contraseña'] ?? null;
-    
-    //     if (!$newPassword) {
-    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"] , 400);
-    //     }
-    
-    //     $adminModel = new Admin();
-    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
-    //     $rowCount = $adminModel->updatePassword($id, $encriptedNewPassword);
-        
-    //     if ($rowCount > 0) {
-    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
-    //     } else {
-    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"] , 404);
-    //     }
-    // }
-    
-    // public function updatePassword($data) {
-    //     $newPassword = $data['Contraseña'] ?? null;
-        
-    //     if (!$newPassword) {
-    //         return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
-    //     }
-        
-    //     // El ID del administrador debería estar disponible a través del middleware de autenticación
-    //     $adminID = Flight::request()->data->getData()['Id_Admin'] ?? null;
-    
-    //     if (!$adminID) {
-    //         return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
-    //     }
-    
-    //     $adminModel = new Admin();
-    //     $encriptedNewPassword = encryptAdminPassword($newPassword);
-    //     $rowCount = $adminModel->updatePassword($adminID, $encriptedNewPassword);
-        
-    //     if ($rowCount > 0) {
-    //         return Flight::json(["message" => "Contraseña actualizada"], 200);
-    //     } else {
-    //         return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
-    //     }
-    // }
-
     public function updatePasswordByMe($data) {
-        $newPassword = $data['Contraseña'] ?? null;
-        
-        if (!$newPassword) {
-            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+        $oldPassword = $data['Contraseña_Actual'] ?? null;
+        $newPassword = $data['Contraseña_Nueva'] ?? null;
+
+        if (!$oldPassword || !$newPassword) {
+            return Flight::json(["message" => "La contraseña antigua y la nueva son obligatorias"], 400);
         }
-        
+
         // El ID del administrador debería estar disponible a través del middleware de autenticación
         $adminID = Flight::request()->data->getData()['Id_Admin'] ?? null;
-    
+
         if (!$adminID) {
             return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
         }
-    
+
         $adminModel = new Admin();
+        $admin = $adminModel->getById($adminID);
+
+        if (!$admin) {
+            return Flight::json(["message" => "No se encontró ningún administrador con el ID proporcionado"], 404);
+        }
+
+        $adminPasswordDecrypted = decryptAdminPassword($admin['Contraseña']);
+
+        if ($adminPasswordDecrypted !== $oldPassword) {
+            return Flight::json(["message" => "La contraseña actual es incorrecta"], 400);
+        }
+
         $encriptedNewPassword = encryptAdminPassword($newPassword);
         $updateSuccess = $adminModel->updatePassword($adminID, $encriptedNewPassword);
         
         if ($updateSuccess) {
             return Flight::json(["message" => "Contraseña actualizada"], 200);
         } else {
-            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
+            return Flight::json(["message" => "Error al actualizar la contraseña"], 500);
         }
     }
+
 
      public function updatePassword($id, $data) {
          $newPassword = $data['Contraseña'] ?? null;

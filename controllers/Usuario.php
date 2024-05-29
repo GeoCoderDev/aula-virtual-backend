@@ -379,8 +379,8 @@ class UsuarioController {
     }
 
     public function updatePasswordByMe($data) {
-        $oldPassword = $data['Antigua_Contraseña'] ?? null;
-        $newPassword = $data['Nueva_Contraseña'] ?? null;
+        $oldPassword = $data['Contraseña_Actual'] ?? null;
+        $newPassword = $data['Contraseña_Nueva'] ?? null;
 
         if (!$oldPassword || !$newPassword) {
             return Flight::json(["message" => "Ambas contraseñas (antigua y nueva) son obligatorias"], 400);
@@ -408,7 +408,7 @@ class UsuarioController {
         // Verificar si la contraseña anterior coincide
         $oldPasswordHash = $usuario['Contraseña_Usuario'];
         if ($oldPassword!==decryptUserPassword($oldPasswordHash)) {
-            return Flight::json(["message" => "La contraseña anterior es incorrecta"], 400);
+            return Flight::json(["message" => "La contraseña actual es incorrecta"], 400);
         }
 
         // Generar hash para la nueva contraseña

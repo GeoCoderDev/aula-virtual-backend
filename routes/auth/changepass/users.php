@@ -21,5 +21,5 @@ Flight::group("/api/auth/me/password", function(){
 
     });
 
-}, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated() ]);
+}, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);
 ?>

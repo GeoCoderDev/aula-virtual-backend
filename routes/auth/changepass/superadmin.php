@@ -15,7 +15,7 @@ Flight::group("/api/auth/superadmin/me/password", function(){
         $data = Flight::request()->data->getData();
     
         // Llamar al método updatePassword() del controlador SuperadminController con los datos de la nueva contraseña
-        $controller->updatePassword($data);    
+        $controller->updatePasswordByMe($data);    
         
     });
 

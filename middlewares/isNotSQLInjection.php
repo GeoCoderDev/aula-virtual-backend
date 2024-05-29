@@ -6,10 +6,12 @@ class NotSQLInjection {
     public function before($params) {
         // Obtener los datos de la solicitud
         $data = Flight::request()->data->getData();
+        // Obtener los parámetros de consulta
+        $queryParams = Flight::request()->query->getData();
 
-        // Verificar si los datos contienen inyección SQL
-        if ($this->containsSQLInjection($data)) {
-            Flight::halt(400, json_encode(["message" => "Los datos contienen una posible inyección SQL"]));
+        // Verificar si los datos de la solicitud contienen inyección SQL
+        if ($this->containsSQLInjection($data) || $this->containsSQLInjection($queryParams)) {
+            Flight::halt(400, json_encode(["message" => "Los datos de la solicitud contienen una posible inyección SQL"]));
         }
     }
 

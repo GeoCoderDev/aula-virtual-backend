@@ -99,32 +99,44 @@ class SuperadminController {
         }
     }
 
-    public function updatePassword($data) {
-        $newPassword = $data['Contraseña'] ?? null;
+    public function updatePasswordByMe($data) {
+        $oldPassword = $data['Contraseña_Actual'] ?? null;
+        $newPassword = $data['Contraseña_Nueva'] ?? null;
 
-        if (!$newPassword) {
-            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
+        if (!$oldPassword || !$newPassword) {
+            return Flight::json(["message" => "La antigua y la nueva contraseña son obligatorias"]);
         }
 
-        // El ID del supeadministrador debería estar disponible a través del middleware de autenticación
+        // El ID del superadministrador debería estar disponible a través del middleware de autenticación
         $superadminID = Flight::request()->data->getData()['Id_Superadmin'] ?? null;
 
         if (!$superadminID) {
-            return Flight::json(["message" => "ID de superadministrador no encontrado en la solicitud"], 400);
+            return Flight::json(["message" => "No estas autenticado como Superadministrador"]);
         }
 
         $superadminModel = new Superadmin();
+        $superadmin = $superadminModel->getById($superadminID);
+
+        if (!$superadmin) {
+            return Flight::json(["message" => "No se encontró ningún superadministrador con el ID proporcionado"]);
+        }
+
+        $superadminPasswordDecrypted = decryptSuperadminPassword($superadmin['Contraseña']);
+
+        if ($superadminPasswordDecrypted !== $oldPassword) {
+            return Flight::json(["message" => "La contraseña actual es incorrecta"]);
+        }
+
         $encriptedNewPassword = encryptSuperadminPassword($newPassword);
         $updateSuccess = $superadminModel->updatePassword($superadminID, $encriptedNewPassword);
         
         if ($updateSuccess) {
-            return Flight::json(["message" => "Contraseña actualizada"], 200);
+            return Flight::json(["message" => "Contraseña actualizada"]);
         } else {
-            return Flight::json(["message" => "No se encontró ningún superadmin con el ID proporcionado"], 404);
+            return Flight::json(["message" => "Error al actualizar la contraseña"]);
         }
     }
 
-    
 
     // Puedes agregar más métodos según sea necesario
 }
