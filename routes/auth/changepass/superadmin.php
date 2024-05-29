@@ -3,6 +3,7 @@
 require_once __DIR__."/../../../controllers/SuperAdmin.php";
 require_once __DIR__ ."/../../../lib/helpers/JWT/JWT_Superadmin.php";
 require_once __DIR__."/../../../middlewares/isSuperadminAuthenticated.php";
+require_once __DIR__."/../../../middlewares/isNotSQLInjection.php";
 
 Flight::group("/api/auth/superadmin/me/password", function(){
 
@@ -18,5 +19,5 @@ Flight::group("/api/auth/superadmin/me/password", function(){
         
     });
 
-}, [new SuperadminAuthenticated()]);
+}, [new NotSQLInjection(), new SuperadminAuthenticated()]);
 ?>

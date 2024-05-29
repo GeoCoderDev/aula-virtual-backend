@@ -213,7 +213,6 @@ class EstudianteController
 
         }
 
-
     public function getCursosByDNI($DNI_Estudiante)
     {
         $estudianteModel = new Estudiante();
@@ -221,6 +220,17 @@ class EstudianteController
         return $cursos;
     }
 
+    public function getUserIdByDNI($DNI_Estudiante)
+    {
+        $estudianteModel = new Estudiante();
+        $userId = $estudianteModel->getUserIdByDNI($DNI_Estudiante);
+
+        if ($userId !== false) {
+            Flight::json(["userId" => $userId], 200);
+        } else {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+        }
+    }
 
     public function delete($DNI_Estudiante)
     {

@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . "/../../middlewares/isStudentAuthenticated.php";
 require_once __DIR__ . "/../../middlewares/isTeacherAuthenticated.php";
+require_once __DIR__ . "/../../middlewares/isNotSQLInjection.php";
 
 Flight::group("/api/myAsignations",  function(){
 
@@ -24,4 +24,4 @@ Flight::group("/api/myAsignations",  function(){
 
     });*/
 
-}, [new TeacherAuthenticated()]);
+}, [new NotSQLInjection(), new TeacherAuthenticated()]);

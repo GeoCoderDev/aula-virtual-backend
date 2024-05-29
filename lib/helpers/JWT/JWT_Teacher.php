@@ -38,10 +38,14 @@ function decodeTeacherJWT($token) {
         $decoded = JWT::decode($token, new Key($JWT_KEY_TEACHER, "HS256"));
         return $decoded;
     } catch (ExpiredException $e) {
-        Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
+       
+            Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
+        
     } catch (Exception $e) {
         // También puedes enviar una respuesta de error al cliente
-        Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
+        
+            Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
+        
     }
 }
 

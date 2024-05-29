@@ -170,6 +170,30 @@ class Profesor{
         return $professor;
     }
 
+    public function getUserIdByDNI($DNI_Profesor)
+    {
+        // Consulta SQL para obtener el ID de usuario por el DNI del profesor
+        $query = "SELECT Id_Usuario FROM T_Profesores WHERE DNI_Profesor = :DNI_Profesor";
+
+        // Preparar la consulta
+        $stmt = $this->conn->prepare($query);
+
+        // Bind de parámetros
+        $stmt->bindParam(":DNI_Profesor", $DNI_Profesor);
+
+        // Ejecutar la consulta
+        $stmt->execute();
+
+        // Obtener el resultado
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Verificar si se encontró el profesor
+        if ($result) {
+            return $result['Id_Usuario'];
+        } else {
+            return false;
+        }
+    }
 
 
     public function create($dni, $userId) {

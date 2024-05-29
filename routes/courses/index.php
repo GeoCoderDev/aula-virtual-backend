@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/../../middlewares/isAdminAuthenticated.php";
 require_once __DIR__ . "/../../middlewares/isSuperadminAuthenticated.php";
+require_once __DIR__ . "/../../middlewares/isNotSQLInjection.php";
 require_once __DIR__.'/../../controllers/Curso.php';
 
 Flight::group("/api/courses", function (){
@@ -60,4 +61,4 @@ Flight::group("/api/courses", function (){
     });
 
 
-}, [new AdminAuthenticated(true), new SuperadminAuthenticated()]);
+}, [new NotSQLInjection(),new AdminAuthenticated(true), new SuperadminAuthenticated()]);

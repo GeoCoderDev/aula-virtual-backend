@@ -21,6 +21,8 @@ class ProfesorController
     }
 
 
+
+
     public function getByDNI($DNI_Profesor)
     {
         $profesorModel = new Profesor();
@@ -81,6 +83,20 @@ class ProfesorController
         $profesorModel = new Profesor();
         $cursos = $profesorModel->getCursosByDNI($DNI_Profesor);
         return $cursos;
+    }
+
+    public function getUserIdByDNI($DNI_Profesor)
+    {
+        $profesorModel = new Profesor();
+        $userId = $profesorModel->getUserIdByDNI($DNI_Profesor);
+        
+        if ($userId) {
+            // Si se encontró el ID de usuario, responder con un JSON
+            Flight::json(["Id_Usuario" => $userId], 200);
+        } else {
+            // Si no se encontró el profesor, responder con un mensaje de error
+            Flight::json(["message" => "No se encontró ningún profesor con el DNI proporcionado"], 404);
+        }
     }
 
     public function getAsignacionesByDNI($DNI_Profesor){

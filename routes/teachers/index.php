@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/../../middlewares/isAdminAuthenticated.php";
 require_once __DIR__ . "/../../middlewares/isSuperadminAuthenticated.php";
+require_once __DIR__ . "/../../middlewares/isNotSQLInjection.php";
 require_once __DIR__ . "/../../controllers/Profesor.php";
 
 Flight::group("/api/teachers",  function(){
@@ -48,4 +49,4 @@ Flight::group("/api/teachers",  function(){
         $controller->delete($DNI);
     });
 
-}, [new AdminAuthenticated(true), new SuperadminAuthenticated()]);
+}, [new NotSQLInjection(), new AdminAuthenticated(true), new SuperadminAuthenticated()]);

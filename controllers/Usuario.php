@@ -3,6 +3,7 @@
 use Config\S3Manager;
 
 require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__.'/../models/Estudiante.php';
 require_once __DIR__ .'/../lib/helpers/JWT/JWT_Teacher.php';
 require_once __DIR__ .'/../lib/helpers/JWT/JWT_Student.php';
 require_once __DIR__ .'/../lib/helpers/encriptations/userEncriptation.php';
@@ -373,33 +374,55 @@ class UsuarioController {
         return $this->getUserRoleByUserId($usuario['Id_Usuario']);
     }
 
+    public function updatePassword($data){
 
-    public function updatePasswordByMe($data) {
-        $newPassword = $data['Contraseña_Usuario'] ?? null;
-        
-        if (!$newPassword) {
-            return Flight::json(["message" => "Nueva contraseña es obligatoria"], 400);
-        }
-        
-        // El ID del administrador debería estar disponible a través del middleware de autenticación
-        $usuarioID = Flight::request()->data->getData()['Id_Usuario'] ?? null;
-    
-        if (!$usuarioID) {
-            return Flight::json(["message" => "ID de administrador no encontrado en la solicitud"], 400);
-        }
-    
-        $usuarioModel = new Usuario();
-        $encriptedNewPassword = encryptUserPassword($newPassword);
-        $updateSuccess = $usuarioModel->updatePassword($usuarioID, $encriptedNewPassword);
-        
-        if ($updateSuccess) {
-            return Flight::json(["message" => "Contraseña actualizada"], 200);
-        } else {
-            return Flight::json(["message" => "No se encontró ningún admin con el ID proporcionado"], 404);
-        }
     }
 
+    public function updatePasswordByMe($data) {
+        $oldPassword = $data['Antigua_Contraseña'] ?? null;
+        $newPassword = $data['Nueva_Contraseña'] ?? null;
 
+        if (!$oldPassword || !$newPassword) {
+            return Flight::json(["message" => "Ambas contraseñas (antigua y nueva) son obligatorias"], 400);
+        }
+
+        if(isset($data["DNI_Estudiante"])){
+            $studentModel = new Estudiante(); 
+            $Id_Usuario = $studentModel->getUserIdByDNI($data["DNI_Estudiante"]);
+        }else{            
+            $teacherModel = new Profesor(); 
+            $Id_Usuario = $teacherModel->getUserIdByDNI($data["DNI_Profesor"]);
+        }
+
+        if(!$Id_Usuario){
+            return Flight::json(["message" => "Tu usuario ya no existe"]);
+        }
+
+        $usuarioModel = new Usuario();
+        $usuario = $usuarioModel->getById($Id_Usuario);
+
+        if (!$usuario) {
+            return Flight::json(["message" => "Usuario no encontrado"], 404);
+        }
+
+        // Verificar si la contraseña anterior coincide
+        $oldPasswordHash = $usuario['Contraseña_Usuario'];
+        if ($oldPassword!==decryptUserPassword($oldPasswordHash)) {
+            return Flight::json(["message" => "La contraseña anterior es incorrecta"], 400);
+        }
+
+        // Generar hash para la nueva contraseña
+        $newPasswordHash = encryptUserPassword($newPassword);
+
+        // Actualizar la contraseña en la base de datos
+        $updateSuccess = $usuarioModel->updatePassword($Id_Usuario, $newPasswordHash);
+
+        if ($updateSuccess) {
+            return Flight::json(["message" => "Contraseña actualizada correctamente"], 200);
+        } else {
+            return Flight::json(["message" => "No se pudo actualizar la contraseña"], 500);
+        }
+    }
 
     public function validateUser($data) {
         $username = $data['username'] ?? null;

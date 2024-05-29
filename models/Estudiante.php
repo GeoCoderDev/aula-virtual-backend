@@ -18,73 +18,99 @@ class Estudiante
     }
 
     public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $grado = null, $seccion = null, $estado = null) // Agrega el nuevo parámetro de consulta
-{
-    if ($includePassword) {
-        $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE 1=1";
-    } else {
-        $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE 1=1";
+    {
+        if ($includePassword) {
+            $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE 1=1";
+        } else {
+            $query = "SELECT U.Id_Usuario, E.DNI_Estudiante, A.Grado, A.Seccion, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Foto_Perfil_Key_S3, U.Estado FROM T_Estudiantes AS E INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario INNER JOIN T_Aulas AS A ON E.Id_Aula = A.Id_Aula WHERE 1=1";
+        }
+
+        // Agregar condiciones según los parámetros de búsqueda
+        if ($dni !== null) {
+            $query .= " AND E.DNI_Estudiante LIKE :dni";
+        }
+        if ($nombre !== null) {
+            $query .= " AND U.Nombres LIKE :nombre";
+        }
+        if ($apellidos !== null) {
+            $query .= " AND U.Apellidos LIKE :apellidos";
+        }
+        if ($grado !== null) {
+            $query .= " AND A.Grado = :grado";
+        }
+        if ($seccion !== null) {
+            $query .= " AND A.Seccion = :seccion";
+        }
+        if ($estado !== null) { // Agrega el filtro por estado si se proporciona
+            $query .= " AND U.Estado = :estado";
+        }
+
+        // Agregar límite y offset
+        $query .= " LIMIT :startFrom, :limit";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular los parámetros
+        if ($dni !== null) {
+            $stmt->bindValue(':dni', $dni . '%', PDO::PARAM_STR);
+        }
+        if ($nombre !== null) {
+            $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
+        }
+        if ($apellidos !== null) {
+            $stmt->bindValue(':apellidos', '%' . $apellidos . '%', PDO::PARAM_STR);
+        }
+        if ($grado !== null) {
+            $stmt->bindValue(':grado', $grado, PDO::PARAM_STR);
+        }
+        if ($seccion !== null) {
+            $stmt->bindValue(':seccion', $seccion, PDO::PARAM_STR);
+        }
+        if ($estado !== null) { // Vincula el valor del estado si se proporciona
+            $stmt->bindValue(':estado', $estado, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Itera sobre los estudiantes para agregar la URL del objeto S3 si 'Foto_Perfil_Key_S3' no es nulo
+        foreach ($students as &$student) {
+            if ($student['Foto_Perfil_Key_S3'] !== null) {
+                $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
+            }
+        }
+
+        return $students;
     }
 
-    // Agregar condiciones según los parámetros de búsqueda
-    if ($dni !== null) {
-        $query .= " AND E.DNI_Estudiante LIKE :dni";
-    }
-    if ($nombre !== null) {
-        $query .= " AND U.Nombres LIKE :nombre";
-    }
-    if ($apellidos !== null) {
-        $query .= " AND U.Apellidos LIKE :apellidos";
-    }
-    if ($grado !== null) {
-        $query .= " AND A.Grado = :grado";
-    }
-    if ($seccion !== null) {
-        $query .= " AND A.Seccion = :seccion";
-    }
-    if ($estado !== null) { // Agrega el filtro por estado si se proporciona
-        $query .= " AND U.Estado = :estado";
-    }
+    public function getUserIdByDNI($DNI_Estudiante)
+    {
+        // Consulta SQL para obtener el ID de usuario por el DNI del estudiante
+        $query = "SELECT Id_Usuario FROM Estudiante WHERE DNI_Estudiante = :DNI_Estudiante";
 
-    // Agregar límite y offset
-    $query .= " LIMIT :startFrom, :limit";
+        // Preparar la consulta
+        $stmt = $this->conn->prepare($query);
 
-    $stmt = $this->conn->prepare($query);
+        // Bind de parámetros
+        $stmt->bindParam(":DNI_Estudiante", $DNI_Estudiante);
 
-    // Vincular los parámetros
-    if ($dni !== null) {
-        $stmt->bindValue(':dni', $dni . '%', PDO::PARAM_STR);
-    }
-    if ($nombre !== null) {
-        $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
-    }
-    if ($apellidos !== null) {
-        $stmt->bindValue(':apellidos', '%' . $apellidos . '%', PDO::PARAM_STR);
-    }
-    if ($grado !== null) {
-        $stmt->bindValue(':grado', $grado, PDO::PARAM_STR);
-    }
-    if ($seccion !== null) {
-        $stmt->bindValue(':seccion', $seccion, PDO::PARAM_STR);
-    }
-    if ($estado !== null) { // Vincula el valor del estado si se proporciona
-        $stmt->bindValue(':estado', $estado, PDO::PARAM_STR);
-    }
+        // Ejecutar la consulta
+        $stmt->execute();
 
-    $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        // Obtener el resultado
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $stmt->execute();
-    $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Itera sobre los estudiantes para agregar la URL del objeto S3 si 'Foto_Perfil_Key_S3' no es nulo
-    foreach ($students as &$student) {
-        if ($student['Foto_Perfil_Key_S3'] !== null) {
-            $student['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($student['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
+        // Verificar si se encontró el estudiante
+        if ($result) {
+            return $result['Id_Usuario'];
+        } else {
+            return false;
         }
     }
 
-    return $students;
-}
 
     public function getByDNI($dni, $includePassword = false)
     {

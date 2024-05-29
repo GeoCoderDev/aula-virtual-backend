@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/../../middlewares/isAdminAuthenticated.php";
 require_once __DIR__ . "/../../middlewares/isSuperadminAuthenticated.php";
+require_once __DIR__ . "/../../middlewares/isNotSQLInjection.php";
 require_once __DIR__ . "/../../controllers/Estudiante.php";
 
 Flight::group("/api/students",  function(){
@@ -59,7 +60,7 @@ Flight::group("/api/students",  function(){
 
     });
 
-    Flight::route("PUT /@DNI", function($DNI){
+    Flight::route("POST /@DNI", function($DNI){
         
         $data = Flight::request()->data->getData();
         $controller = new EstudianteController();
@@ -68,14 +69,12 @@ Flight::group("/api/students",  function(){
     });
 
 
-
     Flight::route("DELETE /@DNI", function($DNI){
 
-        $data = Flight::request()->data->getData();
         $controller = new EstudianteController();
         $controller->delete($DNI);
 
     });
 
 
-}, [ new AdminAuthenticated(true), new SuperadminAuthenticated()]);
+}, [ new NotSQLInjection(), new AdminAuthenticated(true), new SuperadminAuthenticated()]);

@@ -38,7 +38,7 @@ class StudentAuthenticated {
             $estudianteID = $validateResponse["DNI_Estudiante"]; 
             $username = $validateResponse['Nombre_Usuario']; 
             
-            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["DNI_Estudiante"=>$estudianteID, "Nombre_Usuario"=>$username]));
+            Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["DNI_Estudiante"=>$estudianteID, "Nombre_Usuario_Estudiante"=>$username]));
 
          } else { 
 
