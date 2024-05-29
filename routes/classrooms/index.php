@@ -11,12 +11,23 @@ Flight::group("/api/classrooms",  function(){
     Flight::route("GET /grade/@grade/sections", function($grade){
 
         $controller = new AulaController();
-        $sections = $controller->getSectionsByGrade($grade);
-        Flight::json($sections,200);
+        $controller->getSectionsByGrade($grade);
 
     });
 
+    Flight::route("POST /grade/@grade/agreeSection", function($grade){
 
+        $controller = new AulaController();
+        $controller->agreeSection($grade);
+
+    });
+
+    Flight::route("DELETE /grade/@grade/sections", function($grade){
+
+        $controller = new AulaController();
+        $controller->deleteLastSection($grade);
+
+    });
 
 
 }, [new NotSQLInjection(),new AdminAuthenticated(true), new SuperadminAuthenticated()]);

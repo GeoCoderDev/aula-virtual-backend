@@ -51,8 +51,9 @@ class Aula
 
     public function removeAllCursoAssociations()
     {
-        $stmt = $this->conn->query("DELETE FROM T_Cursos_Aula");
-        return $stmt->rowCount() > 0;
+
+        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula");
+        return $stmt->execute();
     }
 
     public function removeCursoFromSpecificAulas($idCurso, $aulas)
@@ -82,24 +83,37 @@ class Aula
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function create($Grado, $Seccion)
+    public function getLastSection($Grado)
+    {
+        $stmt = $this->conn->prepare("SELECT Seccion FROM T_Aulas WHERE Grado = :Grado ORDER BY Id_Aula DESC LIMIT 1");
+        $stmt->execute(['Grado' => $Grado]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['Seccion'] : ''; // Devuelve la última sección o cadena vacía si no hay secciones
+    }
+
+
+    public function getStudentsCountByGradoSeccion($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) AS Total FROM T_Estudiantes WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)");
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? intval($result['Total']) : 0; // Devuelve el número de estudiantes relacionados con la sección
+    }
+
+
+    public function addSection($Grado, $Seccion)
     {
         $stmt = $this->conn->prepare("INSERT INTO T_Aulas (Grado, Seccion) VALUES (:Grado, :Seccion)");
         $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
-        return $this->conn->lastInsertId();
     }
 
-    public function update($Id_Aula, $Grado, $Seccion)
+    public function deleteLastSection($Grado)
     {
-        $stmt = $this->conn->prepare("UPDATE T_Aulas SET Grado = :Grado, Seccion = :Seccion WHERE Id_Aula = :Id_Aula");
-        $stmt->execute(['Id_Aula' => $Id_Aula, 'Grado' => $Grado, 'Seccion' => $Seccion]);
-        return $stmt->rowCount();
+        $lastSection = $this->getLastSection($Grado);
+        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $lastSection]);
     }
 
-    public function delete($Id_Aula)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Id_Aula = :Id_Aula");
-        $stmt->execute(['Id_Aula' => $Id_Aula]);
-        return $stmt->rowCount();
-    }
+
+
 }

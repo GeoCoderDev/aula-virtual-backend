@@ -19,7 +19,8 @@ class AulaController
     public function getSectionsByGrade($Grado)
     {
         $sections = $this->aulaModel->getSectionsByGrade($Grado);
-        return $sections;
+        Flight::json($sections,200);
+
     }
 
     public function getById($Id_Aula)
@@ -34,22 +35,46 @@ class AulaController
         return $aula;
     }
 
-    public function create($Grado, $Seccion)
+    public function agreeSection($Grado)
     {
-        $lastInsertId = $this->aulaModel->create($Grado, $Seccion);
-        return $lastInsertId;
+        // Obtener la última sección agregada para el grado especificado
+        $lastSection = $this->aulaModel->getLastSection($Grado);
+
+        // Generar la próxima sección
+        $newSection = $this->generateNextSection($lastSection);
+
+        // Agregar la nueva sección
+        $this->aulaModel->addSection($Grado, $newSection);
+        
+        Flight::json(["message"=>"Sección $newSection agregada para el grado $Grado."],201);
     }
 
-    public function update($Id_Aula, $Grado, $Seccion)
+
+    public function deleteLastSection($Grado)
     {
-        $rowCount = $this->aulaModel->update($Id_Aula, $Grado, $Seccion);
-        return $rowCount;
+        // Obtener la última sección agregada para el grado especificado
+        $lastSection = $this->aulaModel->getLastSection($Grado);
+
+        // Verificar si hay estudiantes relacionados con la última sección
+        $studentsCount = $this->aulaModel->getStudentsCountByGradoSeccion($Grado, $lastSection);
+
+        // Si no hay estudiantes relacionados, eliminar la última sección
+        if ($studentsCount == 0) {
+            $this->aulaModel->deleteLastSection($Grado);
+
+            Flight::json(["message" => "Sección $lastSection eliminada para el grado $Grado."], 200);
+        } else {
+            Flight::json(["message"=>"No se puede eliminar la última sección, hay estudiantes relacionados con ella."], 400);
+        }
     }
 
-    public function delete($Id_Aula)
+
+    // Método para generar la próxima sección (A, B, C, ...)
+    private function generateNextSection($lastSection)
     {
-        $rowCount = $this->aulaModel->delete($Id_Aula);
-        return $rowCount;
+        // Convertir la última sección a su valor ASCII y aumentar en uno
+        return chr(ord($lastSection) + 1);
     }
+
 }
 ?>
