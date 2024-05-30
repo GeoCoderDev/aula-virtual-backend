@@ -246,7 +246,7 @@ class UsuarioController {
         $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
         $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
         $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
-        $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'] ?? null;
+        $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'];
 
         // Verificar si se ha enviado la foto de perfil
         if(isset($_FILES['Foto_Perfil']) && $_FILES['Foto_Perfil']['error'] === UPLOAD_ERR_OK) {            

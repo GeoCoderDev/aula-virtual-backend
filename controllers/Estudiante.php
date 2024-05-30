@@ -1,7 +1,9 @@
 <?php
+use Config\S3Manager;
 
 require_once __DIR__ . '/../models/Estudiante.php';
 require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
+require_once __DIR__ . '/../lib/helpers/functions/extractExtension.php';
 require_once __DIR__.'/../config/S3Manager.php';
 require_once __DIR__.'/../lib/helpers/functions/areFieldsComplete.php';
 require_once __DIR__.'/Usuario.php';
@@ -167,7 +169,7 @@ class EstudianteController
 
 
             // Verificar si todos los campos requeridos están presentes en $data
-            if(!areFieldsComplete($data,  [ 'Grado', 'Seccion'])) return;    
+            if(!areFieldsComplete($data,  ['Grado', 'Seccion'])) return;    
 
             // Verificar si el estudiante existe
             $estudianteModel = new Estudiante();
@@ -194,8 +196,23 @@ class EstudianteController
             $Id_Aula = $aula['Id_Aula'];
 
             $userController = new UsuarioController();
+            
+            $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
 
-            $data['Foto_Perfil_Key_S3'] = $existingEstudiante['Foto_Perfil_Key_S3'];
+            if($data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
+
+                $s3Manager = new S3Manager();
+                $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Estudiante,extraerExtension($data['Foto_Perfil_Key_S3']));
+
+                $successUpdateOBject = $s3Manager->uploadFile($data['Foto_Perfil_Key_S3'], $newKey);
+
+                if(!$successUpdateOBject){
+                    return Flight::json(["message"=>"Ocurrio un error actualizando el estudiante"], 500);
+                }
+
+                $data['Foto_Perfil_Key_S3'] = $newKey;
+
+            }
 
             $successUpdateUser = $userController->update($existingEstudiante['Id_Usuario'], $data, $DNI_Estudiante);
 

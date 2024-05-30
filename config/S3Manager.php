@@ -92,6 +92,28 @@ class S3Manager
         }
     }
 
+    public function renameObject($oldKey, $newKey)
+    {
+        $bucketName = $_ENV["AWS_BUCKET_NAME"];
+
+        try {
+            // Copia el objeto con el nuevo nombre
+            $this->s3->copyObject([
+                'Bucket' => $bucketName,
+                'Key' => $newKey,
+                'CopySource' => urlencode($bucketName . '/' . $oldKey)
+            ]);
+
+            // Elimina el objeto anterior
+            $this->deleteObject($oldKey);
+
+            return true;
+        } catch (AwsException $e) {
+            return false;
+        }
+    }
+
+
     public function deleteObject($key)
     {
         $bucketName = $_ENV["AWS_BUCKET_NAME"];
