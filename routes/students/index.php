@@ -68,6 +68,12 @@ Flight::group("/api/students",  function(){
 
     });
 
+    Flight::route("PUT /@DNI/toggleState", function($DNI) {
+        $controller = new EstudianteController();
+        $controller->toggleState($DNI);
+    });
+
+
 
     Flight::route("DELETE /@DNI", function($DNI){
 

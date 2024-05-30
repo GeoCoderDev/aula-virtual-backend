@@ -36,7 +36,7 @@ class UsuarioController {
         $otherAlerts = [];
         // Verificar si todos los campos requeridos están presentes en $data
         if (!$returnAlerts) {
-            if (!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) {
+            if (!areFieldsComplete($data,  ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Telefono','Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) {
                 return;
             }
         } else {
@@ -51,11 +51,11 @@ class UsuarioController {
             }
 
             // Verificar que cada elemento del array no sea nulo o indefinido
-            $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
+            $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio','Telefono', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
 
             foreach ($data as $index => $value) {
                 if (!isset($value) || $value === null || $value === '') {
-                    $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
+                    $requiredFields = ['Nombres', 'Apellidos', 'Fecha_Nacimiento', 'Nombre_Usuario', 'Contraseña_Usuario', 'Direccion_Domicilio','Telefono', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'];
                     $field = $requiredFields[$index];
                     global $otherAlerts;
                     $otherAlerts[] = [
@@ -73,9 +73,10 @@ class UsuarioController {
         $Nombre_Usuario = $data[$returnAlerts?3:'Nombre_Usuario'];
         $Contraseña_Usuario = $data[$returnAlerts?4:'Contraseña_Usuario']?? null;
         $Direccion_Domicilio = $data[$returnAlerts?5:'Direccion_Domicilio']?? null;
-        $Nombre_Contacto_Emergencia = $data[$returnAlerts?6:'Nombre_Contacto_Emergencia']?? null;
-        $Parentezco_Contacto_Emergencia = $data[$returnAlerts?7:'Parentezco_Contacto_Emergencia']?? null;
-        $Telefono_Contacto_Emergencia = $data[$returnAlerts?8:'Telefono_Contacto_Emergencia']?? null;
+        $Telefono = $data[$returnAlerts?6:'Telefono']?? null;
+        $Nombre_Contacto_Emergencia = $data[$returnAlerts?7:'Nombre_Contacto_Emergencia']?? null;
+        $Parentezco_Contacto_Emergencia = $data[$returnAlerts?8:'Parentezco_Contacto_Emergencia']?? null;
+        $Telefono_Contacto_Emergencia = $data[$returnAlerts?9:'Telefono_Contacto_Emergencia']?? null;
         $Foto_Perfil_Key_S3 = null;
 
         // Verificar si se ha enviado la foto de perfil(Esto solo se podra desde un formulario)
@@ -134,7 +135,7 @@ class UsuarioController {
             $Fecha_Nacimiento,
             $Nombre_Usuario,
             encryptUserPassword($Contraseña_Usuario),
-            $Direccion_Domicilio,
+            $Direccion_Domicilio,$Telefono,
             $Nombre_Contacto_Emergencia,
             $Parentezco_Contacto_Emergencia,
             $Telefono_Contacto_Emergencia,
@@ -171,6 +172,7 @@ class UsuarioController {
         $Nombre_Usuario = $data['Nombre_Usuario'];
         $Contraseña_Usuario = $data['Contraseña_Usuario'];
         $Direccion_Domicilio = $data['Direccion_Domicilio'];
+        $Telefono = $data['Telefono'];
         $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
         $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
         $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
@@ -221,7 +223,8 @@ class UsuarioController {
             $Fecha_Nacimiento,
             $Nombre_Usuario,
             encryptUserPassword($Contraseña_Usuario),
-            $Direccion_Domicilio,
+            $Direccion_Domicilio, 
+            $Telefono,
             $Nombre_Contacto_Emergencia,
             $Parentezco_Contacto_Emergencia,
             $Telefono_Contacto_Emergencia,
@@ -243,6 +246,7 @@ class UsuarioController {
         $Fecha_Nacimiento = $data['Fecha_Nacimiento'];
         $Nombre_Usuario = $data['Nombre_Usuario'];
         $Direccion_Domicilio = $data['Direccion_Domicilio'];
+        $Telefono = $data['Telefono'];
         $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
         $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
         $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
@@ -299,6 +303,7 @@ class UsuarioController {
             $Fecha_Nacimiento,
             $Nombre_Usuario,
             $Direccion_Domicilio,
+            $Telefono,
             $Nombre_Contacto_Emergencia,
             $Parentezco_Contacto_Emergencia,
             $Telefono_Contacto_Emergencia,
@@ -374,9 +379,10 @@ class UsuarioController {
         return $this->getUserRoleByUserId($usuario['Id_Usuario']);
     }
 
+
     public function updatePassword($data){
 
-    }
+    }    
 
     public function updatePasswordByMe($data) {
         $oldPassword = $data['Contraseña_Actual'] ?? null;
@@ -440,8 +446,14 @@ class UsuarioController {
             if ($profesor) {
                 $decriptedPassword = decryptUserPassword($profesor['Contraseña_Usuario']);
                 if ($decriptedPassword === $password) {
-                    // Credenciales correctas, generar JWT para profesor
-                    return ["token" => generateTeacherJWT($profesor['DNI_Profesor'], $username), "role" => "teacher"];
+                    // Verificar si el usuario está habilitado
+                    if ($profesor['Estado'] === 1) {
+                        // Credenciales correctas y usuario habilitado, generar JWT para profesor
+                        return ["token" => generateTeacherJWT($profesor['DNI_Profesor'], $username), "role" => "teacher"];
+                    } else {
+                        Flight::json(["message" => "El usuario está deshabilitado"], 401);
+                        return 3;
+                    }
                 } else {
                     return 2; // Credenciales incorrectas
                 }
@@ -452,8 +464,14 @@ class UsuarioController {
             if ($estudiante) {
                 $decriptedPassword = decryptUserPassword($estudiante['Contraseña_Usuario']);
                 if ($decriptedPassword === $password) {
-                    // Credenciales correctas, generar JWT para estudiante
-                    return ["token" => generateStudentJWT($estudiante['DNI_Estudiante'], $username), "role" => "student"];
+                    // Verificar si el usuario está habilitado
+                    if ($estudiante['Estado'] === 1) {
+                        // Credenciales correctas y usuario habilitado, generar JWT para estudiante
+                        return ["token" => generateStudentJWT($estudiante['DNI_Estudiante'], $username), "role" => "student"];
+                    } else {
+                        Flight::json(["message" => "El usuario está deshabilitado"], 401);
+                        return 3;
+                    }
                 } else {
                     return 2; // Credenciales incorrectas
                 }

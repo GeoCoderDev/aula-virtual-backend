@@ -2,6 +2,7 @@
 use Config\S3Manager;
 
 require_once __DIR__ . '/../models/Estudiante.php';
+require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
 require_once __DIR__ . '/../lib/helpers/functions/extractExtension.php';
 require_once __DIR__.'/../config/S3Manager.php';
@@ -255,6 +256,32 @@ class EstudianteController
         }
     }
 
+
+    public function toggleState($DNI_Estudiante) {
+        $estudianteModel = new Estudiante();
+
+        // Obtener el estudiante por su DNI
+        $estudiante = $estudianteModel->getByDNI($DNI_Estudiante);
+
+        // Verificar si se encontró el estudiante
+        if (!$estudiante) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
+        }        
+
+        $usuarioModel = new Usuario();
+        // Cambiar el estado del estudiante
+        $success= $usuarioModel->toggleState($estudiante["Id_Usuario"]);
+
+        if ($success) {
+            Flight::json(["message" => "Estado del estudiante actualizado correctamente"], 200);
+        } else {
+            Flight::json(["message" => "Error al actualizar el estado del estudiante"], 500);
+        }
+    }
+
+
+
     public function delete($DNI_Estudiante)
     {
         $estudianteModel = new Estudiante();
@@ -271,8 +298,8 @@ class EstudianteController
         if ($successDeleteStudent) {
 
             // Eliminar el usuario correspondiente
-            $usuarioModel = new UsuarioController();
-            $userDeletedSuccess = $usuarioModel->delete($estudiante['Id_Usuario']);
+            $usuarioController = new UsuarioController();
+            $userDeletedSuccess = $usuarioController->delete($estudiante['Id_Usuario']);
             if(!$userDeletedSuccess){
                 Flight::json(["message" => "No se pudo eliminar el usuario"], 500);
                 return;

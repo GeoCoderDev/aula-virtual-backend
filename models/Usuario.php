@@ -27,16 +27,15 @@ class Usuario {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getByNombreUsuario($Nombre_Usuario)
-    {
+    public function getByNombreUsuario($Nombre_Usuario) {
         $stmt = $this->conn->prepare("SELECT * FROM T_Usuarios WHERE Nombre_Usuario = :Nombre_Usuario");
         $stmt->execute(['Nombre_Usuario' => $Nombre_Usuario]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function create($Nombres, $Apellidos, $Fecha_Nacimiento, $Nombre_Usuario, $passwordEncripted, $Direccion_Domicilio, $Nombre_Contacto_Emergencia, $Parentezco_Contacto_Emergencia, $Telefono_Contacto_Emergencia, $Foto_Perfil_Key_S3)
+    public function create($Nombres, $Apellidos, $Fecha_Nacimiento, $Nombre_Usuario, $passwordEncripted, $Direccion_Domicilio, $Telefono,$Nombre_Contacto_Emergencia, $Parentezco_Contacto_Emergencia, $Telefono_Contacto_Emergencia, $Foto_Perfil_Key_S3)
     {
-        $stmt = $this->conn->prepare("INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Direccion_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3) VALUES (:Nombres, :Apellidos, :Fecha_Nacimiento, :Nombre_Usuario, :passwordEncripted, :Direccion_Domicilio, :Nombre_Contacto_Emergencia, :Parentezco_Contacto_Emergencia, :Telefono_Contacto_Emergencia, :Foto_Perfil_Key_S3)");
+        $stmt = $this->conn->prepare("INSERT INTO T_Usuarios (Nombres, Apellidos, Fecha_Nacimiento, Nombre_Usuario, Contraseña_Usuario, Direccion_Domicilio, Nombre_Contacto_Emergencia, Parentezco_Contacto_Emergencia, Telefono_Contacto_Emergencia, Foto_Perfil_Key_S3, Telefono) VALUES (:Nombres, :Apellidos, :Fecha_Nacimiento, :Nombre_Usuario, :passwordEncripted, :Direccion_Domicilio, :Nombre_Contacto_Emergencia, :Parentezco_Contacto_Emergencia, :Telefono_Contacto_Emergencia, :Foto_Perfil_Key_S3, :Telefono)");
 
         $success = $stmt->execute([
             'Nombres' => $Nombres,
@@ -48,7 +47,8 @@ class Usuario {
             'Nombre_Contacto_Emergencia' => $Nombre_Contacto_Emergencia,
             'Parentezco_Contacto_Emergencia' => $Parentezco_Contacto_Emergencia,
             'Telefono_Contacto_Emergencia' => $Telefono_Contacto_Emergencia,
-            'Foto_Perfil_Key_S3' => $Foto_Perfil_Key_S3
+            'Foto_Perfil_Key_S3' => $Foto_Perfil_Key_S3,
+            'Telefono' => $Telefono
         ]);
 
         if ($success) {
@@ -59,16 +59,17 @@ class Usuario {
     }
 
     public function update(
-    $Id_Usuario,
-    $Nombres,
-    $Apellidos,
-    $Fecha_Nacimiento,
-    $Nombre_Usuario,
-    $Direccion_Domicilio,
-    $Nombre_Contacto_Emergencia,
-    $Parentezco_Contacto_Emergencia,
-    $Telefono_Contacto_Emergencia,
-    $Foto_Perfil_Key_S3 = null
+        $Id_Usuario,
+        $Nombres,
+        $Apellidos,
+        $Fecha_Nacimiento,
+        $Nombre_Usuario,
+        $Direccion_Domicilio,
+        $Telefono,
+        $Nombre_Contacto_Emergencia,
+        $Parentezco_Contacto_Emergencia,
+        $Telefono_Contacto_Emergencia,
+        $Foto_Perfil_Key_S3 = null
     ) {
         // Construir la consulta SQL para la actualización
         $query = "UPDATE T_Usuarios SET ";
@@ -80,7 +81,8 @@ class Usuario {
         $query .= "Nombre_Contacto_Emergencia = :nombre_contacto_emergencia, ";
         $query .= "Parentezco_Contacto_Emergencia = :parentezco_contacto_emergencia, ";
         $query .= "Telefono_Contacto_Emergencia = :telefono_contacto_emergencia, ";
-        $query .= "Foto_Perfil_Key_S3 = :foto_perfil_key_s3 ";
+        $query .= "Foto_Perfil_Key_S3 = :foto_perfil_key_s3, ";
+        $query .= "Telefono = :telefono ";
         $query .= "WHERE Id_Usuario = :id_usuario";
 
         // Preparar la consulta
@@ -94,6 +96,7 @@ class Usuario {
         $stmt->bindParam(':nombre_contacto_emergencia', $Nombre_Contacto_Emergencia);
         $stmt->bindParam(':parentezco_contacto_emergencia', $Parentezco_Contacto_Emergencia);
         $stmt->bindParam(':telefono_contacto_emergencia', $Telefono_Contacto_Emergencia);
+        $stmt->bindParam(':telefono', $Telefono);
         $stmt->bindParam(':id_usuario', $Id_Usuario);
 
         // Asignar el valor de Foto_Perfil_Key_S3 teniendo en cuenta la posibilidad de que sea null
@@ -106,6 +109,44 @@ class Usuario {
         // Ejecutar la consulta
         return $stmt->execute();
     }
+
+    public function updateState($id, $newState) {
+        // Preparar la consulta SQL
+        $query = "UPDATE T_Usuarios SET Estado = :estado WHERE Id_Usuario = :id";
+
+        // Preparar los parámetros
+        $params = array(
+            ":estado" => $newState,
+            ":id" => $id
+        );
+
+        // Preparar la declaración
+        $stmt = $this->conn->prepare($query);
+
+        // Ejecutar la consulta
+        return $stmt->execute($params);
+    }
+
+
+
+    public function toggleState($id) {
+        // Obtener el usuario por su ID
+        $usuario = $this->getById($id);
+
+        // Verificar si se encontró el usuario
+        if (!$usuario) {
+            return false; // Usuario no encontrado
+        }
+
+        // Cambiar el estado del usuario
+        $newState = $usuario['Estado'] === 1 ? 0 : 1;
+
+        // Actualizar el estado del usuario en la base de datos
+        $success = $this->updateState($id, $newState);
+
+        return $success;
+    }
+
 
 
     public function delete($Id_Usuario)
@@ -121,7 +162,4 @@ class Usuario {
 
     }
 
-
 }
-
-?>

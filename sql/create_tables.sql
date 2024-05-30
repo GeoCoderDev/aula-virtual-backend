@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS T_Usuarios (
     Nombre_Usuario VARCHAR(255) NOT NULL,
     Contraseña_Usuario VARCHAR(255) NOT NULL,
     Direccion_Domicilio VARCHAR(255),
+    Telefono VARCHAR(20) DEFAULT '-',
     Nombre_Contacto_Emergencia VARCHAR(255),
     Parentezco_Contacto_Emergencia VARCHAR(255),
     Telefono_Contacto_Emergencia VARCHAR(20),
