@@ -28,7 +28,7 @@ class UsuarioController {
     public function getByUsername($username) {
         $usuarioModel = new Usuario();
         $usuario = $usuarioModel->getByUsername($username);
-        return json_encode($usuario);
+        return $usuario;
     }
 
     public function create($data, $DNI,  $returnAlerts=false,$rowIndex=null) {
@@ -247,18 +247,7 @@ class UsuarioController {
         $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
         $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
         $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'];
-
         
-        // Verificar si ya existe un usuario con el mismo nombre de usuario
-        $usuarioModelo = new Usuario();
-        $existingUsuario = $usuarioModelo->getByUsername($Nombre_Usuario);
-
-        // Si existe un usuario con el mismo nombre de usuario y su ID es diferente del ID actual, devolver un mensaje de error
-        if ($existingUsuario && $existingUsuario['Id_Usuario'] !== $id) {
-            Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
-            return;
-        }
-
         // Verificar si se ha enviado la foto de perfil
         if(isset($_FILES['Foto_Perfil']) && $_FILES['Foto_Perfil']['error'] === UPLOAD_ERR_OK) {            
 

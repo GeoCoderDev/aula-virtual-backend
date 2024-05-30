@@ -197,6 +197,14 @@ class EstudianteController
 
             $userController = new UsuarioController();
             
+            $existingUsuario = $userController->getByUsername($data["Nombre_Usuario"]);
+
+            // Si existe un usuario con el mismo nombre de usuario y su ID es diferente del ID actual, devolver un mensaje de error
+            if ($existingUsuario && $existingUsuario['Id_Usuario'] !== $existingEstudiante["Id_Usuario"]) {
+                Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
+                return;
+            }
+
             $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
 
             if($data['Foto_Perfil_Key_S3'] && $data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
@@ -204,7 +212,7 @@ class EstudianteController
                 $s3Manager = new S3Manager();
                 $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Estudiante,extraerExtension($data['Foto_Perfil_Key_S3']));
 
-                $successUpdateOBject = $s3Manager->uploadFile($data['Foto_Perfil_Key_S3'], $newKey);
+                $successUpdateOBject = $s3Manager->renameObject($data['Foto_Perfil_Key_S3'], $newKey);
 
                 if(!$successUpdateOBject){
                     return Flight::json(["message"=>"Ocurrio un error actualizando el estudiante"], 500);
