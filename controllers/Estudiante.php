@@ -199,7 +199,7 @@ class EstudianteController
             
             $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
 
-            if($data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
+            if($data['Foto_Perfil_Key_S3'] && $data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
 
                 $s3Manager = new S3Manager();
                 $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Estudiante,extraerExtension($data['Foto_Perfil_Key_S3']));
@@ -223,8 +223,6 @@ class EstudianteController
                 } else {
                     Flight::json(["message" => "Error al actualizar el estudiante"], 500);
                 }
-            }else{
-                Flight::json(["message" => "Error al actualizar el usuario"], 500);
             }
 
 
