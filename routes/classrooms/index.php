@@ -21,7 +21,7 @@ Flight::group("/api/classrooms",  function(){
 
     });
 
-    Flight::route("POST /grade/@grade/agreeSection", function($grade){
+    Flight::route("POST /grade/@grade/sections", function($grade){
 
         $controller = new AulaController();
         $controller->agreeSection($grade);
