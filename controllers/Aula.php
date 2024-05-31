@@ -16,6 +16,12 @@ class AulaController
         return $aulas;
     }
 
+
+    public function getAllSectionsByGrades(){
+        $sectionsByGrade = $this->aulaModel->getAllSectionsByGrades();
+        Flight::json($sectionsByGrade, 200);
+    }
+
     public function getSectionsByGrade($Grado)
     {
         $sections = $this->aulaModel->getSectionsByGrade($Grado);

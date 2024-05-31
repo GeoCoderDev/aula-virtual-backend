@@ -32,13 +32,32 @@ Flight::group("/api/teachers",  function(){
 
     });
 
+    Flight::route("GET /@DNI", function($DNI){
+        $controller = new ProfesorController();
+        $controller->getByDNI($DNI);
+    });
+
     Flight::route("POST ", function(){
         $data = Flight::request()->data->getData();
         $controller = new ProfesorController();
         $controller->create($data);
     });
 
-    Flight::route("PUT /@DNI", function($DNI){
+    Flight::route("POST /multiple", function(){
+
+        $data = Flight::request()->data->getData();
+        $controller = new ProfesorController();
+        $controller->multipleCreate($data);
+
+    });
+
+    Flight::route("PUT /@DNI/toggleState", function($DNI) {
+        $controller = new ProfesorController();
+        $controller->toggleState($DNI);
+    });
+
+
+    Flight::route("POST /@DNI", function($DNI){
         $data = Flight::request()->data->getData();
         $controller = new ProfesorController();
         $controller->update($DNI, $data);

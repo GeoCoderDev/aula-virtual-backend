@@ -1,7 +1,10 @@
 <?php
+use Config\S3Manager;
 require_once __DIR__ . '/../models/Profesor.php';
 require_once __DIR__ . '/Usuario.php';
 require_once __DIR__ . '/../lib/helpers/encriptations/userEncriptation.php';
+require_once __DIR__.'/../config/S3Manager.php';
+require_once __DIR__ . '/../lib/helpers/functions/extractExtension.php';
 
 class ProfesorController
 {
@@ -20,14 +23,17 @@ class ProfesorController
         return $count;
     }
 
-
-
-
     public function getByDNI($DNI_Profesor)
     {
         $profesorModel = new Profesor();
         $profesor = $profesorModel->getByDNI($DNI_Profesor);
-        return $profesor;
+        
+        if(!$profesor){
+            Flight::json(["message"=>"No existe el profesor con $DNI_Profesor"],404);
+        }else{
+            Flight::json($profesor,200);
+        }
+
     }
 
     public function validateDNIAndUsername($data) {
@@ -72,6 +78,55 @@ class ProfesorController
         }
     }
 
+    public function multipleCreate($data) {
+        $alerts = [];
+
+        if (!isset($data['teacherValues']) || !is_array($data['teacherValues'])) {
+            return Flight::json(["message" => "No se encontraron datos de profesores para crear"], 400);
+        }
+
+        $profesorModel = new Profesor();
+        $userController = new UsuarioController();
+
+        foreach ($data['teacherValues'] as $index => $teacherData) {
+            $DNI_Profesor = $teacherData[0] ?? null;
+
+            $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
+            if ($existingProfesor) {
+                $alerts[] = [
+                    'type' => 'critical',
+                    'content' => "Fila " . ($index + 1) . ": Ya existe un profesor con el DNI '$DNI_Profesor'"
+                ];
+                continue;
+            }
+
+
+            // Crear usuario
+            $usuarioIdOrAlerts = $userController->create(array_slice($teacherData, 1), $DNI_Profesor, true, $index);
+
+            if (!is_array($usuarioIdOrAlerts)) {
+                // Crear estudiante
+                $success = $profesorModel->create($DNI_Profesor, $usuarioIdOrAlerts);
+                if ($success) {
+                    $alerts[] = [
+                        'type' => 'success',
+                        'content' => "Fila " . ($index + 1) . ": Profesor creado exitosamente"
+                    ];
+                } else {
+                    $alerts[] = [
+                        'type' => 'critical',
+                        'content' => "Fila " . ($index + 1) . ": No se pudo crear el profesor. Por favor, inténtalo de nuevo"
+                    ];
+                }
+            }else{
+                $alerts = array_merge($alerts, $usuarioIdOrAlerts);
+            }
+        }
+
+        return Flight::json(["message" => "Creación de profesores completada", "alerts" => $alerts], 200);
+    }
+
+
     /**
      * Esta funcion devuelve la lista de curso que enseña un profesor sin considerar el grado o seccion, y sin repetir 
      *
@@ -108,12 +163,12 @@ class ProfesorController
     public function update($DNI_Profesor, $data)
     
     {
-        // Verificar si el estudiante existe
+        // Verificar si el profesor existe
         $profesorModel = new Profesor();
         $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
 
         if (!$existingProfesor) {
-            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            Flight::json(["message" => "No se encontró ningún profesor con el DNI proporcionado"], 404);
             return;
         }
 
@@ -121,12 +176,51 @@ class ProfesorController
 
         $data['Foto_Perfil_Key_S3'] = $existingProfesor['Foto_Perfil_Key_S3'];
 
+
+        if($data['Foto_Perfil_Key_S3'] && $data["Nombre_Usuario"]!==$existingProfesor["Nombre_Usuario"]){
+
+            $s3Manager = new S3Manager();
+            $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Profesor,extraerExtension($data['Foto_Perfil_Key_S3']));
+
+            $successUpdateOBject = $s3Manager->renameObject($data['Foto_Perfil_Key_S3'], $newKey);
+
+            if(!$successUpdateOBject){
+                return Flight::json(["message"=>"Ocurrio un error actualizando el estudiante"], 500);
+            }
+
+            $data['Foto_Perfil_Key_S3'] = $newKey;
+
+        }
+
         $successUpdateUser = $userController->update($existingProfesor['Id_Usuario'], $data, $DNI_Profesor);
 
         if ($successUpdateUser) {        
-            Flight::json(["message" => "Usuario actualizado correctamente"], 200);
+            Flight::json(["message" => "Profesor actualizado correctamente"], 200);
         }else{
-            Flight::json(["message" => "Error al actualizar el usuario"], 500);
+            Flight::json(["message" => "Error al actualizar el Profesor"], 500);
+        }
+    }
+
+    public function toggleState($DNI_Profesor) {
+        $profesorModel = new Profesor();
+
+        // Obtener el profesor por su DNI
+        $profesor = $profesorModel->getByDNI($DNI_Profesor);
+
+        // Verificar si se encontró el profesor
+        if (!$profesor) {
+            Flight::json(["message" => "No se encontró ningún profesor con el DNI proporcionado"], 404);
+            return;
+        }
+
+        $usuarioModel = new Usuario();
+        // Cambiar el estado del profesor
+        $success= $usuarioModel->toggleState($profesor["Id_Usuario"]);
+
+        if ($success) {
+            Flight::json(["message" => "Estado del profesor actualizado correctamente"], 200);
+        } else {
+            Flight::json(["message" => "Error al actualizar el estado del profesor"], 500);
         }
     }
 

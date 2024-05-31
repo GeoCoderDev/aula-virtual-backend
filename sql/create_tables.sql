@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS T_Usuarios (
     Nombre_Contacto_Emergencia VARCHAR(255),
     Parentezco_Contacto_Emergencia VARCHAR(255),
     Telefono_Contacto_Emergencia VARCHAR(20),
-    Foto_Perfil_Key_S3 VARCHAR(255),
+    Foto_Perfil_Key_S3 VARCHAR(255) DEFAULT NULL,
     Estado TINYINT NOT NULL DEFAULT 1 CHECK (Estado >= 0 AND Estado <= 2)
 );
 

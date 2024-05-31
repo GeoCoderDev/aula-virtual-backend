@@ -166,76 +166,75 @@ class EstudianteController
     }
 
 
-        public function update($DNI_Estudiante, $data) {
+    public function update($DNI_Estudiante, $data) {
 
+        // Verificar si todos los campos requeridos están presentes en $data
+        if(!areFieldsComplete($data,  ['Grado', 'Seccion'])) return;    
 
-            // Verificar si todos los campos requeridos están presentes en $data
-            if(!areFieldsComplete($data,  ['Grado', 'Seccion'])) return;    
+        // Verificar si el estudiante existe
+        $estudianteModel = new Estudiante();
+        $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
 
-            // Verificar si el estudiante existe
-            $estudianteModel = new Estudiante();
-            $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
+        if (!$existingEstudiante) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
+        }
 
-            if (!$existingEstudiante) {
-                Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
-                return;
+        $Grado = $data['Grado'];
+        $Seccion = $data['Seccion'];
+
+        $aulaController = new AulaController();
+
+        // Obtener el ID del aula correspondiente al grado y la sección
+        $aula = $aulaController->getByGradoSeccion($Grado, $Seccion);
+
+        if (!$aula) {
+            Flight::json(["message" => "No se encontró el aula correspondiente al grado $Grado y la sección $Seccion"], 404);
+            return;
+        }
+
+        $Id_Aula = $aula['Id_Aula'];
+
+        $userController = new UsuarioController();
+        
+        $existingUsuario = $userController->getByUsername($data["Nombre_Usuario"]);
+
+        // Si existe un usuario con el mismo nombre de usuario y su ID es diferente del ID actual, devolver un mensaje de error
+        if ($existingUsuario && $existingUsuario['Id_Usuario'] !== $existingEstudiante["Id_Usuario"]) {
+            Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
+            return;
+        }
+
+        $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
+
+        if($data['Foto_Perfil_Key_S3'] && $data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
+
+            $s3Manager = new S3Manager();
+            $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Estudiante,extraerExtension($data['Foto_Perfil_Key_S3']));
+
+            $successUpdateOBject = $s3Manager->renameObject($data['Foto_Perfil_Key_S3'], $newKey);
+
+            if(!$successUpdateOBject){
+                return Flight::json(["message"=>"Ocurrio un error actualizando el estudiante"], 500);
             }
 
-            $Grado = $data['Grado'];
-            $Seccion = $data['Seccion'];
-
-            $aulaController = new AulaController();
-
-            // Obtener el ID del aula correspondiente al grado y la sección
-            $aula = $aulaController->getByGradoSeccion($Grado, $Seccion);
-
-            if (!$aula) {
-                Flight::json(["message" => "No se encontró el aula correspondiente al grado $Grado y la sección $Seccion"], 404);
-                return;
-            }
-
-            $Id_Aula = $aula['Id_Aula'];
-
-            $userController = new UsuarioController();
-            
-            $existingUsuario = $userController->getByUsername($data["Nombre_Usuario"]);
-
-            // Si existe un usuario con el mismo nombre de usuario y su ID es diferente del ID actual, devolver un mensaje de error
-            if ($existingUsuario && $existingUsuario['Id_Usuario'] !== $existingEstudiante["Id_Usuario"]) {
-                Flight::json(["message" => "Ya existe un usuario con ese nombre de usuario"], 409);
-                return;
-            }
-
-            $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
-
-            if($data['Foto_Perfil_Key_S3'] && $data["Nombre_Usuario"]!==$existingEstudiante["Nombre_Usuario"]){
-
-                $s3Manager = new S3Manager();
-                $newKey = generateProfilePhotoKeyS3($data["Nombre_Usuario"],$DNI_Estudiante,extraerExtension($data['Foto_Perfil_Key_S3']));
-
-                $successUpdateOBject = $s3Manager->renameObject($data['Foto_Perfil_Key_S3'], $newKey);
-
-                if(!$successUpdateOBject){
-                    return Flight::json(["message"=>"Ocurrio un error actualizando el estudiante"], 500);
-                }
-
-                $data['Foto_Perfil_Key_S3'] = $newKey;
-
-            }
-
-            $successUpdateUser = $userController->update($existingEstudiante['Id_Usuario'], $data, $DNI_Estudiante);
-
-            if ($successUpdateUser) {
-                $success = $estudianteModel->update($DNI_Estudiante, $existingEstudiante['Id_Usuario'], $Id_Aula);
-                if ($success) {
-                    Flight::json(["message" => "Usuario actualizado correctamente"], 200);
-                } else {
-                    Flight::json(["message" => "Error al actualizar el estudiante"], 500);
-                }
-            }
-
+            $data['Foto_Perfil_Key_S3'] = $newKey;
 
         }
+
+        $successUpdateUser = $userController->update($existingEstudiante['Id_Usuario'], $data, $DNI_Estudiante);
+
+        if ($successUpdateUser) {
+            $success = $estudianteModel->update($DNI_Estudiante, $existingEstudiante['Id_Usuario'], $Id_Aula);
+            if ($success) {
+                Flight::json(["message" => "Estudiante actualizado correctamente"], 200);
+            } else {
+                Flight::json(["message" => "Error al actualizar el estudiante"], 500);
+            }
+        }
+
+
+    }
 
     public function getCursosByDNI($DNI_Estudiante)
     {

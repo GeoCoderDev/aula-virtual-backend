@@ -7,6 +7,12 @@ require_once __DIR__ . "/../../controllers/Aula.php";
 
 Flight::group("/api/classrooms",  function(){
 
+    Flight::route("GET ", function(){
+
+        $controller = new AulaController();
+        $controller->getAllSectionsByGrades();
+
+    });
 
     Flight::route("GET /grade/@grade/sections", function($grade){
 

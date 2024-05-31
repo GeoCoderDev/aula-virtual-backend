@@ -33,6 +33,37 @@ class Aula
         return $stmt->rowCount() > 0;
     }
 
+    public function getAllSectionsByGrades()
+    {
+        // Consulta SQL para obtener los grados y secciones
+        $query = "SELECT Grado, GROUP_CONCAT(Seccion ORDER BY Seccion) AS Secciones FROM T_Aulas GROUP BY Grado";
+
+        // Preparar la consulta
+        $stmt = $this->conn->prepare($query);
+
+        // Ejecutar la consulta
+        $stmt->execute();
+
+        // Obtener los resultados
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Array para almacenar los grados y secciones
+        $gradosSecciones = [];
+
+        // Iterar sobre los resultados
+        foreach ($results as $result) {
+            // Obtener el grado y las secciones
+            $grado = $result['Grado'];
+            $secciones = explode(',', $result['Secciones']);
+
+            // Agregar el grado y las secciones al array
+            $gradosSecciones[$grado] = $secciones;
+        }
+
+        // Devolver el array de grados y secciones
+        return $gradosSecciones;
+    }
+
 
     public function getSectionsByGrade($Grado)
     {
