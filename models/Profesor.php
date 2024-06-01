@@ -214,12 +214,12 @@ class Profesor{
         
     }
 
-    public function getCursosByDNI($DNI_Profesor)
-    {
-        $stmt = $this->conn->prepare("SELECT DISTINCT C.* FROM T_Cursos AS C  INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso  INNER JOIN T_Horario_Curso_Aula AS HCA ON CA.Id_Curso_Aula = HCA.Id_Curso_Aula INNER JOIN T_Asignaciones AS ASIG ON HCA.Id_Horario_Curso_Aula = ASIG.Id_Horario_Curso_Aula INNER JOIN T_Profesores AS P ON ASIG.DNI_Profesor = P.DNI_Profesor WHERE P.DNI_Profesor = :DNI_Profesor");
-        $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    public function getCursosByDNI($DNI_Profesor) 
+{
+    $stmt = $this->conn->prepare("SELECT DISTINCT C.Id_Curso, C.Nombre AS Nombre_Curso, A.Grado, A.Seccion FROM T_Cursos AS C   INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso INNER JOIN T_Horario_Curso_Aula AS HCA ON CA.Id_Curso_Aula = HCA.Id_Curso_Aula INNER JOIN T_Asignaciones AS ASIG ON HCA.Id_Horario_Curso_Aula = ASIG.Id_Horario_Curso_Aula  INNER JOIN T_Profesores AS P ON ASIG.DNI_Profesor = P.DNI_Profesor  INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula WHERE P.DNI_Profesor = :DNI_Profesor");
+    $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     public function getAsignacionesByDNI($DNI_Profesor)
     {
