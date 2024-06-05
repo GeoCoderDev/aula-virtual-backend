@@ -34,6 +34,6 @@ Flight::group("/api/classrooms",  function(){
         $controller->deleteLastSection($grade);
 
     });
-
+    
 
 }, [new NotSQLInjection(),new AdminAuthenticated(true), new SuperadminAuthenticated()]);

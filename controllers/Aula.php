@@ -52,7 +52,7 @@ class AulaController
         // Agregar la nueva sección
         $this->aulaModel->addSection($Grado, $newSection);
         
-        Flight::json(["message"=>"Sección $newSection agregada para el grado $Grado."],201);
+        Flight::json(["message"=>"Sección $newSection agregada para el grado $Grado."], 201);
     }
 
 
@@ -64,15 +64,17 @@ class AulaController
         // Verificar si hay estudiantes relacionados con la última sección
         $studentsCount = $this->aulaModel->getStudentsCountByGradoSeccion($Grado, $lastSection);
 
-        // Si no hay estudiantes relacionados, eliminar la última sección
+        // Si no hay estudiantes relacionados, eliminar los cursos asociados y la última sección
         if ($studentsCount == 0) {
-            $this->aulaModel->deleteLastSection($Grado);
+            $this->aulaModel->deleteCursosByGradoSeccion($Grado, $lastSection);
+            $this->aulaModel->deleteSection($Grado, $lastSection);
 
             Flight::json(["message" => "Sección $lastSection eliminada para el grado $Grado."], 200);
         } else {
             Flight::json(["message"=>"No se puede eliminar la última sección, hay estudiantes relacionados con ella."], 400);
         }
     }
+
 
 
     // Método para generar la próxima sección (A, B, C, ...)

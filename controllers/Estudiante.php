@@ -236,6 +236,10 @@ class EstudianteController
 
     }
 
+    public function updateByMe(){
+        
+    }
+
     public function getCursosByDNI($DNI_Estudiante)
     {
         $estudianteModel = new Estudiante();

@@ -4,19 +4,19 @@ require_once __DIR__.'/../lib/helpers/functions/areFieldsComplete.php';
 
 class CursoController
 {
-    public function getAll( $startFrom = 0, $limit = 200, $nombre = null, $grados = null)
+    public function getAll( $startFrom = 0, $limit = 200, $nombre = null, $grado = null)
     {
         $cursoModel = new Curso();
-        $cursos = $cursoModel->getAll( $startFrom, $limit,  $nombre, $grados);
+        $cursos = $cursoModel->getAll( $startFrom, $limit,  $nombre, $grado);
         return $cursos;
     }
 
-    public function getCursosCount($nombre = null, $grados = null)
-{
-    $cursoModel = new Curso();
-    $count = $cursoModel->getCursosCount($nombre, $grados);
-    return $count;
-}
+    public function getCursosCount($nombre = null, $grado = null)
+    {
+        $cursoModel = new Curso();
+        $count = $cursoModel->getCursosCount($nombre, $grado);
+        return $count;
+    }
 
 
     public function getById($Id_Curso)

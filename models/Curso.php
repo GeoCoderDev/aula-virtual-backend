@@ -10,17 +10,17 @@ class Curso
     {
         $this->conn = Database::getConnection();
     }
-    public function getAll($startFrom = 0, $limit = 200, $nombre = null, $grados = null)
+    public function getAll($startFrom = 0, $limit = 200, $nombre = null, $grado = null)
     {
         $query = "SELECT C.Id_Curso, C.Nombre AS Nombre_Curso, (SELECT GROUP_CONCAT(DISTINCT A.Grado) FROM T_Cursos_Aula AS CA_Inner INNER JOIN T_Aulas AS A ON CA_Inner.Id_Aula = A.Id_Aula WHERE CA_Inner.Id_Curso = C.Id_Curso) AS Grados  FROM T_Cursos AS C ";
 
         // Agregar condiciones según los parámetros de búsqueda
-        if ($grados !== null) {
+        if ($grado !== null) {
             $query .= "WHERE EXISTS ( SELECT 1 FROM T_Cursos_Aula AS CA_Inner INNER JOIN T_Aulas AS A ON CA_Inner.Id_Aula = A.Id_Aula  WHERE CA_Inner.Id_Curso = C.Id_Curso AND A.Grado = :grado) ";
         }
 
         if ($nombre !== null) {
-            $query .= ($grados !== null ? "AND" : "WHERE") . " C.Nombre LIKE :nombre ";
+            $query .= ($grado !== null ? "AND" : "WHERE") . " C.Nombre LIKE :nombre ";
         }
 
         $query .= "LIMIT :startFrom, :limit";
@@ -28,8 +28,8 @@ class Curso
         $stmt = $this->conn->prepare($query);
 
         // Vincular los parámetros
-        if ($grados !== null) {
-            $stmt->bindValue(':grado', $grados, PDO::PARAM_INT);
+        if ($grado !== null) {
+            $stmt->bindValue(':grado', $grado, PDO::PARAM_INT);
         }
         if ($nombre !== null) {
             $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);

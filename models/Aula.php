@@ -98,7 +98,19 @@ class Aula
         return $stmt->rowCount() > 0;
     }
 
-
+    public function deleteCursosByGradoSeccion($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare(
+            "DELETE FROM T_Cursos_Aula WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)"
+        );
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
+    
+    public function deleteSection($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
 
     public function getById($Id_Aula)
     {
@@ -131,12 +143,43 @@ class Aula
         return $result ? intval($result['Total']) : 0; // Devuelve el número de estudiantes relacionados con la sección
     }
 
+    public function getCursosByGrado($Grado)
+    {
+        $stmt = $this->conn->prepare("SELECT c.Id_Curso  FROM T_Cursos c JOIN T_Cursos_Aula ca ON c.Id_Curso = ca.Id_Curso JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula WHERE a.Grado = :Grado GROUP BY c.Id_Curso");
+        $stmt->execute(['Grado' => $Grado]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+
 
     public function addSection($Grado, $Seccion)
     {
-        $stmt = $this->conn->prepare("INSERT INTO T_Aulas (Grado, Seccion) VALUES (:Grado, :Seccion)");
-        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+        $this->conn->beginTransaction(); // Start transaction
+
+        try {
+            // Insertar nueva sección
+            $stmt = $this->conn->prepare("INSERT INTO T_Aulas (Grado, Seccion) VALUES (:Grado, :Seccion)");
+            $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+
+            // Obtener el Id_Aula de la nueva sección
+            $idAula = $this->conn->lastInsertId();
+
+            // Obtener cursos existentes para el grado
+            $cursos = $this->getCursosByGrado($Grado);
+
+            // Insertar cursos para la nueva sección
+            foreach ($cursos as $idCurso) {
+                $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Curso, Id_Aula) VALUES (:idCurso, :idAula)");
+                $stmt->execute(['idCurso' => $idCurso, 'idAula' => $idAula]);
+            }
+
+            $this->conn->commit(); // Commit transaction
+        } catch (Exception $e) {
+            $this->conn->rollBack(); // Rollback transaction if something fails
+            throw $e; // Rethrow exception
+        }
     }
+
 
     public function deleteLastSection($Grado)
     {

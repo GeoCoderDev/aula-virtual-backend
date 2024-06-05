@@ -21,7 +21,7 @@ class StudentAuthenticated {
         if(!$token){            
             
             if(!$this->nextIsTeacherMiddleware){
-                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"])); 
+                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar este recurso"])); 
             }
 
             return;
