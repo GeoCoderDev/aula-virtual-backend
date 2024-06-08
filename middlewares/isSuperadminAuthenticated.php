@@ -5,9 +5,20 @@ require_once __DIR__."/../lib/helpers/JWT/JWT_Superadmin.php";
 
 class SuperadminAuthenticated {
 
+    private $nextMiddleware;
+
+    public function __construct($nextMiddleware = false) {
+        $this->nextMiddleware = $nextMiddleware;
+    }
+
     public function before($params) {        
 
-        if (array_key_exists("Id_Admin", Flight::request()->data->getData())) return;
+        $data = Flight::request()->data->getData();
+
+        if (array_key_exists("DNI_Estudiante", $data)) return;
+        if (array_key_exists("Id_Admin", $data)) return;
+        if (array_key_exists("DNI_Profesor", $data)) return;
+
         
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
         header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -18,7 +29,7 @@ class SuperadminAuthenticated {
             return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"])); 
         } 
 
-        $jwtData = decodeSuperAdminJWT($token); 
+        $jwtData = decodeSuperAdminJWT($token, $this->nextMiddleware); 
 
         if(is_null($jwtData)) return;                  
         
@@ -32,7 +43,11 @@ class SuperadminAuthenticated {
 
          } else { 
 
-            return Flight::halt(401, json_encode(["message" => "No estas autorizado para usar esta ruta"]));
+            if(!$this->nextMiddleware){
+                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));
+            }
+            
+            return ;  
         
         }
     }

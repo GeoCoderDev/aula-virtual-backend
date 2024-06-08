@@ -8,7 +8,12 @@ class SuperadminController {
     public function getById($id) {
         $superadminModel = new Superadmin();
         $superadmin = $superadminModel->getById($id);
-        return json_encode($superadmin);
+        if(!$superadmin){
+            Flight::json(["message"=>"No existe este superadministrador"],404);
+        }else{
+            Flight::json($superadmin,200);
+        }
+
     }
 
     /**

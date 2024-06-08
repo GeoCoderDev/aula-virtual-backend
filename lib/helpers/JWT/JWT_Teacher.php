@@ -31,7 +31,7 @@ function generateTeacherJWT($teacherID, $username) {
     return $jwt;
 }
 
-function decodeTeacherJWT($token) {
+function decodeTeacherJWT($token, $nextMiddleware) {
     global $JWT_KEY_TEACHER;
 
     try {
@@ -39,12 +39,16 @@ function decodeTeacherJWT($token) {
         return $decoded;
     } catch (ExpiredException $e) {
        
+        if(!$nextMiddleware)
             Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
+        else return null;
         
     } catch (Exception $e) {
-        // También puedes enviar una respuesta de error al cliente
-        
+        // También puedes enviar una respuesta de error al cliente        
+        if(!$nextMiddleware)
+            // También puedes enviar una respuesta de error al cliente
             Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
+        else return null;
         
     }
 }

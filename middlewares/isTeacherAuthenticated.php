@@ -5,10 +5,19 @@ require_once __DIR__."/../lib/helpers/JWT/JWT_Teacher.php";
 
 class TeacherAuthenticated {
 
+    private $nextMiddleware;
 
+    public function __construct($nextMiddleware = false) {
+        $this->nextMiddleware = $nextMiddleware;
+    }
 
-    public function before($params) {        
-        if (array_key_exists("DNI_Estudiante", Flight::request()->data->getData())) return;
+    public function before($params) {
+        
+        $data = Flight::request()->data->getData();
+        
+        if (array_key_exists("DNI_Estudiante", $data)) return;
+        if (array_key_exists("Id_Admin", $data)) return;
+        if (array_key_exists("Id_Superadmin", $data)) return;
         
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
         header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -16,10 +25,10 @@ class TeacherAuthenticated {
 
         
         if(!$token){                        
-                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));             
+            Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));             
         } 
 
-        $jwtData = decodeTeacherJWT($token); 
+        $jwtData = decodeTeacherJWT($token, $this->nextMiddleware); 
 
         if(is_null($jwtData)) return;                  
         
@@ -33,7 +42,11 @@ class TeacherAuthenticated {
             Flight::request()->data->setData(array_merge(Flight::request()->data->getData(),["DNI_Profesor"=>$profesorID, "Nombre_Usuario_Profesor"=>$username]));
 
          } else { 
-            return Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));          
+
+            if(!$this->nextMiddleware){
+                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar esta ruta"]));
+            }            
+            return ;       
         }
     }
 

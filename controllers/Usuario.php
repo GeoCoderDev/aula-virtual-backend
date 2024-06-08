@@ -449,7 +449,7 @@ class UsuarioController {
                     // Verificar si el usuario está habilitado
                     if ($profesor['Estado'] === 1) {
                         // Credenciales correctas y usuario habilitado, generar JWT para profesor
-                        return ["token" => generateTeacherJWT($profesor['DNI_Profesor'], $username), "role" => "teacher"];
+                        return ["token" => generateTeacherJWT($profesor['DNI_Profesor'], $username), "role" => "teacher","urlImage"=>$profesor["Foto_Perfil_URL"]??null];
                     } else {
                         Flight::json(["message" => "El usuario está deshabilitado"], 401);
                         return 3;
@@ -467,7 +467,7 @@ class UsuarioController {
                     // Verificar si el usuario está habilitado
                     if ($estudiante['Estado'] === 1) {
                         // Credenciales correctas y usuario habilitado, generar JWT para estudiante
-                        return ["token" => generateStudentJWT($estudiante['DNI_Estudiante'], $username), "role" => "student"];
+                        return ["token" => generateStudentJWT($estudiante['DNI_Estudiante'], $username), "role" => "student", "urlImage"=>$estudiante["Foto_Perfil_URL"]??null];
                     } else {
                         Flight::json(["message" => "El usuario está deshabilitado"], 401);
                         return 3;

@@ -30,18 +30,18 @@ function generateStudentJWT($studentID, $username) {
     return $jwt;
 }
 
-function decodeStudentJWT($token, $nextIsTeacherMiddleware) {
+function decodeStudentJWT($token, $nextMiddleware) {
     global $JWT_KEY_STUDENT;
 
     try {
         $decoded = JWT::decode($token, new Key($JWT_KEY_STUDENT, "HS256"));
         return $decoded;
     } catch (ExpiredException $e) {
-        if(!$nextIsTeacherMiddleware)
+        if(!$nextMiddleware)
         Flight::halt(401, json_encode(['message' => 'El token ha expirado']));
         else return null;
     } catch (Exception $e) {
-        if(!$nextIsTeacherMiddleware)
+        if(!$nextMiddleware)
         // También puedes enviar una respuesta de error al cliente
         Flight::halt(401, json_encode(['message' => 'Token inválido', 'content' => 'Error al decodificar el token: ' . $e->getMessage()]));
         else return null;

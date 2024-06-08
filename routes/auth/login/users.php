@@ -15,7 +15,7 @@ Flight::group("/api/auth/login",function(){
     
         if (is_array($validateResponse) && isset($validateResponse['token'])) {    
             // Devuelve el token JWT en la respuesta junto con el rol
-            Flight::json(["message" => "Usuario autenticado", "token" => $validateResponse['token'], "role" => $validateResponse['role']], 200);
+            Flight::json(["message" => "Usuario autenticado", "token" => $validateResponse['token'], "role" => $validateResponse['role'], "urlImage"=>$validateResponse['urlImage']??null], 200);
         } else {
             if ($validateResponse === 1) {
                 Flight::json(["message" => "Nombre de usuario y contraseña son obligatorios"], 400);

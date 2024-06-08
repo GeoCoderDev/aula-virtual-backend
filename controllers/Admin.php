@@ -15,7 +15,12 @@ class AdminController {
     public function getById($id) {
         $adminModel = new Admin();
         $admin = $adminModel->getById($id);
-        return $admin;
+        if(!$admin){
+            Flight::json(["message"=>"No existe el profesor con Id $id"],404);
+        }else{
+            Flight::json($admin,200);
+        }
+
     }
 
     public function getAdminCount() {
