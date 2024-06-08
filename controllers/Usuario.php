@@ -310,11 +310,90 @@ class UsuarioController {
             $Foto_Perfil_Key_S3
         );
 
-        // Verificar si se actualizó al menos una fila
         return $successUpdate;
 
 
     }
+
+    public function updateByMe($Id_Usuario, $data)
+{
+    // Verificar si todos los campos requeridos están presentes en $data
+    if (!areFieldsComplete($data, ['Direccion_Domicilio', 'Telefono', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) {
+        return;
+    }
+
+    $Direccion_Domicilio = $data['Direccion_Domicilio'];
+    $Telefono = $data['Telefono'];
+    $Nombre_Contacto_Emergencia = $data['Nombre_Contacto_Emergencia'];
+    $Parentezco_Contacto_Emergencia = $data['Parentezco_Contacto_Emergencia'];
+    $Telefono_Contacto_Emergencia = $data['Telefono_Contacto_Emergencia'];
+    $Foto_Perfil_Key_S3 = $data['Foto_Perfil_Key_S3'];
+
+    // Verificar si se ha enviado la foto de perfil
+    if (isset($_FILES['Foto_Perfil']) && $_FILES['Foto_Perfil']['error'] === UPLOAD_ERR_OK) {
+        $usuarioModel = new Usuario();
+        $usuario = $usuarioModel->getById($Id_Usuario);
+
+        if (!$usuario) {
+            Flight::json(["message" => "Usuario no encontrado"], 404);
+            return;
+        }
+
+        $Foto_Perfil_Key_S3 = $usuario["Foto_Perfil_Key_S3"];
+
+        // Obtener la información de la foto de perfil
+        $fotoPerfil = $_FILES['Foto_Perfil'];
+        $extension = pathinfo($fotoPerfil['name'], PATHINFO_EXTENSION); // Obtener la extensión del archivo
+
+        // Validar la extensión del archivo
+        $allowedExtensions = ['jpg', 'jpeg', 'png']; // Extensiones permitidas
+        if (!in_array(strtolower($extension), $allowedExtensions)) {
+            Flight::json(["message" => "La extensión del archivo de la foto de perfil no es válida. Solo se permiten archivos jpg, jpeg y png."], 400);
+            return;
+        }
+
+        $s3Manager = new S3Manager();
+
+        // Eliminar la anterior foto de perfil si existe
+        if ($Foto_Perfil_Key_S3) {
+            // Intentar eliminar la foto de perfil anterior
+            $deleteResult = $s3Manager->deleteObject($Foto_Perfil_Key_S3);
+            // Verificar si la eliminación fue exitosa
+            if (!$deleteResult) {
+                // Si la eliminación falla, devolver un error
+                Flight::json(["message" => "Error al eliminar la foto de perfil anterior"], 500);
+                return;
+            }
+        }
+
+        $Foto_Perfil_Key_S3 = generateProfilePhotoKeyS3($usuario["Nombre_Usuario"], $data["DNI_Estudiante"] ?? $data["DNI_Profesor"], $extension);
+
+        // Ruta temporal del archivo
+        $tempFilePath = $fotoPerfil['tmp_name'];
+
+        // Subir el archivo al bucket de S3
+        $uploadResult = $s3Manager->uploadFile($tempFilePath, $Foto_Perfil_Key_S3);
+
+        if (!$uploadResult) {
+            Flight::json(["message" => "Error al subir la foto de perfil"], 500);
+            return;
+        }
+    }
+
+    $usuarioModelo = new Usuario();
+
+    $successUpdate = $usuarioModelo->updateByMe(
+        $Id_Usuario,
+        $Direccion_Domicilio,
+        $Telefono,
+        $Nombre_Contacto_Emergencia,
+        $Parentezco_Contacto_Emergencia,
+        $Telefono_Contacto_Emergencia,
+        $Foto_Perfil_Key_S3
+    );
+
+    return $successUpdate;
+}
 
     
     public function delete($id)

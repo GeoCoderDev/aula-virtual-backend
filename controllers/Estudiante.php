@@ -39,6 +39,19 @@ class EstudianteController
         }
     }
 
+    public function getProfilePhotoUrl($DNI_Estudiante)
+    {
+        $estudianteModel = new Estudiante();
+        $photoUrl = $estudianteModel->getProfilePhotoUrl($DNI_Estudiante);
+
+        if ($photoUrl) {
+            Flight::json(["Foto_Perfil_URL" => $photoUrl], 200);
+        } else {
+            Flight::json(["message" => "No se encontró tu foto de perfil"], 404);
+        }
+    }
+
+    
     public function validateDNIAndUsername($data) {
     $estudianteModel = new Estudiante();
     $estudianteFinded = $estudianteModel->getByDNI($data->DNI_Estudiante);
@@ -236,6 +249,29 @@ class EstudianteController
 
     }
 
+    public function updateByMe($DNI_Estudiante, $data)
+    {
+
+        // Verificar si el estudiante existe
+        $estudianteModel = new Estudiante();
+        $existingEstudiante = $estudianteModel->getByDNI($DNI_Estudiante);
+
+        if (!$existingEstudiante) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
+        }
+
+        $data['Foto_Perfil_Key_S3'] = $existingEstudiante["Foto_Perfil_Key_S3"];
+
+        $Id_Usuario = $existingEstudiante["Id_Usuario"];
+
+        $userController = new UsuarioController();
+        $successUpdateUser = $userController->updateByMe($Id_Usuario, $data);
+
+        if ($successUpdateUser) {
+            Flight::json(["message" => "Datos actualizados correctamente"], 200);
+        }
+    }
 
     public function getCursosByDNI($DNI_Estudiante)
     {

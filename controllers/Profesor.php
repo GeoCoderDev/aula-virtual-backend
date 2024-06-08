@@ -160,6 +160,18 @@ class ProfesorController
         return $asignations;
     }
 
+    public function getProfilePhotoUrl($DNI_Profesor)
+    {
+        $profesorModel = new Profesor();
+        $photoUrl = $profesorModel->getProfilePhotoUrl($DNI_Profesor);
+
+        if ($photoUrl) {
+            Flight::json(["Foto_Perfil_URL" => $photoUrl], 200);
+        } else {
+            Flight::json(["message" => "No se encontró tu foto de perfil"], 404);
+        }
+    }
+    
     public function update($DNI_Profesor, $data)
     
     {
@@ -198,6 +210,35 @@ class ProfesorController
             Flight::json(["message" => "Profesor actualizado correctamente"], 200);
         }else{
             Flight::json(["message" => "Error al actualizar el Profesor"], 500);
+        }
+    }
+
+    public function updateByMe($DNI_Profesor, $data)
+    {
+        // Verificar si todos los campos requeridos están presentes en $data
+        if (!areFieldsComplete($data, ['Direccion_Domicilio', 'Telefono', 'Nombre_Contacto_Emergencia', 'Parentezco_Contacto_Emergencia', 'Telefono_Contacto_Emergencia'])) {
+            return;
+        }
+
+        // Verificar si el estudiante existe
+        $profesorModel = new Profesor();
+        $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
+
+        if (!$existingProfesor) {
+            Flight::json(["message" => "No se encontró ningún estudiante con el DNI proporcionado"], 404);
+            return;
+        }
+
+        $data['Foto_Perfil_Key_S3'] = $existingProfesor["Foto_Perfil_Key_S3"];
+
+        $Id_Usuario = $existingProfesor["Id_Usuario"];
+
+        
+        $userController = new UsuarioController();
+        $successUpdateUser = $userController->updateByMe($Id_Usuario, $data);
+
+        if ($successUpdateUser) {
+            Flight::json(["message" => "Datos actualizados correctamente"], 200);
         }
     }
 

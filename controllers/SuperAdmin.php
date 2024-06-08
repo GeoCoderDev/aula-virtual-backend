@@ -5,16 +5,26 @@ require __DIR__ . '/../lib/helpers/encriptations/superadminEncriptation.php';
 
 class SuperadminController {
 
-    public function getById($id) {
+    public function getById($id, $includePassword = false)
+    {
         $superadminModel = new Superadmin();
-        $superadmin = $superadminModel->getById($id);
-        if(!$superadmin){
-            Flight::json(["message"=>"No existe este superadministrador"],404);
-        }else{
-            Flight::json($superadmin,200);
-        }
+        $superadmin = $superadminModel->getById($id, $includePassword);
 
+        if (!$superadmin) {
+            Flight::json(["message" => "No existe este superadministrador"], 404);
+        } else {
+            // Desencriptar el nombre de usuario
+            $superadmin['Nombre_Usuario'] = decryptSuperadminUsername($superadmin['Nombre_Usuario']);
+
+            // Si includePassword es verdadero, desencriptar la contraseña
+            if ($includePassword) {
+                $superadmin['Contraseña'] = decryptSuperadminPassword($superadmin['Contraseña']);
+            }
+
+            Flight::json($superadmin, 200);
+        }
     }
+
 
     /**
      * Esta función devuelve un array o false

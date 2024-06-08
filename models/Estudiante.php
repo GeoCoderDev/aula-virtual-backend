@@ -223,6 +223,34 @@ class Estudiante
     return $count;
 }
 
+    public function getProfilePhotoUrl($DNI_Estudiante)
+    {
+        // Consulta SQL para obtener el 'Foto_Perfil_Key_S3' por el DNI del estudiante
+        $query = "SELECT U.Foto_Perfil_Key_S3 FROM T_Estudiantes AS E  INNER JOIN T_Usuarios AS U ON E.Id_Usuario = U.Id_Usuario  WHERE E.DNI_Estudiante = :dni";
+
+        // Preparar la consulta
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular el parámetro
+        $stmt->bindValue(':dni', $DNI_Estudiante, PDO::PARAM_STR);
+
+        // Ejecutar la consulta
+        $stmt->execute();
+
+        // Obtener el resultado
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Verificar si se encontró el estudiante y si tiene una foto de perfil
+        if ($result && $result['Foto_Perfil_Key_S3'] !== null) {
+            // Obtener la URL del objeto S3
+            $photoUrl = $this->s3Manager->getObjectUrl($result['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_STUDENT);
+            return $photoUrl;
+        } else {
+            return null; // Si no se encontró el estudiante o no tiene foto de perfil
+        }
+    }
+
+
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
         $stmt = $this->conn->prepare("INSERT INTO T_Estudiantes (DNI_Estudiante, Id_Usuario, Id_Aula) VALUES (:DNI_Estudiante, :Id_Usuario, :Id_Aula)");

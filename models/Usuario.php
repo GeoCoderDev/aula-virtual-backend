@@ -110,6 +110,50 @@ class Usuario {
         return $stmt->execute();
     }
 
+
+    public function updateByMe(
+    $Id_Usuario,
+    $Direccion_Domicilio,
+    $Telefono,
+    $Nombre_Contacto_Emergencia,
+    $Parentezco_Contacto_Emergencia,
+    $Telefono_Contacto_Emergencia,
+    $Foto_Perfil_Key_S3 = null
+) {
+    // Construir la consulta SQL para la actualización
+    $query = "UPDATE T_Usuarios SET ";
+    $query .= "Direccion_Domicilio = :direccion_domicilio, ";
+    $query .= "Telefono = :telefono, ";
+    $query .= "Nombre_Contacto_Emergencia = :nombre_contacto_emergencia, ";
+    $query .= "Parentezco_Contacto_Emergencia = :parentezco_contacto_emergencia, ";
+    $query .= "Telefono_Contacto_Emergencia = :telefono_contacto_emergencia, ";
+    $query .= "Foto_Perfil_Key_S3 = :foto_perfil_key_s3 ";
+    $query .= "WHERE Id_Usuario = :id_usuario";
+
+    // Preparar la consulta
+    $stmt = $this->conn->prepare($query);
+
+    $stmt->bindParam(':direccion_domicilio', $Direccion_Domicilio);
+    $stmt->bindParam(':telefono', $Telefono);
+    $stmt->bindParam(':nombre_contacto_emergencia', $Nombre_Contacto_Emergencia);
+    $stmt->bindParam(':parentezco_contacto_emergencia', $Parentezco_Contacto_Emergencia);
+    $stmt->bindParam(':telefono_contacto_emergencia', $Telefono_Contacto_Emergencia);
+    $stmt->bindParam(':id_usuario', $Id_Usuario);
+
+    // Asignar el valor de Foto_Perfil_Key_S3 teniendo en cuenta la posibilidad de que sea null
+    if ($Foto_Perfil_Key_S3 === null) {
+        $stmt->bindValue(':foto_perfil_key_s3', null, PDO::PARAM_NULL);
+    } else {
+        $stmt->bindParam(':foto_perfil_key_s3', $Foto_Perfil_Key_S3);
+    }
+
+    // Ejecutar la consulta
+    return $stmt->execute();
+}
+
+
+
+
     public function updateState($id, $newState) {
         // Preparar la consulta SQL
         $query = "UPDATE T_Usuarios SET Estado = :estado WHERE Id_Usuario = :id";
