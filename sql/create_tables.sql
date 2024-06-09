@@ -106,5 +106,13 @@ CREATE TABLE IF NOT EXISTS T_Asignaciones (
     FOREIGN KEY (Id_Horario_Curso_Aula) REFERENCES T_Horario_Curso_Aula(Id_Horario_Curso_Aula)
 );
 
+-- Tabla de Configuraciones de la aplicacion
+CREATE TABLE T_Configuraciones (
+    Id_Conf INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre_Conf VARCHAR(255) NOT NULL UNIQUE,
+    Valor TEXT NOT NULL,
+    Descripcion TEXT NULL,
+    Ult_Actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
 

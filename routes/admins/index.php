@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__."/../../middlewares/isSuperadminAuthenticated.php";
+require_once __DIR__."/../../middlewares/isNotSQLInjection.php";
 require_once __DIR__."/../../controllers/Admin.php";
 
 
@@ -60,6 +61,6 @@ Flight::group("/api/admins",  function(){
     });
 
 //Para usar cualquiera de estas rutas el token proporcionado debera ser el de un superadministrador
-},[new SuperadminAuthenticated()]);
+},[new NotSQLInjection() ,new SuperadminAuthenticated()]);
 
 

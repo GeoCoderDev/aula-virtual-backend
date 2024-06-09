@@ -200,3 +200,16 @@ VALUES
 ('98765432', 18),
 ('23456789', 19),
 ('34567890', 20);
+
+-- Registros para la tabla configuraciones
+
+INSERT INTO T_Configuraciones (Nombre_Conf, Valor, Descripcion) 
+VALUES 
+('Hora_Academica_Minutos', '45', 'Duración de una hora académica en minutos'),
+('Inicio_Año', '2024-03-25', 'Fecha de inicio del año escolar'),
+('Fin_Año', '2024-12-13', 'Fecha de fin del año escolar'),
+('Dias_Clase', 'Lunes, Martes, Miércoles, Jueves, Viernes', 'Días de la semana en los que se asiste al colegio'),
+('Hora_Inicio_Clases', '08:00', 'Hora de inicio de clases diario'),
+('Hora_Final_Clases', '15:00', 'Hora final de clases diario'),
+('Hora_Inicio_Recreo1', '10:30', 'Hora de inicio del primer recreo'),
+('Hora_Final_Recreo1', '11:00', 'Hora final del primer recreo');
