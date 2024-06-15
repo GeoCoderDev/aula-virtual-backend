@@ -56,7 +56,6 @@ class ProfesorController
         // Si todos los campos requeridos están presentes, continuar con la lógica para insertar en la base de datos
         $DNI_Profesor = $data['DNI_Profesor'];
        
-
         $profesorModel = new Profesor();
         $existingProfesor = $profesorModel->getByDNI($DNI_Profesor);
 

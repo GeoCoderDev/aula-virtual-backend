@@ -13,14 +13,15 @@ class TeacherAuthenticated {
 
     public function before($params) {
         
+        header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
+        header('Access-Control-Allow-Headers: Authorization, Content-Type');
+        
         $data = Flight::request()->data->getData();
         
         if (array_key_exists("DNI_Estudiante", $data)) return;
         if (array_key_exists("Id_Admin", $data)) return;
         if (array_key_exists("Id_Superadmin", $data)) return;
         
-        header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
-        header('Access-Control-Allow-Headers: Authorization, Content-Type');
         $token = getallheaders()["Authorization"] ?? null;
 
         

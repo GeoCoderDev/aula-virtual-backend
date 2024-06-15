@@ -26,6 +26,25 @@ Flight::group("/api/myCourses",  function(){
 
     });
 
+    Flight::route("GET /@id/access", function(){
+
+        $data = Flight::request()->data->getData();
+
+        if(key_exists("DNI_Estudiante", $data)){
+            $controller = new EstudianteController();
+
+            $DNI_Estudiante = $data["DNI_Estudiante"];
+
+
+        }else{
+
+            $controller = new ProfesorController();
+
+            $DNI_Profesor = $data["DNI_Profesor"];
+
+        }
+
+    });
 
 
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);

@@ -4,6 +4,9 @@
 class NotSQLInjection {
     
     public function before($params) {
+
+        header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
+
         // Obtener los datos de la solicitud
         $data = Flight::request()->data->getData();
         // Obtener los parámetros de consulta

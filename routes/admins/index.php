@@ -36,6 +36,7 @@ Flight::group("/api/admins",  function(){
     });
 
     Flight::route("POST /multiple", function(){
+        
         $data = Flight::request()->data->getData();        
         $controller = new AdminController();
         $controller->multipleCreate($data);  
