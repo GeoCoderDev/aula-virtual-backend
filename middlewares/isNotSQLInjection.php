@@ -1,10 +1,8 @@
 <?php
 
-
 class NotSQLInjection {
     
     public function before($params) {
-
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
 
         // Obtener los datos de la solicitud
@@ -19,14 +17,24 @@ class NotSQLInjection {
     }
 
     private function containsSQLInjection($data) {
-        // Convertir los valores del array en cadenas para verificar
-        $values = array_map('strval', $data);
-        
+        // Verificar recursivamente los datos
+        return $this->checkForSQLInjection($data);
+    }
+
+    private function checkForSQLInjection($data) {
         // Lista de palabras clave de SQL para buscar en los valores
         $sqlKeywords = ["SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "TRUNCATE"];
 
-        // Verificar si alguna palabra clave de SQL está presente en los valores
-        foreach ($values as $value) {
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                if ($this->checkForSQLInjection($value)) {
+                    return true; // Se encontró una posible inyección SQL en un array anidado
+                }
+            }
+        } else {
+            // Convertir el valor a cadena
+            $value = strval($data);
+            // Verificar si alguna palabra clave de SQL está presente en el valor
             foreach ($sqlKeywords as $keyword) {
                 if (stripos($value, $keyword) !== false) {
                     return true; // Se encontró una posible inyección SQL

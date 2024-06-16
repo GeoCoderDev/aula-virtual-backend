@@ -79,8 +79,7 @@ class Admin {
 
     public function delete($id) {
         $stmt = $this->conn->prepare("DELETE FROM T_Administradores WHERE Id_Admin = :id");
-        $stmt->execute(['id' => $id]);
-        return $stmt->rowCount();
+        return $stmt->execute(['id' => $id]);
     }
 
 }

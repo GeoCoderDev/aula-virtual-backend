@@ -31,10 +31,16 @@ class Tema
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getByCursoAula($Id_Curso_Aula)
+    public function getByIDCursoAula($Id_Curso_Aula)
     {
         $stmt = $this->conn->prepare("SELECT * FROM T_Temas WHERE Id_Curso_Aula = :Id_Curso_Aula");
         $stmt->execute(['Id_Curso_Aula' => $Id_Curso_Aula]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByCursoAula($Id_Curso, $Id_Aula) {
+        $stmt = $this->conn->prepare("SELECT * FROM T_Temas WHERE Id_Curso_Aula = (SELECT Id_Curso_Aula FROM T_Cursos_Aula WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula)");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

@@ -51,15 +51,8 @@ Flight::group("/api/courses", function (){
     
     Flight::route("DELETE /@id", function($id){
         $controller = new CursoController();
-        $result = $controller->delete($id);
-
-        if (isset($result['error'])) {
-            Flight::json($result, 404);
-        } elseif (isset($result['message'])) {
-            Flight::json($result, 200);
-        } else {
-            Flight::json(["error" => "Error desconocido al eliminar el curso"], 500);
-        }
+        $controller->delete($id);
+    
     });
 
 

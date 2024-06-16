@@ -110,6 +110,21 @@ public function getCursosCount($nombre = null, $grados = null)
         return $stmt->execute(['Id_Curso' => $Id_Curso, 'Nombre' => $Nombre]);
     }
 
+    public function beginTransaction()
+    {
+        $this->conn->beginTransaction();
+    }
+
+    public function commit()
+    {
+        $this->conn->commit();
+    }
+
+    public function rollBack()
+    {
+        $this->conn->rollBack();
+    }
+
     public function delete($Id_Curso)
     {
         $stmt = $this->conn->prepare("DELETE FROM T_Cursos WHERE Id_Curso = :Id_Curso");

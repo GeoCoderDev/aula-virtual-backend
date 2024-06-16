@@ -17,21 +17,45 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getByGrados($grados)
-{
-    $gradosPlaceholders = rtrim(str_repeat('?, ', count($grados)), ', ');
-    $query = "SELECT * FROM T_Aulas WHERE Grado IN ($gradosPlaceholders)";
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute($grados);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
-    public function addCursoToAula($idAula, $idCurso)
+
+    public function getByGrados($grados)
     {
-        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Curso, Id_Aula) VALUES (:idCurso, :idAula)");
-        $stmt->execute(['idCurso' => $idCurso, 'idAula' => $idAula]);
-        return $stmt->rowCount() > 0;
+        $gradosPlaceholders = rtrim(str_repeat('?, ', count($grados)), ', ');
+        $query = "SELECT * FROM T_Aulas WHERE Grado IN ($gradosPlaceholders)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($grados);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function getGradosByCurso($Id_Curso) {
+        $stmt = $this->conn->prepare("SELECT DISTINCT A.Grado FROM T_Cursos_Aula AS CA INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula WHERE CA.Id_Curso = :Id_Curso");
+        $stmt->execute(['Id_Curso' => $Id_Curso]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function getByGrado($grado) {
+        $stmt = $this->conn->prepare("SELECT * FROM T_Aulas WHERE Grado = :grado");
+        $stmt->execute(['grado' => $grado]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addCursoToAula($Id_Aula, $Id_Curso) {
+        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso) VALUES (:Id_Aula, :Id_Curso)");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
+    }
+
+    public function removeCursoFromAula($Id_Aula, $Id_Curso) {
+        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Aula = :Id_Aula AND Id_Curso = :Id_Curso");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
+    }
+
+    public function removeCursoFromAulas($idCurso)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Curso = :idCurso");
+        return $stmt->execute(['idCurso' => $idCurso]);
+    }
+
 
     public function getAllSectionsByGrades()
     {
@@ -72,12 +96,6 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-        public function removeCursoFromAula($idCurso)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Curso = :idCurso");
-        $stmt->execute(['idCurso' => $idCurso]);
-        return $stmt->rowCount() > 0;
-    }
 
 
     public function removeAllCursoAssociations()
