@@ -192,6 +192,63 @@ class Curso
     }
 
 
+    public function addCursoToAula($Id_Aula, $Id_Curso)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso) VALUES (:Id_Aula, :Id_Curso)");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
+    }
+
+
+    public function addCursoToGrado($idCurso, $grado) {
+        try {
+            // Preparar la consulta SQL
+            $sql = "INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso)
+                    SELECT a.Id_Aula, :idCurso
+                    FROM T_Aulas a
+                    WHERE a.Grado = :grado
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM T_Cursos_Aula ca
+                        WHERE ca.Id_Aula = a.Id_Aula
+                        AND ca.Id_Curso = :idCurso
+                    )";
+
+            // Preparar la declaración SQL
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':idCurso', $idCurso, PDO::PARAM_INT);
+            $stmt->bindParam(':grado', $grado, PDO::PARAM_INT);
+
+            // Ejecutar la consulta
+            return $stmt->execute();
+
+        } catch (PDOException $e) {
+            echo $e;
+            return false;
+        }
+    }
+
+    public function removeCursoFromAula($Id_Aula, $Id_Curso)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Aula = :Id_Aula AND Id_Curso = :Id_Curso");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
+    }
+
+
+    public function deleteCursosByGradoSeccion($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare(
+            "DELETE FROM T_Cursos_Aula WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)"
+        );
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
+    
+    public function deleteSection($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
+
+
     public function beginTransaction() {
         return $this->conn->beginTransaction();
     }
@@ -203,8 +260,6 @@ class Curso
     public function rollback() {
         return $this->conn->rollBack();
     }
-
-
 
     public function create($Nombre)
     {

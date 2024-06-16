@@ -107,32 +107,6 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function addCursoToAula($Id_Aula, $Id_Curso)
-    {
-        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso) VALUES (:Id_Aula, :Id_Curso)");
-        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
-    }
-
-    public function removeCursoFromAula($Id_Aula, $Id_Curso)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Aula = :Id_Aula AND Id_Curso = :Id_Curso");
-        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
-    }
-
-    public function deleteCursosByGradoSeccion($Grado, $Seccion)
-    {
-        $stmt = $this->conn->prepare(
-            "DELETE FROM T_Cursos_Aula WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)"
-        );
-        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
-    }
-    
-    public function deleteSection($Grado, $Seccion)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
-        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
-    }
-
     public function getById($Id_Aula)
     {
         $stmt = $this->conn->prepare("SELECT * FROM T_Aulas WHERE Id_Aula = :Id_Aula");

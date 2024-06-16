@@ -97,11 +97,11 @@ class CursoController
 
         // Agregar el nuevo curso a todas las aulas obtenidas
         foreach ($aulas as $aula) {
-            $success = $aulaModel->addCursoToAula($aula['Id_Aula'], $cursoId);
+            $success = $cursoModel->addCursoToAula($aula['Id_Aula'], $cursoId);
             if (!$success) {
                 // En caso de error, deshacer la creación del curso y devolver un error
                 $cursoModel->delete($cursoId);
-                Flight::json(["error" => "Error al asociar el curso al aula"], 500);
+                Flight::json(["message" => "Error al asociar el curso al aula"], 500);
                 return;
             }
         }
@@ -137,14 +137,6 @@ class CursoController
             return;
         }
 
-        // Verificar si ya existe un curso con el mismo nombre
-        $cursoExistente = $cursoModel->getByNombre($nombre);
-        if ($cursoExistente && $cursoExistente['Id_Curso'] != $Id_Curso) {
-            Flight::json(["message" => "Ya existe otro curso con el mismo nombre"], 400);
-            $cursoModel->rollback();
-            return;
-        }
-
         // Actualizar el nombre del curso
         $successUpdate = $cursoModel->update($Id_Curso, $nombre);
 
@@ -170,16 +162,13 @@ class CursoController
         $gradosToAdd = array_diff($gradosArray, $currentGrados);
         $gradosToRemove = array_diff($currentGrados, $gradosArray);
 
-        // Agregar nuevas asociaciones curso-aula
+        // Agregar el curso a los nuevos grados
         foreach ($gradosToAdd as $grado) {
-            $aulas = $aulaModel->getByGrado($grado);
-            foreach ($aulas as $aula) {
-                $success = $aulaModel->addCursoToAula($aula['Id_Aula'], $Id_Curso);
-                if (!$success) {
-                    Flight::json(["message" => "Error al asociar el curso al aula"], 500);
-                    $cursoModel->rollback();
-                    return;
-                }
+            $success = $cursoModel->addCursoToGrado($Id_Curso, $grado);
+            if (!$success) {
+                Flight::json(["message" => "Error al asociar el curso al grado {$grado}"], 500);
+                $cursoModel->rollback();
+                return;
             }
         }
 
@@ -194,7 +183,7 @@ class CursoController
                     $cursoModel->rollback();
                     return;
                 }
-                $success = $aulaModel->removeCursoFromAula($aula['Id_Aula'], $Id_Curso);
+                $success = $cursoModel->removeCursoFromAula($aula['Id_Aula'], $Id_Curso);
                 if (!$success) {
                     Flight::json(["message" => "Error al desasociar el curso del aula"], 500);
                     $cursoModel->rollback();
@@ -210,9 +199,11 @@ class CursoController
     } catch (Exception $e) {
         // Revertir la transacción en caso de error desde el modelo
         $cursoModel->rollback();
-        Flight::json(["message" => "Ocurrió un error al actualizar el curso"], 500);
+        Flight::json(["message" => "No se pudo actualizar el curso"], 500);
     }
 }
+
+
 
 
 
