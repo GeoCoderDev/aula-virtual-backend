@@ -222,7 +222,6 @@ class Curso
             return $stmt->execute();
 
         } catch (PDOException $e) {
-            echo $e;
             return false;
         }
     }

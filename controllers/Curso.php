@@ -79,7 +79,7 @@ class CursoController
         $existingCurso = $cursoModel->getByNombre(strtolower($nombre));
 
         if ($existingCurso) {
-            Flight::json(["error" => "Ya existe un curso con ese nombre"], 400);
+            Flight::json(["message" => "Ya existe un curso con ese nombre"], 400);
             return;
         }
 
@@ -87,7 +87,7 @@ class CursoController
         $cursoId = $cursoModel->create($nombre);
 
         if (!$cursoId) {
-            Flight::json(["error" => "Error al crear el curso"], 500);
+            Flight::json(["message" => "Error al crear el curso"], 500);
             return;
         }
 
@@ -107,7 +107,7 @@ class CursoController
         }
 
         // Si todo fue exitoso, devolver un mensaje de éxito
-        Flight::json(["message" => "Curso creado y asociado a las aulas correspondientes"], 201);
+        Flight::json(["message" => "Curso creado y asociado a las aulas correspondientes", "Id"=> $cursoId], 201);
     }
 
     public function updateWithAulas($Id_Curso, $data) {
@@ -202,10 +202,6 @@ class CursoController
         Flight::json(["message" => "No se pudo actualizar el curso"], 500);
     }
 }
-
-
-
-
 
 
 public function delete($Id_Curso)
