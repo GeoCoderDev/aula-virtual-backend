@@ -43,34 +43,34 @@ class Curso
         return $cursos;
     }
 
-public function getCursosCount($nombre = null, $grados = null)
-{
-    $query = "SELECT COUNT(*) AS count FROM T_Cursos AS C ";
+    public function getCursosCount($nombre = null, $grados = null)
+    {
+        $query = "SELECT COUNT(*) AS count FROM T_Cursos AS C ";
 
-    // Agregar condiciones según los parámetros de búsqueda
-    if ($grados !== null) {
-        $query .= "WHERE EXISTS ( SELECT 1 FROM T_Cursos_Aula AS CA_Inner INNER JOIN T_Aulas AS A ON CA_Inner.Id_Aula = A.Id_Aula  WHERE CA_Inner.Id_Curso = C.Id_Curso AND A.Grado = :grado) ";
+        // Agregar condiciones según los parámetros de búsqueda
+        if ($grados !== null) {
+            $query .= "WHERE EXISTS ( SELECT 1 FROM T_Cursos_Aula AS CA_Inner INNER JOIN T_Aulas AS A ON CA_Inner.Id_Aula = A.Id_Aula  WHERE CA_Inner.Id_Curso = C.Id_Curso AND A.Grado = :grado) ";
+        }
+
+        if ($nombre !== null) {
+            $query .= ($grados !== null ? "AND" : "WHERE") . " C.Nombre LIKE :nombre ";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular los parámetros
+        if ($grados !== null) {
+            $stmt->bindValue(':grado', $grados, PDO::PARAM_INT);
+        }
+        if ($nombre !== null) {
+            $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['count'];
     }
-
-    if ($nombre !== null) {
-        $query .= ($grados !== null ? "AND" : "WHERE") . " C.Nombre LIKE :nombre ";
-    }
-
-    $stmt = $this->conn->prepare($query);
-
-    // Vincular los parámetros
-    if ($grados !== null) {
-        $stmt->bindValue(':grado', $grados, PDO::PARAM_INT);
-    }
-    if ($nombre !== null) {
-        $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
-    }
-
-    $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    return $result['count'];
-}
 
 
     public function getById($Id_Curso)
@@ -96,6 +96,115 @@ public function getCursosCount($nombre = null, $grados = null)
         return $cursos;
     }
 
+    public function checkDependencies($Id_Curso, $Id_Aula)
+    {
+        // Verificar archivos_tema
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) 
+            FROM T_Archivos_Tema 
+            WHERE Id_Tema IN (
+                SELECT Id_Tema 
+                FROM T_Temas 
+                WHERE Id_Curso_Aula IN (
+                    SELECT Id_Curso_Aula 
+                    FROM T_Cursos_Aula 
+                    WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula
+                )
+            )
+        ");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
+        $count = $stmt->fetchColumn();
+        if ($count > 0) return true;
+
+        // Verificar urls
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) 
+            FROM T_URLs 
+            WHERE Id_Tema IN (
+                SELECT Id_Tema 
+                FROM T_Temas 
+                WHERE Id_Curso_Aula IN (
+                    SELECT Id_Curso_Aula 
+                    FROM T_Cursos_Aula 
+                    WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula
+                )
+            )
+        ");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
+        $count = $stmt->fetchColumn();
+        if ($count > 0) return true;
+
+        // Verificar tareas
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) 
+            FROM T_Tarea 
+            WHERE Id_Tema IN (
+                SELECT Id_Tema 
+                FROM T_Temas 
+                WHERE Id_Curso_Aula IN (
+                    SELECT Id_Curso_Aula 
+                    FROM T_Cursos_Aula 
+                    WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula
+                )
+            )
+        ");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
+        $count = $stmt->fetchColumn();
+        if ($count > 0) return true;
+
+        // Verificar cuestionarios
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) 
+            FROM T_Cuestionario 
+            WHERE Id_Tema IN (
+                SELECT Id_Tema 
+                FROM T_Temas 
+                WHERE Id_Curso_Aula IN (
+                    SELECT Id_Curso_Aula 
+                    FROM T_Cursos_Aula 
+                    WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula
+                )
+            )
+        ");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
+        $count = $stmt->fetchColumn();
+        if ($count > 0) return true;
+
+        // Verificar foros
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) 
+            FROM T_Foro 
+            WHERE Id_Tema IN (
+                SELECT Id_Tema 
+                FROM T_Temas 
+                WHERE Id_Curso_Aula IN (
+                    SELECT Id_Curso_Aula 
+                    FROM T_Cursos_Aula 
+                    WHERE Id_Curso = :Id_Curso AND Id_Aula = :Id_Aula
+                )
+            )
+        ");
+        $stmt->execute(['Id_Curso' => $Id_Curso, 'Id_Aula' => $Id_Aula]);
+        $count = $stmt->fetchColumn();
+        if ($count > 0) return true;
+
+        return false;
+    }
+
+
+    public function beginTransaction() {
+        return $this->conn->beginTransaction();
+    }
+
+    public function commit() {
+        return $this->conn->commit();
+    }
+
+    public function rollback() {
+        return $this->conn->rollBack();
+    }
+
+
 
     public function create($Nombre)
     {
@@ -109,26 +218,13 @@ public function getCursosCount($nombre = null, $grados = null)
         $stmt = $this->conn->prepare("UPDATE T_Cursos SET Nombre = :Nombre WHERE Id_Curso = :Id_Curso");
         return $stmt->execute(['Id_Curso' => $Id_Curso, 'Nombre' => $Nombre]);
     }
-
-    public function beginTransaction()
-    {
-        $this->conn->beginTransaction();
-    }
-
-    public function commit()
-    {
-        $this->conn->commit();
-    }
-
-    public function rollBack()
-    {
-        $this->conn->rollBack();
-    }
-
+    
     public function delete($Id_Curso)
     {
         $stmt = $this->conn->prepare("DELETE FROM T_Cursos WHERE Id_Curso = :Id_Curso");
         $stmt->execute(['Id_Curso' => $Id_Curso]);
         return $stmt->rowCount();
     }
+
+
 }

@@ -34,21 +34,6 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function getByGrado($grado) {
-        $stmt = $this->conn->prepare("SELECT * FROM T_Aulas WHERE Grado = :grado");
-        $stmt->execute(['grado' => $grado]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function addCursoToAula($Id_Aula, $Id_Curso) {
-        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso) VALUES (:Id_Aula, :Id_Curso)");
-        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
-    }
-
-    public function removeCursoFromAula($Id_Aula, $Id_Curso) {
-        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Aula = :Id_Aula AND Id_Curso = :Id_Curso");
-        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
-    }
 
     public function removeCursoFromAulas($idCurso)
     {
@@ -96,15 +81,6 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-
-
-    public function removeAllCursoAssociations()
-    {
-
-        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula");
-        return $stmt->execute();
-    }
-
     public function removeCursoFromSpecificAulas($idCurso, $aulas)
     {
         $aulasIds = array_column($aulas, 'Id_Aula');
@@ -114,6 +90,33 @@ class Aula
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         return $stmt->rowCount() > 0;
+    }
+
+
+    public function getAulasByCurso($Id_Curso)
+    {
+        $stmt = $this->conn->prepare("SELECT A.* FROM T_Aulas AS A INNER JOIN T_Cursos_Aula AS CA ON A.Id_Aula = CA.Id_Aula WHERE CA.Id_Curso = :Id_Curso");
+        $stmt->execute(['Id_Curso' => $Id_Curso]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByGrado($grado)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM T_Aulas WHERE Grado = :grado");
+        $stmt->execute(['grado' => $grado]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addCursoToAula($Id_Aula, $Id_Curso)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO T_Cursos_Aula (Id_Aula, Id_Curso) VALUES (:Id_Aula, :Id_Curso)");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
+    }
+
+    public function removeCursoFromAula($Id_Aula, $Id_Curso)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Aula = :Id_Aula AND Id_Curso = :Id_Curso");
+        return $stmt->execute(['Id_Aula' => $Id_Aula, 'Id_Curso' => $Id_Curso]);
     }
 
     public function deleteCursosByGradoSeccion($Grado, $Seccion)
@@ -151,8 +154,7 @@ class Aula
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['Seccion'] : ''; // Devuelve la última sección o cadena vacía si no hay secciones
     }
-
-
+    
     public function getStudentsCountByGradoSeccion($Grado, $Seccion)
     {
         $stmt = $this->conn->prepare("SELECT COUNT(*) AS Total FROM T_Estudiantes WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)");
