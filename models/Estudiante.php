@@ -250,6 +250,13 @@ class Estudiante
         }
     }
 
+    public function getCursosByDNI($DNI_Estudiante)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT DISTINCT C.Id_Curso, C.Nombre AS Nombre_Curso, A.Grado, A.Seccion FROM T_Cursos AS C  INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso  INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula INNER JOIN T_Estudiantes AS E ON A.Id_Aula = E.Id_Aula WHERE E.DNI_Estudiante = :DNI_Estudiante");
+        $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
@@ -257,13 +264,20 @@ class Estudiante
         return $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante, 'Id_Usuario' => $Id_Usuario, 'Id_Aula' => $Id_Aula]);        
     }
 
-    public function getCursosByDNI($DNI_Estudiante)
-{
-    $stmt = $this->conn->prepare("
-        SELECT DISTINCT C.Id_Curso, C.Nombre AS Nombre_Curso, A.Grado, A.Seccion FROM T_Cursos AS C  INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso  INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula INNER JOIN T_Estudiantes AS E ON A.Id_Aula = E.Id_Aula WHERE E.DNI_Estudiante = :DNI_Estudiante");
-    $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    public function hasAccessToCourse($DNI_Estudiante, $course_id) {
+        // Consulta para verificar si el estudiante tiene acceso al curso en una sola consulta
+        $query = "
+            SELECT COUNT(*) as count 
+            FROM T_Estudiantes e
+            JOIN T_Cursos_Aula ca ON e.Id_Aula = ca.Id_Aula
+            WHERE e.DNI_Estudiante = ? AND ca.Id_Curso = ?
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$DNI_Estudiante, $course_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['count'] > 0;
+    }
 
 
 

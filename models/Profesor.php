@@ -230,6 +230,23 @@ class Profesor{
         return $success;
     }
 
+    public function hasAccessToCourse($DNI_Profesor, $course_id) {
+        // Consulta para verificar si el profesor tiene acceso al curso a través de sus asignaciones
+        $query = "
+            SELECT COUNT(*) as count 
+            FROM T_Asignaciones a
+            JOIN T_Horario_Curso_Aula hca ON a.Id_Horario_Curso_Aula = hca.Id_Horario_Curso_Aula
+            JOIN T_Cursos_Aula ca ON hca.Id_Curso_Aula = ca.Id_Curso_Aula
+            WHERE a.DNI_Profesor = ? AND ca.Id_Curso = ?
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$DNI_Profesor, $course_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['count'] > 0;
+    }
+
+
     public function update($dni, $userId) {
         $stmt = $this->conn->prepare("UPDATE T_Profesores SET Id_Usuario = :userId WHERE DNI_Profesor = :dni");
         return $stmt->execute(['dni' => $dni, 'userId' => $userId]);        

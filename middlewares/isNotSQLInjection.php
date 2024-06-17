@@ -4,6 +4,7 @@ class NotSQLInjection {
     
     public function before($params) {
         header("Access-Control-Allow-Origin: ".ALLOWED_ORIGINS);
+        header('Access-Control-Allow-Headers: Authorization, Content-Type');
 
         // Obtener los datos de la solicitud
         $data = Flight::request()->data->getData();

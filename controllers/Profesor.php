@@ -170,6 +170,12 @@ class ProfesorController
             Flight::json(["message" => "No se encontró tu foto de perfil"], 404);
         }
     }
+
+    public function hasAccessToCourse($DNI_Profesor, $course_id) {
+        $profesor = new Profesor();
+        $access = $profesor->hasAccessToCourse($DNI_Profesor, $course_id);
+        Flight::json(['access' => $access], 200);
+    }
     
     public function update($DNI_Profesor, $data)
     

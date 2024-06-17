@@ -22,17 +22,17 @@ class StudentAuthenticated {
         if (array_key_exists("Id_Admin", $data)) return;
         if (array_key_exists("Id_Superadmin", $data)) return;
         
-        $token = getallheaders()["Authorization"] ?? null;
-
+        $token = getallheaders()["Authorization"] ?? $data["Authorization"]?? null;
         
         if(!$token){            
             
-            if(!$this->nextMiddleware){
-                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar este recurso"])); 
-            }
+
+                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar este recurso s3"])); 
+            
 
             return;
         } 
+
 
         $jwtData = decodeStudentJWT($token, $this->nextMiddleware); 
 

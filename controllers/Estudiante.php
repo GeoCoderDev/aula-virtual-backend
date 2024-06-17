@@ -316,7 +316,11 @@ class EstudianteController
         }
     }
 
-
+    public function hasAccessToCourse($DNI_Estudiante, $course_id) {
+        $estudiante = new Estudiante();
+        $access = $estudiante->hasAccessToCourse($DNI_Estudiante, $course_id);
+        Flight::json(['access' => $access], 200);
+    }
 
     public function delete($DNI_Estudiante)
     {

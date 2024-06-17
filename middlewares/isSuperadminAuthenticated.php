@@ -23,7 +23,7 @@ class SuperadminAuthenticated {
         if (array_key_exists("DNI_Profesor", $data)) return;
 
         
-        $token = getallheaders()["Authorization"] ?? null;
+        $token = getallheaders()["Authorization"] ?? $data["Authorization"]?? null;
 
         
         if(!$token){                        
