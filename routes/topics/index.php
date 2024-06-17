@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../../middlewares/isTeacherAuthenticated.php.php";
+require_once __DIR__ . "/../../middlewares/isTeacherAuthenticated.php";
 require_once __DIR__ . "/../../middlewares/isNotSQLInjection.php";
 require_once __DIR__ . "/../../controllers/Profesor.php";
 
