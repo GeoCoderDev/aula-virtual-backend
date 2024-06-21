@@ -9,6 +9,9 @@ require_once __DIR__.'/../config/S3Manager.php';
 require_once __DIR__.'/../lib/helpers/functions/areFieldsComplete.php';
 require_once __DIR__.'/Usuario.php';
 
+
+define("TEACHER_ASOCIATED_NOT_FOUND", "No hay ningun profesor asignado");
+
 class EstudianteController
 {
     
@@ -82,7 +85,7 @@ class EstudianteController
         'Id_Curso_Aula' => $courseData['Id_Curso_Aula'],
         'Grado' => $courseData['Grado'],
         'Seccion' => $courseData['Seccion'],
-        'Profesor_Asociado' => $courseData['Profesor_Asociado'],
+        'Profesor_Asociado' => $courseData['Profesor_Asociado']===null?TEACHER_ASOCIATED_NOT_FOUND:$courseData['Profesor_Asociado'],
         'Nombre_Curso' => $courseData['Nombre_Curso']
     ];
 
