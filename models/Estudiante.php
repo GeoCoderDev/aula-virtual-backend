@@ -264,6 +264,63 @@ class Estudiante
         return $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante, 'Id_Usuario' => $Id_Usuario, 'Id_Aula' => $Id_Aula]);        
     }
 
+    public function fetchCourseData($idCursoAula) {
+    $query = "
+        SELECT 
+            ca.Id_Curso_Aula, 
+            a.Grado, 
+            a.Seccion, 
+            CONCAT(u.Nombres, ' ', u.Apellidos) AS Profesor_Asociado,
+            c.Nombre AS Nombre_Curso  -- Agregar el nombre del curso
+        FROM 
+            T_Cursos_Aula ca
+            INNER JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula
+            INNER JOIN T_Horario_Curso_Aula hca ON ca.Id_Curso_Aula = hca.Id_Curso_Aula
+            INNER JOIN T_Asignaciones asg ON hca.Id_Horario_Curso_Aula = asg.Id_Horario_Curso_Aula
+            INNER JOIN T_Profesores p ON asg.DNI_Profesor = p.DNI_Profesor
+            INNER JOIN T_Usuarios u ON p.Id_Usuario = u.Id_Usuario
+            INNER JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso  -- Join con la tabla de cursos para obtener el nombre
+        WHERE 
+            ca.Id_Curso_Aula = :idCursoAula
+    ";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':idCursoAula', $idCursoAula);
+    $stmt->execute();
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+    public function fetchCourseTopics($idCursoAula) {
+        $query = "
+            SELECT 
+                t.Id_Tema, 
+                t.Nombre_Tema
+            FROM 
+                T_Temas t
+                INNER JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula
+            WHERE 
+                ca.Id_Curso_Aula = :idCursoAula
+            ORDER BY 
+                t.Num_Orden
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':idCursoAula', $idCursoAula);
+        $stmt->execute();
+
+        $topics = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $topics[] = [
+                'Id_Tema' => $row['Id_Tema'],
+                'Nombre_Tema' => $row['Nombre_Tema']
+            ];
+        }
+
+        return $topics;
+    }
+
     public function hasAccessToCourse($DNI_Estudiante, $course_id) {
         // Consulta para verificar si el estudiante tiene acceso al curso en una sola consulta
         $query = "

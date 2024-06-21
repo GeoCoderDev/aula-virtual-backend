@@ -26,6 +26,23 @@ Flight::group("/api/myCourses",  function(){
 
     });
 
+    Flight::route("GET /@id/data",function ($id){
+
+        $data = Flight::request()->data->getData();
+
+        if(key_exists("DNI_Estudiante", $data)){
+
+            $controller = new EstudianteController();
+        
+            $controller->getCourseData($id);
+
+        }else{
+            $controller = new ProfesorController();
+        
+            $controller->getCourseData($id);
+        }
+    });
+
     Flight::route("POST /@id/access", function($id){
 
         $data = Flight::request()->data->getData();

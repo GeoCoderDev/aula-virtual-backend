@@ -8,9 +8,8 @@ Flight::group("/api/topics",  function(){
 
     Flight::route("GET ", function() {
         
+        
 
     });
-
  
-
 }, [new NotSQLInjection(), new TeacherAuthenticated()]);

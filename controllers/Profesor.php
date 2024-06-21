@@ -36,6 +36,36 @@ class ProfesorController
 
     }
 
+    public function getCourseData($idCursoAula) {
+        $profesorModelo = new Profesor();
+
+        // Obtener datos del curso
+        $courseData = $profesorModelo->fetchCourseData($idCursoAula);
+        
+        if (!$courseData) {
+            Flight::json(['message' => 'No se encontraron datos del curso'], 404);
+            return;
+        }
+
+        // Obtener temas del curso
+        $courseTopics = $profesorModelo->fetchCourseTopics($idCursoAula);
+
+        // Construir la respuesta combinando datos del curso y, opcionalmente, los temas
+        $response = [
+            'Id_Curso_Aula' => $courseData['Id_Curso_Aula'],
+            'Grado' => $courseData['Grado'],
+            'Seccion' => $courseData['Seccion'],
+            'Nombre_Curso' => $courseData['Nombre_Curso']
+        ];
+
+        if (!empty($courseTopics)) {
+            $response['Temas'] = $courseTopics;
+        }
+
+        Flight::json($response, 200);
+    }
+
+
     public function validateDNIAndUsername($data) {
         $profesorModel = new Profesor();
         $profesorFinded = $profesorModel->getByDNI($data->DNI_Profesor);

@@ -224,6 +224,58 @@ class Profesor{
     }
 
 
+    public function fetchCourseData($idCursoAula) {
+        $query = "
+            SELECT 
+                ca.Id_Curso_Aula, 
+                a.Grado, 
+                a.Seccion,
+                c.Nombre AS Nombre_Curso
+            FROM 
+                T_Cursos_Aula ca
+                INNER JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula
+                INNER JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso
+            WHERE 
+                ca.Id_Curso_Aula = :idCursoAula
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':idCursoAula', $idCursoAula);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function fetchCourseTopics($idCursoAula) {
+    $query = "
+        SELECT 
+            t.Id_Tema, 
+            t.Nombre_Tema
+        FROM 
+            T_Temas t
+            INNER JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula
+        WHERE 
+            ca.Id_Curso_Aula = :idCursoAula
+        ORDER BY 
+            t.Num_Orden
+    ";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':idCursoAula', $idCursoAula);
+    $stmt->execute();
+
+    $topics = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $topics[] = [
+            'Id_Tema' => $row['Id_Tema'],
+            'Nombre_Tema' => $row['Nombre_Tema']
+        ];
+    }
+
+    return $topics;
+}
+
+
     public function create($dni, $userId) {
         $stmt = $this->conn->prepare("INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario) VALUES (:dni, :userId)");
         $success = $stmt->execute(['dni' => $dni, 'userId' => $userId]);

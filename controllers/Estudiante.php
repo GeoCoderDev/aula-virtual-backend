@@ -63,6 +63,32 @@ class EstudianteController
     return false;
     }
 
+    public function getCourseData($idCursoAula) {
+    $estudianteModelo = new Estudiante();
+
+    // Obtener datos del curso y temas
+    $courseData = $estudianteModelo->fetchCourseData($idCursoAula);
+    $courseTopics = $estudianteModelo->fetchCourseTopics($idCursoAula);
+
+    if (!$courseData || empty($courseTopics)) {
+        Flight::json(['message' => 'No se encontraron datos del curso o temas'], 404);
+        return;
+    }
+
+    // Construir la respuesta combinando datos del curso y temas
+    $response = [
+        'Id_Curso_Aula' => $courseData['Id_Curso_Aula'],
+        'Grado' => $courseData['Grado'],
+        'Seccion' => $courseData['Seccion'],
+        'Profesor_Asociado' => $courseData['Profesor_Asociado'],
+        'Nombre_Curso' => $courseData['Nombre_Curso'],  // Agregar el nombre del curso
+        'Temas' => $courseTopics
+    ];
+
+    Flight::json($response, 200);
+}
+
+    
     public function create($data)
     {
         // Verificar si todos los campos requeridos están presentes en $data
