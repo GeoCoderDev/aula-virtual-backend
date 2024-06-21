@@ -66,27 +66,33 @@ class EstudianteController
     public function getCourseData($idCursoAula) {
     $estudianteModelo = new Estudiante();
 
-    // Obtener datos del curso y temas
+    // Obtener datos del curso
     $courseData = $estudianteModelo->fetchCourseData($idCursoAula);
-    $courseTopics = $estudianteModelo->fetchCourseTopics($idCursoAula);
-
-    if (!$courseData || empty($courseTopics)) {
-        Flight::json(['message' => 'No se encontraron datos del curso o temas'], 404);
+    
+    if (!$courseData) {
+        Flight::json(['message' => 'No se encontraron datos del curso'], 404);
         return;
     }
 
-    // Construir la respuesta combinando datos del curso y temas
+    // Obtener temas del curso
+    $courseTopics = $estudianteModelo->fetchCourseTopics($idCursoAula);
+
+    // Construir la respuesta combinando datos del curso y, opcionalmente, los temas
     $response = [
         'Id_Curso_Aula' => $courseData['Id_Curso_Aula'],
         'Grado' => $courseData['Grado'],
         'Seccion' => $courseData['Seccion'],
         'Profesor_Asociado' => $courseData['Profesor_Asociado'],
-        'Nombre_Curso' => $courseData['Nombre_Curso'],  // Agregar el nombre del curso
-        'Temas' => $courseTopics
+        'Nombre_Curso' => $courseData['Nombre_Curso']
     ];
+
+    if (!empty($courseTopics)) {
+        $response['Temas'] = $courseTopics;
+    }
 
     Flight::json($response, 200);
 }
+
 
     
     public function create($data)
@@ -303,7 +309,7 @@ class EstudianteController
     {
         $estudianteModel = new Estudiante();
         $cursos = $estudianteModel->getCursosByDNI($DNI_Estudiante);
-        return $cursos;
+        Flight::json($cursos , 200);
     }
 
     public function getUserIdByDNI($DNI_Estudiante)
@@ -342,9 +348,9 @@ class EstudianteController
         }
     }
 
-    public function hasAccessToCourse($DNI_Estudiante, $course_id) {
+    public function hasAccessToCourse($DNI_Estudiante, $cursoAulaID) {
         $estudiante = new Estudiante();
-        $access = $estudiante->hasAccessToCourse($DNI_Estudiante, $course_id);
+        $access = $estudiante->hasAccessToCourse($DNI_Estudiante, $cursoAulaID);
         Flight::json(['access' => $access], 200);
     }
 

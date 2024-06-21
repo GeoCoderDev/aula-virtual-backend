@@ -14,14 +14,16 @@ Flight::group("/api/myCourses",  function(){
             $controller = new EstudianteController();
 
             $DNI_Estudiante = $data["DNI_Estudiante"];
-            Flight::json($controller->getCursosByDNI($DNI_Estudiante) ,200);
+            $controller->getCursosByDNI($DNI_Estudiante);
+            
 
         }else{
 
             $controller = new ProfesorController();
 
             $DNI_Profesor = $data["DNI_Profesor"];
-            Flight::json($controller->getCursosByDNI($DNI_Profesor) ,200);
+            $controller->getCursosByDNI($DNI_Profesor);
+            
         }
 
     });

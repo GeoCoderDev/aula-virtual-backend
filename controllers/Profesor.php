@@ -155,18 +155,11 @@ class ProfesorController
         return Flight::json(["message" => "Creación de profesores completada", "alerts" => $alerts], 200);
     }
 
-
-    /**
-     * Esta funcion devuelve la lista de curso que enseña un profesor sin considerar el grado o seccion, y sin repetir 
-     *
-     * @param [type] $DNI_Profesor
-     * @return array
-    */
     public function getCursosByDNI($DNI_Profesor)
     {
         $profesorModel = new Profesor();
         $cursos = $profesorModel->getCursosByDNI($DNI_Profesor);
-        return $cursos;
+        Flight::json($cursos ,200);
     }
 
     public function getUserIdByDNI($DNI_Profesor)
@@ -201,9 +194,9 @@ class ProfesorController
         }
     }
 
-    public function hasAccessToCourse($DNI_Profesor, $course_id) {
+    public function hasAccessToCourse($DNI_Profesor, $cursoAulaID) {
         $profesor = new Profesor();
-        $access = $profesor->hasAccessToCourse($DNI_Profesor, $course_id);
+        $access = $profesor->hasAccessToCourse($DNI_Profesor, $cursoAulaID);
         Flight::json(['access' => $access], 200);
     }
     

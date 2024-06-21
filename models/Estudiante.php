@@ -251,12 +251,25 @@ class Estudiante
     }
 
     public function getCursosByDNI($DNI_Estudiante)
-    {
-        $stmt = $this->conn->prepare("
-            SELECT DISTINCT C.Id_Curso, C.Nombre AS Nombre_Curso, A.Grado, A.Seccion FROM T_Cursos AS C  INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso  INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula INNER JOIN T_Estudiantes AS E ON A.Id_Aula = E.Id_Aula WHERE E.DNI_Estudiante = :DNI_Estudiante");
-        $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+{
+    $stmt = $this->conn->prepare("
+        SELECT DISTINCT 
+            CA.Id_Curso_Aula, 
+            C.Nombre AS Nombre_Curso, 
+            A.Grado, 
+            A.Seccion 
+        FROM 
+            T_Cursos AS C  
+            INNER JOIN T_Cursos_Aula AS CA ON C.Id_Curso = CA.Id_Curso  
+            INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula 
+            INNER JOIN T_Estudiantes AS E ON A.Id_Aula = E.Id_Aula 
+        WHERE 
+            E.DNI_Estudiante = :DNI_Estudiante
+    ");
+    $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     public function create($DNI_Estudiante, $Id_Usuario, $Id_Aula)
     {
@@ -265,31 +278,31 @@ class Estudiante
     }
 
     public function fetchCourseData($idCursoAula) {
-    $query = "
-        SELECT 
-            ca.Id_Curso_Aula, 
-            a.Grado, 
-            a.Seccion, 
-            CONCAT(u.Nombres, ' ', u.Apellidos) AS Profesor_Asociado,
-            c.Nombre AS Nombre_Curso  -- Agregar el nombre del curso
-        FROM 
-            T_Cursos_Aula ca
-            INNER JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula
-            INNER JOIN T_Horario_Curso_Aula hca ON ca.Id_Curso_Aula = hca.Id_Curso_Aula
-            INNER JOIN T_Asignaciones asg ON hca.Id_Horario_Curso_Aula = asg.Id_Horario_Curso_Aula
-            INNER JOIN T_Profesores p ON asg.DNI_Profesor = p.DNI_Profesor
-            INNER JOIN T_Usuarios u ON p.Id_Usuario = u.Id_Usuario
-            INNER JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso  -- Join con la tabla de cursos para obtener el nombre
-        WHERE 
-            ca.Id_Curso_Aula = :idCursoAula
-    ";
+        $query = "
+            SELECT 
+                ca.Id_Curso_Aula, 
+                a.Grado, 
+                a.Seccion, 
+                CONCAT(u.Nombres, ' ', u.Apellidos) AS Profesor_Asociado,
+                c.Nombre AS Nombre_Curso
+            FROM 
+                T_Cursos_Aula ca
+                INNER JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula
+                LEFT JOIN T_Horario_Curso_Aula hca ON ca.Id_Curso_Aula = hca.Id_Curso_Aula
+                LEFT JOIN T_Asignaciones asg ON hca.Id_Horario_Curso_Aula = asg.Id_Horario_Curso_Aula
+                LEFT JOIN T_Profesores p ON asg.DNI_Profesor = p.DNI_Profesor
+                LEFT JOIN T_Usuarios u ON p.Id_Usuario = u.Id_Usuario
+                INNER JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso
+            WHERE 
+                ca.Id_Curso_Aula = :idCursoAula
+        ";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':idCursoAula', $idCursoAula);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':idCursoAula', $idCursoAula);
+        $stmt->execute();
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
 
     public function fetchCourseTopics($idCursoAula) {
@@ -321,16 +334,16 @@ class Estudiante
         return $topics;
     }
 
-    public function hasAccessToCourse($DNI_Estudiante, $course_id) {
-        // Consulta para verificar si el estudiante tiene acceso al curso en una sola consulta
+    public function hasAccessToCourse($DNI_Estudiante, $cursoAulaID) {
+        // Consulta para verificar si el estudiante tiene acceso al curso aula en una sola consulta
         $query = "
             SELECT COUNT(*) as count 
             FROM T_Estudiantes e
             JOIN T_Cursos_Aula ca ON e.Id_Aula = ca.Id_Aula
-            WHERE e.DNI_Estudiante = ? AND ca.Id_Curso = ?
+            WHERE e.DNI_Estudiante = ? AND ca.Id_Curso_Aula = ?
         ";
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$DNI_Estudiante, $course_id]);
+        $stmt->execute([$DNI_Estudiante, $cursoAulaID]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result['count'] > 0;
