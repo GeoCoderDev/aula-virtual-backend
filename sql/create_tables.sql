@@ -117,10 +117,23 @@ CREATE TABLE IF NOT EXISTS T_Temas (
     Id_Tema INT PRIMARY KEY AUTO_INCREMENT,
     Nombre_Tema VARCHAR(255) NOT NULL,
     Id_Curso_Aula INT,
-    Num_Orden INT,
+    Num_Orden INT DEFAULT NULL,
     FOREIGN KEY (Id_Curso_Aula) REFERENCES T_Cursos_Aula(Id_Curso_Aula)
 );
 
+-- ============================================================
+-- |                   RECURSOS POR TEMA                      |
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS T_Recursos_Tema (
+    Id_Recurso_Tema INT PRIMARY KEY AUTO_INCREMENT,
+    Id_Tema INT,
+    Titulo VARCHAR(255) NOT NULL,
+    Descripcion_Recurso TEXT,
+    Imagen_Key_S3 VARCHAR(255) DEFAULT NULL,
+    Tipo TINYINT NOT NULL,
+    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+);
 
 -- ============================================================
 -- |           ARCHIVOS CON TITULO ALMACENADOS EN S3          |
@@ -142,9 +155,9 @@ CREATE TABLE IF NOT EXISTS T_Archivos (
 CREATE TABLE IF NOT EXISTS T_Archivos_Tema (
     Id_Archivo_Tema INT PRIMARY KEY AUTO_INCREMENT,
     Id_Archivo INT,
-    Id_Tema INT,
+    Id_Recurso_Tema INT,
     FOREIGN KEY (Id_Archivo) REFERENCES T_Archivos(Id_Archivo),
-    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+    FOREIGN KEY (Id_Recurso_Tema) REFERENCES T_Recursos_Tema(Id_Recurso_Tema)
 );
 
 -- ============================================================
@@ -154,13 +167,11 @@ CREATE TABLE IF NOT EXISTS T_Archivos_Tema (
 -- Tabla de Tareas
 CREATE TABLE IF NOT EXISTS T_Tarea (
     Id_Tarea INT PRIMARY KEY AUTO_INCREMENT,
-    Id_Tema INT,
-    Titulo VARCHAR(255) NOT NULL,
-    Descrip_tarea TEXT,
+    Id_Recurso_Tema INT,
     Fecha_hora_apertura DATETIME NOT NULL,
     Fecha_hora_limite DATETIME NOT NULL,
     Puntaje_Max DECIMAL(5,2) NOT NULL,
-    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+    FOREIGN KEY (Id_Recurso_Tema) REFERENCES T_Recursos_Tema(Id_Recurso_Tema)
 );
 
 -- Tabla de Archivos adjuntos de Tarea
@@ -199,12 +210,10 @@ CREATE TABLE IF NOT EXISTS T_Revision_Tarea (
 -- Tabla de Foros
 CREATE TABLE IF NOT EXISTS T_Foro (
     Id_Foro INT PRIMARY KEY AUTO_INCREMENT,
-    Titulo VARCHAR(255) NOT NULL,
-    Descrip_Foro TEXT,
-    Id_Tema INT,
-    Imagen_Key_S3 VARCHAR(255),
-    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+    Id_Recurso_Tema INT,
+    FOREIGN KEY (Id_Recurso_Tema) REFERENCES T_Recursos_Tema(Id_Recurso_Tema)
 );
+
 
 -- Tabla de Respuestas de Foro
 CREATE TABLE IF NOT EXISTS T_Respuestas_Foro (
@@ -224,10 +233,9 @@ CREATE TABLE IF NOT EXISTS T_Respuestas_Foro (
 -- Tabla de URLs
 CREATE TABLE IF NOT EXISTS T_URLs (
     Id_URL INT PRIMARY KEY AUTO_INCREMENT,
-    Descripcion VARCHAR(255) NOT NULL,
     URL TEXT NOT NULL,
-    Id_Tema INT,
-    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+    Id_Recurso_Tema INT,
+    FOREIGN KEY (Id_Recurso_Tema) REFERENCES T_Recursos_Tema(Id_Recurso_Tema)
 );
 
 
@@ -238,12 +246,11 @@ CREATE TABLE IF NOT EXISTS T_URLs (
 -- Tabla de Cuestionarios
 CREATE TABLE IF NOT EXISTS T_Cuestionario (
     Id_Cuestionario INT PRIMARY KEY AUTO_INCREMENT,
-    Nom_Cuest VARCHAR(255) NOT NULL,
-    Id_Tema INT,
+    Id_Recurso_Tema INT,
     Fecha_hora_apertura DATETIME NOT NULL,
     Fecha_hora_limite DATETIME NOT NULL,
     Puntaje_Max DECIMAL(5,2) NOT NULL,
-    FOREIGN KEY (Id_Tema) REFERENCES T_Temas(Id_Tema)
+    FOREIGN KEY (Id_Recurso_Tema) REFERENCES T_Recursos_Tema(Id_Recurso_Tema)
 );
 
 -- Tabla de Preguntas por Cuestionario

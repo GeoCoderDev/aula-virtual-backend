@@ -27,7 +27,7 @@ class StudentAuthenticated {
         if(!$token){            
             
 
-                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar este recurso s3"])); 
+                Flight::halt(401, json_encode(["message" => "No estás autorizado para usar este recurso"])); 
             
 
             return;

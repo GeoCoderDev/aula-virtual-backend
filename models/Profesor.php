@@ -247,33 +247,33 @@ class Profesor{
     }
 
     public function fetchCourseTopics($idCursoAula) {
-    $query = "
-        SELECT 
-            t.Id_Tema, 
-            t.Nombre_Tema
-        FROM 
-            T_Temas t
-            INNER JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula
-        WHERE 
-            ca.Id_Curso_Aula = :idCursoAula
-        ORDER BY 
-            t.Num_Orden
-    ";
+        $query = "
+            SELECT 
+                t.Id_Tema, 
+                t.Nombre_Tema
+            FROM 
+                T_Temas t
+                INNER JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula
+            WHERE 
+                ca.Id_Curso_Aula = :idCursoAula
+            ORDER BY 
+                t.Id_Tema ASC
+        ";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':idCursoAula', $idCursoAula);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':idCursoAula', $idCursoAula);
+        $stmt->execute();
 
-    $topics = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $topics[] = [
-            'Id_Tema' => $row['Id_Tema'],
-            'Nombre_Tema' => $row['Nombre_Tema']
-        ];
+        $topics = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $topics[] = [
+                'Id_Tema' => $row['Id_Tema'],
+                'Nombre_Tema' => $row['Nombre_Tema']
+            ];
+        }
+
+        return $topics;
     }
-
-    return $topics;
-}
 
 
     public function create($dni, $userId) {
