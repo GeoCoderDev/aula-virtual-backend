@@ -19,6 +19,7 @@ class AdminController {
             Flight::json(["message"=>"No existe el profesor con Id $id"],404);
         }else{
             Flight::json($admin,200);
+            
         }
 
     }
