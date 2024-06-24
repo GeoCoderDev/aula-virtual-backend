@@ -182,6 +182,20 @@ class Aula
         $stmt->execute(['Grado' => $Grado, 'Seccion' => $lastSection]);
     }
 
+    public function deleteCursosByGradoSeccion($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare(
+            "DELETE FROM T_Cursos_Aula WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)"
+        );
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
+    
+    public function deleteSection($Grado, $Seccion)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
+        $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
+    }
+
 
 
 }
