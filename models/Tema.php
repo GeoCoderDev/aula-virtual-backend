@@ -55,5 +55,16 @@ class Tema
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();         
     }
+
+    public function existsByNombreAndCursoAula($nombre, $cursoAulaId)
+    {
+        $query = "SELECT 1 FROM T_Temas WHERE Nombre_Tema = :nombre AND Id_Curso_Aula = :cursoAulaId";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            'nombre' => $nombre,
+            'cursoAulaId' => $cursoAulaId
+        ]);
+        return $stmt->fetchColumn();
+    }
 }
 ?>

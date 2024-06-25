@@ -1,16 +1,20 @@
 <?php
 require_once __DIR__ . '/../models/Tema.php';
 require_once __DIR__ . '/../models/RecursoTema.php';
+require_once __DIR__ . '/../models/Curso_Aula.php';
+require_once __DIR__ . '/../lib/helpers/functions/areFieldsComplete.php';
 
 class TemaController
 {
     private $temaModel;
     private $recursoModel;
+    private $cursoAulaModel;
 
     public function __construct()
     {
         $this->temaModel = new Tema();
         $this->recursoModel = new RecursoTema();
+        $this->cursoAulaModel = new Curso_Aula();
     }
 
     public function getAll()
@@ -29,19 +33,25 @@ class TemaController
         }
     }
 
-    public function create()
+    public function create($data)
     {
-        $requestData = Flight::request()->data;
 
-        $nombre = $requestData->Nombre;
-        $cursoAulaId = $requestData->Id_Curso_Aula;
+        if(!areFieldsComplete($data,  ['Nombre_Tema', 'Id_Curso_Aula'])) return;   
 
-        if (empty($nombre) || empty($cursoAulaId)) {
-            Flight::json(['message' => 'El nombre del tema y el ID del curso aula son requeridos'], 400);
+        $nombre = $data['Nombre_Tema'];
+        $cursoAulaId = $data['Id_Curso_Aula'];
+
+        // Verificar si el curso aula existe
+        if (!$this->cursoAulaModel->getById($cursoAulaId)) {
+            Flight::json(['message' => 'El curso aula especificado no existe'], 400);
             return;
         }
 
-        $descripcion = $requestData->Descripcion ?? '';
+        // Verificar si ya existe un tema con el mismo nombre en el mismo curso aula
+        if ($this->temaModel->existsByNombreAndCursoAula($nombre, $cursoAulaId)) {
+            Flight::json(['message' => 'Ya existe un tema con el mismo nombre en este curso de esta aula'], 400);
+            return;
+        }
 
         if ($this->temaModel->create($nombre, $cursoAulaId)) {
             Flight::json(['message' => 'Tema creado exitosamente'], 201);
@@ -53,8 +63,7 @@ class TemaController
     public function update($id)
     {
         $requestData = Flight::request()->data;
-
-        $nombre = $requestData->Nombre;
+        $nombre = $requestData->Nombre_Tema;
         $descripcion = $requestData->Descripcion;
 
         if ($this->temaModel->update($id, $nombre, $descripcion)) {
