@@ -3,7 +3,8 @@
 require __DIR__ . '/../models/SuperAdmin.php';
 require __DIR__ . '/../lib/helpers/encriptations/superadminEncriptation.php';
 
-class SuperadminController {
+class SuperadminController
+{
 
     public function getById($id, $includePassword = false)
     {
@@ -33,18 +34,17 @@ class SuperadminController {
      * @param [type] $data
      * @return bool|array
      */
-    public function validateIdAndUsername($data){
+    public function validateIdAndUsername($data)
+    {
 
         $superadmin = new Superadmin();
         $superadminFinded = $superadmin->getById($data->Id_Superadmin);
 
-        if($superadminFinded && $superadminFinded["Nombre_Usuario"]==$data->Username_Superadmin){
+        if ($superadminFinded && $superadminFinded["Nombre_Usuario"] == $data->Username_Superadmin) {
             return $superadminFinded;
- 
         }
-        
-        return false;
 
+        return false;
     }
 
     /**
@@ -55,49 +55,53 @@ class SuperadminController {
      * @param array $data
      * @return int|array
      */
-    public function validateSuperadmin($data) {
+    public function validateSuperadmin($data)
+    {
 
         $username = $data['username'] ?? null;
         $password = $data['password'] ?? null;
-        
+
         if (!$username || !$password) return 1;
 
         $username_encripted = encryptSuperadminUsername($username);
 
         $superadmin = new Superadmin();
-        $superadminFinded = $superadmin->getByUsername($username_encripted);        
+        $superadminFinded = $superadmin->getByUsername($username_encripted);
 
         if ($superadminFinded) {
             $superadmin_password_decripted = decryptSuperadminPassword($superadminFinded["Contraseña"]);
-            if($superadmin_password_decripted==$password) return $superadminFinded;
+            if ($superadmin_password_decripted == $password) return $superadminFinded;
         }
 
-        return 2;// Credenciales inválidas
-        
+        return 2; // Credenciales inválidas
+
     }
 
-    
-    public function getAll() {
+
+    public function getAll()
+    {
         $superadminModel = new Superadmin();
         $superadmins = $superadminModel->getAll();
         return json_encode($superadmins);
     }
 
-    public function create($data) {
+    public function create($data)
+    {
         $nombreUsuario = $data['nombreUsuario'] ?? null;
         $contrasena = $data['contrasena'] ?? null;
-        
+
         if (!$nombreUsuario || !$contrasena) {
             return json_encode(["message" => "Nombre de usuario y contraseña son obligatorios"]);
         }
 
         $superadminModel = new Superadmin();
         $superadminId = $superadminModel->create($nombreUsuario, $contrasena);
-        
+
         return json_encode(["message" => "Superadmin creado con ID: $superadminId"]);
     }
 
-    public function updateUsername($id, $data) {
+    public function updateUsername($id, $data)
+    {
         $newUsername = $data['newUsername'] ?? null;
 
         if (!$newUsername) {
@@ -106,7 +110,7 @@ class SuperadminController {
 
         $superadminModel = new Superadmin();
         $rowCount = $superadminModel->updateUsername($id, $newUsername);
-        
+
         if ($rowCount > 0) {
             return ["message" => "Nombre de usuario actualizado"];
         } else {
@@ -114,7 +118,8 @@ class SuperadminController {
         }
     }
 
-    public function updatePasswordByMe($data) {
+    public function updatePasswordByMe($data)
+    {
         $oldPassword = $data['Contraseña_Actual'] ?? null;
         $newPassword = $data['Contraseña_Nueva'] ?? null;
 
@@ -144,7 +149,7 @@ class SuperadminController {
 
         $encriptedNewPassword = encryptSuperadminPassword($newPassword);
         $updateSuccess = $superadminModel->updatePassword($superadminID, $encriptedNewPassword);
-        
+
         if ($updateSuccess) {
             return Flight::json(["message" => "Contraseña actualizada"]);
         } else {
@@ -155,4 +160,3 @@ class SuperadminController {
 
     // Puedes agregar más métodos según sea necesario
 }
-?>
