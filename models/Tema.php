@@ -32,11 +32,14 @@ class Tema
     {
         $query = "INSERT INTO T_Temas (Nombre_Tema, Id_Curso_Aula) VALUES (:nombre, :cursoAulaId)";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([
-            'nombre' => $nombre,
-            'cursoAulaId' => $cursoAulaId
-        ]);
+        
+        if ($stmt->execute(['nombre' => $nombre, 'cursoAulaId' => $cursoAulaId])) {
+            return $this->conn->lastInsertId();
+        } else {
+            return false;
+        }
     }
+
 
     public function update($id, $nombre, $descripcion)
     {

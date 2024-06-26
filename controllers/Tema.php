@@ -53,8 +53,10 @@ class TemaController
             return;
         }
 
-        if ($this->temaModel->create($nombre, $cursoAulaId)) {
-            Flight::json(['message' => 'Tema creado exitosamente'], 201);
+        $idTemaCreated = $this->temaModel->create($nombre, $cursoAulaId);
+
+        if ($idTemaCreated) {
+            Flight::json(['message' => 'Tema creado exitosamente', "Id"=> $idTemaCreated], 201);
         } else {
             Flight::json(['message' => 'Error al crear el tema'], 500);
         }
