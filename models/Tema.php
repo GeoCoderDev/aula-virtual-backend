@@ -59,15 +59,20 @@ class Tema
         return $stmt->execute();         
     }
 
+    public function updateName($id, $newName)
+    {
+        $query = "UPDATE T_Temas SET Nombre_Tema = :newName WHERE Id_Tema = :id";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute(['id' => $id, 'newName' => $newName]);
+    }
+
     public function existsByNombreAndCursoAula($nombre, $cursoAulaId)
     {
-        $query = "SELECT 1 FROM T_Temas WHERE Nombre_Tema = :nombre AND Id_Curso_Aula = :cursoAulaId";
+        $query = "SELECT COUNT(*) FROM T_Temas WHERE Nombre_Tema = :nombre AND Id_Curso_Aula = :cursoAulaId";
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([
-            'nombre' => $nombre,
-            'cursoAulaId' => $cursoAulaId
-        ]);
-        return $stmt->fetchColumn();
+        $stmt->execute(['nombre' => $nombre, 'cursoAulaId' => $cursoAulaId]);
+        return $stmt->fetchColumn() > 0;
     }
+
 }
 ?>

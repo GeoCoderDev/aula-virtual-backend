@@ -35,7 +35,6 @@ class TemaController
 
     public function create($data)
     {
-
         if(!areFieldsComplete($data,  ['Nombre_Tema', 'Id_Curso_Aula'])) return;   
 
         $nombre = $data['Nombre_Tema'];
@@ -62,16 +61,30 @@ class TemaController
         }
     }
 
-    public function update($id)
+    public function updateName($id, $data)
     {
-        $requestData = Flight::request()->data;
-        $nombre = $requestData->Nombre_Tema;
-        $descripcion = $requestData->Descripcion;
+        if (!areFieldsComplete($data, ['Nombre_Tema'])) return;
 
-        if ($this->temaModel->update($id, $nombre, $descripcion)) {
-            Flight::json(['message' => 'Tema actualizado exitosamente']);
+        $newName = $data['Nombre_Tema'];
+        
+        // Verificar si el tema existe
+        $tema = $this->temaModel->getById($id);
+        if (!$tema) {
+            Flight::json(['message' => 'Tema no encontrado'], 404);
+            return;
+        }
+
+        // Verificar si ya existe un tema con el mismo nombre en el mismo curso aula
+        $cursoAulaId = $tema['Id_Curso_Aula'];
+        if ($this->temaModel->existsByNombreAndCursoAula($newName, $cursoAulaId)) {
+            Flight::json(['message' => 'Ya existe un tema con el mismo nombre en este curso de esta aula'], 400);
+            return;
+        }
+
+        if ($this->temaModel->updateName($id, $newName)) {
+            Flight::json(['message' => 'Nombre del tema actualizado exitosamente']);
         } else {
-            Flight::json(['message' => 'Error al actualizar el tema'], 500);
+            Flight::json(['message' => 'Error al actualizar el nombre del tema'], 500);
         }
     }
 
