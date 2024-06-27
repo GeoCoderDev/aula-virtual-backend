@@ -7,6 +7,11 @@ require_once __DIR__ . '/../../controllers/RecursoTema.php';
 
 Flight::group('/api/topicResources', function () {
 
+    Flight::route("GET /@topicId", function($topicId){
+        $controller = new RecursoTemaController();
+        $controller->getResourcesByTopicId($topicId);
+    });
+
     Flight::route("POST /@topicId/addFile", function($topicId){
         $data = Flight::request()->data->getData();
         $controller = new RecursoTemaController();

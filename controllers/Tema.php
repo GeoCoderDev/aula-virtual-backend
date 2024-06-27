@@ -35,7 +35,7 @@ class TemaController
 
     public function create($data)
     {
-        if(!areFieldsComplete($data,  ['Nombre_Tema', 'Id_Curso_Aula'])) return;   
+        if (!areFieldsComplete($data,  ['Nombre_Tema', 'Id_Curso_Aula'])) return;
 
         $nombre = $data['Nombre_Tema'];
         $cursoAulaId = $data['Id_Curso_Aula'];
@@ -55,7 +55,7 @@ class TemaController
         $idTemaCreated = $this->temaModel->create($nombre, $cursoAulaId);
 
         if ($idTemaCreated) {
-            Flight::json(['message' => 'Tema creado exitosamente', "Id"=> $idTemaCreated], 201);
+            Flight::json(['message' => 'Tema creado exitosamente', "Id" => $idTemaCreated], 201);
         } else {
             Flight::json(['message' => 'Error al crear el tema'], 500);
         }
@@ -66,7 +66,7 @@ class TemaController
         if (!areFieldsComplete($data, ['Nombre_Tema'])) return;
 
         $newName = $data['Nombre_Tema'];
-        
+
         // Verificar si el tema existe
         $tema = $this->temaModel->getById($id);
         if (!$tema) {
@@ -95,17 +95,5 @@ class TemaController
         } else {
             Flight::json(['message' => 'Error al eliminar el tema'], 500);
         }
-    }
-
-    public function getResourcesByTopicId($id)
-    {
-        $recursos = $this->recursoModel->getByTopicId($id);
-
-        if ($recursos === false) {
-            Flight::json(['message' => 'Aun no hay recursos para este tema'], 404);
-        } else {
-            Flight::json($recursos);
-        }
-    }
+    }    
 }
-?>

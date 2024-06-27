@@ -2,6 +2,7 @@
 
 use Config\S3Manager;
 
+
 require_once __DIR__ . '/../models/RecursoTema.php';
 require_once __DIR__ . '/../models/Archivo.php';
 require_once __DIR__ . '/../config/S3Manager.php';
@@ -159,4 +160,16 @@ class RecursoTemaController
             Flight::json(['message' => 'Error al eliminar el recurso'], 500);
         }
     }
+
+    public function getResourcesByTopicId($id)
+    {
+        $recursos = $this->recursoTemaModel->getByTopicId($id);
+
+        if ($recursos === false) {
+            Flight::json(['message' => 'Aun no hay recursos para este tema'], 404);
+        } else {
+            Flight::json($recursos);
+        }
+    }
+
 }
