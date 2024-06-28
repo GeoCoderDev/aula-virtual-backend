@@ -125,6 +125,7 @@ class RecursoTema
             $stmtTarea->bindParam(':puntajeMax', $puntajeMax, PDO::PARAM_STR);
 
             $idTarea = $this->conn->lastInsertId();
+            error_log("HOLAAAAAAAAAAAAAAA" . $idTarea);
 
             return $idTarea;
         } catch (Exception $e) {
