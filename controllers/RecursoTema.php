@@ -149,6 +149,7 @@ class RecursoTemaController
             Flight::json(['message' => 'Recurso actualizado exitosamente'], 200);
         } else {
             Flight::json(['message' => 'Error al actualizar el recurso'], 500);
+            
         }
     }
 
