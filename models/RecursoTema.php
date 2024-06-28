@@ -35,7 +35,8 @@ class RecursoTema
 
     public function create($idTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo)
     {
-        $query = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
+        $query = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) 
+              VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':idTema', $idTema, PDO::PARAM_INT);
         $stmt->bindParam(':titulo', $titulo, PDO::PARAM_STR);
@@ -43,8 +44,13 @@ class RecursoTema
         $stmt->bindParam(':imagenKeyS3', $imagenKeyS3, PDO::PARAM_STR);
         $stmt->bindParam(':tipo', $tipo, PDO::PARAM_INT);
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId(); // Devuelve el ID del recurso tema recién creado
+        } else {
+            return false;
+        }
     }
+
 
     public function update($idRecursoTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo)
     {
