@@ -6,6 +6,7 @@ use Config\S3Manager;
 require_once __DIR__ . '/../models/RecursoTema.php';
 require_once __DIR__ . '/../models/Archivo.php';
 require_once __DIR__ . '/../models/Tema.php';
+require_once __DIR__ . '/../models/Tarea.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateResourceDescriptionImageKeyS3.php';
@@ -15,12 +16,14 @@ class RecursoTemaController
     private $recursoTemaModel;
     private $archivoModel;
     private $temaModel;
+    private $tareaModel;
 
     public function __construct()
     {
         $this->recursoTemaModel = new RecursoTema();
         $this->archivoModel = new Archivo();
         $this->temaModel = new Tema();
+        $this->tareaModel = new Tarea();
     }
 
     public function getByTopicId($id)
@@ -145,7 +148,7 @@ class RecursoTemaController
 
         if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso', 'Fecha_hora_apertura', 'Fecha_hora_limite', 'Puntaje_Max'])) return;
 
-        
+
         if (!$this->temaModel->getById($topicId)) {
             Flight::json(['message' => 'No existe el tema'], 404);
             return;
@@ -153,7 +156,7 @@ class RecursoTemaController
 
         $this->recursoTemaModel->beginTransaction();
         $s3Manager = new S3Manager();
-        
+
         $tipo = 2; // Tipo 2 para tareas
         $titulo = $data['Titulo'];
         $descripcionRecurso = $data['Descripcion_Recurso'] ?? null;
@@ -194,11 +197,21 @@ class RecursoTemaController
             }
         }
 
-
         $recursoTemaId = $this->recursoTemaModel->create($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo);
 
         if (!$recursoTemaId) {
-            Flight::json(['message' => 'Error al crear el recurso de tarea en la base de datos'], 500);
+            Flight::json(['message' => 'Error al crear la tarea'], 500);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+
+        $fechaApertura = $data['Fecha_hora_apertura'];
+        $fechaLimite = $data['Fecha_hora_limite'];
+        $puntajeMax = $data['Puntaje_Max'];
+        $tareaId = $this->tareaModel->create($recursoTemaId, $fechaApertura, $fechaLimite, $puntajeMax);
+
+        if (!$tareaId) {
+            Flight::json(['message' => 'Error al crear la tarea'], 500);
             $this->recursoTemaModel->rollBack();
             return;
         }
