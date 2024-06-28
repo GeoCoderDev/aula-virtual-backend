@@ -35,19 +35,18 @@ class RecursoTema
 
     public function create($idTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo)
     {
-        $query = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':idTema', $idTema, PDO::PARAM_INT);
-        $stmt->bindParam(':titulo', $titulo, PDO::PARAM_STR);
-        $stmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
-        $stmt->bindParam(':imagenKeyS3', $imagenKeyS3, PDO::PARAM_STR);
-        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_INT);
+        $queryRecurso = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
+        $stmtRecurso = $this->conn->prepare($queryRecurso);
+        $stmtRecurso->bindParam(':idTema', $idTema, PDO::PARAM_INT);
+        $stmtRecurso->bindParam(':titulo', $titulo, PDO::PARAM_STR);
+        $stmtRecurso->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+        $stmtRecurso->bindParam(':imagenKeyS3', $imagenKeyS3, PDO::PARAM_STR);
+        $stmtRecurso->bindParam(':tipo', $tipo, PDO::PARAM_INT);
+        $stmtRecurso->execute();
 
-        if ($stmt->execute()) {
-            return $this->conn->lastInsertId();
-        } else {
-            return false;
-        }
+        $idRecursoTema = $this->conn->lastInsertId();
+
+        return $idRecursoTema;
     }
 
     public function update($idRecursoTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo)

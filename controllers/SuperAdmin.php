@@ -157,6 +157,4 @@ class SuperadminController
         }
     }
 
-
-    // Puedes agregar más métodos según sea necesario
 }
