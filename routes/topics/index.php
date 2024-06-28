@@ -7,6 +7,12 @@ require_once __DIR__ . "/../../controllers/Tema.php";
 
 Flight::group('/api/topics', function () {
 
+    Flight::route('GET /@id/additionalData', function ($id) {
+
+        $temaController = new TemaController();
+        $temaController->getTopicAdditionalData($id);
+    });
+
     Flight::route('POST ', function () {
         $data = Flight::request()->data->getData();
         $temaController = new TemaController();
@@ -19,5 +25,4 @@ Flight::group('/api/topics', function () {
         $temaController = new TemaController();
         $temaController->updateName($id, $data);
     });
-
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);

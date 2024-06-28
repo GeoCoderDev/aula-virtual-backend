@@ -33,6 +33,16 @@ class TemaController
         }
     }
 
+    public function getTopicAdditionalData($id)
+    {
+        $data = $this->temaModel->getAdditionalDataById($id);
+        if ($data) {
+            Flight::json($data);
+        } else {
+            Flight::json(['message' => 'No se encontraron datos adicionales para el tema especificado'], 404);
+        }
+    }
+
     public function create($data)
     {
         if (!areFieldsComplete($data,  ['Nombre_Tema', 'Id_Curso_Aula'])) return;
