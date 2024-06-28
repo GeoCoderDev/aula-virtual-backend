@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/RecursoTema.php';
 require_once __DIR__ . '/../models/Archivo.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
+require_once __DIR__ . '/../lib/helpers/functions/generateResourceDescriptionImageKeyS3.php';
 
 class RecursoTemaController
 {
@@ -131,6 +132,73 @@ class RecursoTemaController
         Flight::json(['message' => 'Archivo añadido al Tema exitosamente'], 201);
     }
 
+    public function addHomeworkToTopic($topicId, $data)
+    {
+
+        if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso', 'Fecha_hora_apertura', 'Fecha_hora_limite', 'Puntaje_Max'])) return;
+
+        $this->recursoTemaModel->beginTransaction();
+
+        $s3Manager = new S3Manager();
+
+        $tipo = 2; // Tipo 2 para tareas
+        $titulo = $data['Titulo'];
+        $descripcionRecurso = $data['Descripcion_Recurso'] ?? null;
+
+        if ($this->recursoTemaModel->existsWithTitleAndType($topicId, $titulo, $tipo)) {
+            Flight::json(['message' => 'Ya existe una tarea con el mismo título en el tema especificado'], 409);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+
+        $imagenDescripcionKeyS3 = null;
+        if (isset($_FILES['Imagen_Descripcion']) && $_FILES['Imagen_Descripcion']['error'] === UPLOAD_ERR_OK) {
+            $imagenDescripcion = $_FILES['Imagen_Descripcion'];
+            $extensionImagenDescripcion = pathinfo($imagenDescripcion['name'], PATHINFO_EXTENSION);
+            $nombreImagenDescripcion = $data['Imagen_Descripcion_Nombre'];
+
+            if (!$nombreImagenDescripcion) {
+                Flight::json(["message" => "Falta el campo: Imagen_Descripcion_Nombre"], 400);
+                return;
+            };
+            
+
+            $imagenDescripcionKeyS3 = generateResourceDescriptionImageKeyS3(
+                $data['Grado'],
+                $data['Seccion'],
+                $data['Nombre_Curso'],
+                $data['Id_Tema'],
+                $nombreImagenDescripcion,
+                $extensionImagenDescripcion
+            );
+            
+            $tempImagenDescripcionPath = $imagenDescripcion['tmp_name'];
+            $uploadImagenDescripcionResult = $s3Manager->uploadFile($tempImagenDescripcionPath, $imagenDescripcionKeyS3);
+
+            if (!$uploadImagenDescripcionResult) {
+                $this->recursoTemaModel->rollBack();
+                Flight::json(['message' => 'Error al subir la imagen de descripción a S3'], 500);
+            }
+
+        }
+
+
+        $recursoTemaId = $this->recursoTemaModel->create($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo);
+
+        if (!$recursoTemaId) {
+            Flight::json(['message' => 'Error al crear el recurso de tarea en la base de datos'], 500);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+       
+
+        $this->recursoTemaModel->commit();
+        Flight::json(['message' => 'Tarea añadida al Tema exitosamente'], 201);
+
+
+    }
+
+
     public function update($id)
     {
         $requestData = Flight::request()->data;
@@ -149,7 +217,6 @@ class RecursoTemaController
             Flight::json(['message' => 'Recurso actualizado exitosamente'], 200);
         } else {
             Flight::json(['message' => 'Error al actualizar el recurso'], 500);
-            
         }
     }
 
@@ -172,5 +239,4 @@ class RecursoTemaController
             Flight::json($recursos);
         }
     }
-
 }
