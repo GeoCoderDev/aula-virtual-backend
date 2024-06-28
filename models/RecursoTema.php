@@ -124,7 +124,7 @@ class RecursoTema
             $stmtTarea->bindParam(':fechaLimite', $fechaLimite, PDO::PARAM_STR);
             $stmtTarea->bindParam(':puntajeMax', $puntajeMax, PDO::PARAM_STR);
 
-            $idTarea = $this->conn->query("SELECT MAX(Id) FROM T_Tarea")->fetchColumn();
+            $idTarea = $this->conn->query("SELECT MAX(Id_Tarea) FROM T_Tarea")->fetchColumn();
 
             error_log($idTarea);
             return $idTarea;
