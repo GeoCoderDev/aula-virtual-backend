@@ -100,6 +100,37 @@ class RecursoTema
         }
     }
 
+    public function addHomeworkToTopic($idTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo, $fechaApertura, $fechaLimite, $puntajeMax)
+    {
+        try {
+
+
+            $queryRecurso = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
+            $stmtRecurso = $this->conn->prepare($queryRecurso);
+            $stmtRecurso->bindParam(':idTema', $idTema, PDO::PARAM_INT);
+            $stmtRecurso->bindParam(':titulo', $titulo, PDO::PARAM_STR);
+            $stmtRecurso->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+            $stmtRecurso->bindParam(':imagenKeyS3', $imagenKeyS3, PDO::PARAM_STR);
+            $stmtRecurso->bindParam(':tipo', $tipo, PDO::PARAM_INT);
+            $stmtRecurso->execute();
+
+            $idRecursoTema = $this->conn->lastInsertId();
+
+            $queryTarea = "INSERT INTO T_Tarea (Id_Recurso_Tema, Fecha_hora_apertura, Fecha_hora_limite, Puntaje_Max) 
+                  VALUES (:idRecursoTema, :fechaApertura, :fechaLimite, :puntajeMax)";
+            $stmtTarea = $this->conn->prepare($queryTarea);
+            $stmtTarea->bindParam(':idRecursoTema', $idRecursoTema, PDO::PARAM_INT);
+            $stmtTarea->bindParam(':fechaApertura', $fechaApertura, PDO::PARAM_STR);
+            $stmtTarea->bindParam(':fechaLimite', $fechaLimite, PDO::PARAM_STR);
+            $stmtTarea->bindParam(':puntajeMax', $puntajeMax, PDO::PARAM_STR);
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+
     public function existsWithTitleAndType($idTema, $titulo, $tipo)
     {
         $query = "SELECT COUNT(*) FROM T_Recursos_Tema WHERE Id_Tema = :idTema AND Titulo = :titulo AND Tipo = :tipo";

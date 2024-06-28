@@ -197,20 +197,13 @@ class RecursoTemaController
             }
         }
 
-        $recursoTemaId = $this->recursoTemaModel->create($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo);
-
-        if (!$recursoTemaId) {
-            Flight::json(['message' => 'Error al crear la tarea'], 500);
-            $this->recursoTemaModel->rollBack();
-            return;
-        }
 
         $fechaApertura = $data['Fecha_hora_apertura'];
         $fechaLimite = $data['Fecha_hora_limite'];
         $puntajeMax = $data['Puntaje_Max'];
-        $tareaId = $this->tareaModel->create($recursoTemaId, $fechaApertura, $fechaLimite, $puntajeMax);
 
-        if (!$tareaId) {
+
+        if (!$this->recursoTemaModel->addHomeworkToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo,$fechaApertura, $fechaLimite, $puntajeMax)) {
             Flight::json(['message' => 'Error al crear la tarea'], 500);
             $this->recursoTemaModel->rollBack();
             return;
