@@ -21,6 +21,6 @@ Flight::group('/api/topicResources', function () {
     Flight::route("POST /@topicId/addHomework", function ($topicId) {
         $data = Flight::request()->data->getData();
         $controller = new RecursoTemaController();
-        $controller->addFileToTopic($topicId, $data);
+        $controller->addHomeworkToTopic($topicId, $data);
     });
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);

@@ -5,6 +5,7 @@ use Config\S3Manager;
 
 require_once __DIR__ . '/../models/RecursoTema.php';
 require_once __DIR__ . '/../models/Archivo.php';
+require_once __DIR__ . '/../models/Tema.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateResourceDescriptionImageKeyS3.php';
@@ -13,11 +14,13 @@ class RecursoTemaController
 {
     private $recursoTemaModel;
     private $archivoModel;
+    private $temaModel;
 
     public function __construct()
     {
         $this->recursoTemaModel = new RecursoTema();
         $this->archivoModel = new Archivo();
+        $this->temaModel = new Tema();
     }
 
     public function getByTopicId($id)
@@ -79,6 +82,11 @@ class RecursoTemaController
             return;
         }
 
+        if (!$this->temaModel->getById($topicId)) {
+            Flight::json(['message' => 'No existe el tema'], 404);
+            return;
+        }
+
         $archivo = $_FILES['Archivo'];
         $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
 
@@ -137,10 +145,15 @@ class RecursoTemaController
 
         if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso', 'Fecha_hora_apertura', 'Fecha_hora_limite', 'Puntaje_Max'])) return;
 
+        
+        if (!$this->temaModel->getById($topicId)) {
+            Flight::json(['message' => 'No existe el tema'], 404);
+            return;
+        }
+
         $this->recursoTemaModel->beginTransaction();
-
         $s3Manager = new S3Manager();
-
+        
         $tipo = 2; // Tipo 2 para tareas
         $titulo = $data['Titulo'];
         $descripcionRecurso = $data['Descripcion_Recurso'] ?? null;
@@ -161,7 +174,7 @@ class RecursoTemaController
                 Flight::json(["message" => "Falta el campo: Imagen_Descripcion_Nombre"], 400);
                 return;
             };
-            
+
 
             $imagenDescripcionKeyS3 = generateResourceDescriptionImageKeyS3(
                 $data['Grado'],
@@ -171,7 +184,7 @@ class RecursoTemaController
                 $nombreImagenDescripcion,
                 $extensionImagenDescripcion
             );
-            
+
             $tempImagenDescripcionPath = $imagenDescripcion['tmp_name'];
             $uploadImagenDescripcionResult = $s3Manager->uploadFile($tempImagenDescripcionPath, $imagenDescripcionKeyS3);
 
@@ -179,7 +192,6 @@ class RecursoTemaController
                 $this->recursoTemaModel->rollBack();
                 Flight::json(['message' => 'Error al subir la imagen de descripción a S3'], 500);
             }
-
         }
 
 
@@ -190,12 +202,10 @@ class RecursoTemaController
             $this->recursoTemaModel->rollBack();
             return;
         }
-       
+
 
         $this->recursoTemaModel->commit();
         Flight::json(['message' => 'Tarea añadida al Tema exitosamente'], 201);
-
-
     }
 
 
