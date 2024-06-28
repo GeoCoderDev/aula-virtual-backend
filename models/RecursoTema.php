@@ -43,8 +43,11 @@ class RecursoTema
         $stmt->bindParam(':imagenKeyS3', $imagenKeyS3, PDO::PARAM_STR);
         $stmt->bindParam(':tipo', $tipo, PDO::PARAM_INT);
 
-        $stmt->execute();
-        return $this->conn->lastInsertId();
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        } else {
+            return false;
+        }
     }
 
     public function update($idRecursoTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo)
