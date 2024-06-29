@@ -185,7 +185,7 @@ class ProfesorController
     public function getAsignacionesByDNI($DNI_Profesor)
     {
         $asignacionesModel = new Asignacion();
-        $asignations = $asignacionesModel->getAsignationsByAula($DNI_Profesor);
+        $asignations = $asignacionesModel->getAsignationsByTeacher($DNI_Profesor);
         return $asignations;
     }
 
