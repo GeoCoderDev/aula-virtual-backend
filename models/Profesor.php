@@ -1,23 +1,25 @@
 <?php
 
-require_once __DIR__."/./Usuario.php";
-require_once __DIR__."/../config/S3Manager.php"; // Agrega la ruta correcta al archivo S3Manager.php
-require_once __DIR__.'/../lib/helpers/functions/totalTimeInSeconds.php';
+require_once __DIR__ . "/./Usuario.php";
+require_once __DIR__ . "/../config/S3Manager.php"; // Agrega la ruta correcta al archivo S3Manager.php
+require_once __DIR__ . '/../lib/helpers/functions/totalTimeInSeconds.php';
 
 use Config\Database;
 use Config\S3Manager; // Asegúrate de agregar el uso de S3Manager aquí
 
-define("DURATION_PERFIL_PHOTO_TEACHER", totalTimeInSeconds(1,0,0,0));
+define("DURATION_PERFIL_PHOTO_TEACHER", totalTimeInSeconds(1, 0, 0, 0));
 
-class Profesor{
+class Profesor
+{
     private $conn;
     private $s3Manager; // Agrega una propiedad para el S3Manager
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conn = Database::getConnection();
         $this->s3Manager = new S3Manager(); // Inicializa el S3Manager en el constructor
     }
-    
+
     public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
     {
         if ($includePassword) {
@@ -76,7 +78,8 @@ class Profesor{
         return $professors;
     }
 
-    public function getProfessorCount($dni = null, $nombre = null, $apellidos = null, $estado = null) {
+    public function getProfessorCount($dni = null, $nombre = null, $apellidos = null, $estado = null)
+    {
         $query = "SELECT COUNT(*) AS count FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
 
         // Agregar condiciones según los parámetros de consulta
@@ -134,7 +137,8 @@ class Profesor{
         return $professor;
     }
 
-    public function getByUsername($username, $includePassword = false) {
+    public function getByUsername($username, $includePassword = false)
+    {
         if ($includePassword) {
             $stmt = $this->conn->prepare("SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Telefono, U.Foto_Perfil_Key_S3, U.Estado FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE U.Nombre_Usuario = :username");
         } else {
@@ -224,7 +228,8 @@ class Profesor{
     }
 
 
-    public function fetchCourseData($idCursoAula) {
+    public function fetchCourseData($idCursoAula)
+    {
         $query = "
             SELECT 
                 ca.Id_Curso_Aula, 
@@ -246,7 +251,8 @@ class Profesor{
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function fetchCourseTopics($idCursoAula) {
+    public function fetchCourseTopics($idCursoAula)
+    {
         $query = "
             SELECT 
                 t.Id_Tema, 
@@ -276,44 +282,47 @@ class Profesor{
     }
 
 
-    public function create($dni, $userId) {
+    public function create($dni, $userId)
+    {
         $stmt = $this->conn->prepare("INSERT INTO T_Profesores (DNI_Profesor, Id_Usuario) VALUES (:dni, :userId)");
         $success = $stmt->execute(['dni' => $dni, 'userId' => $userId]);
         return $success;
     }
 
-    public function hasAccessToCourse($DNI_Profesor, $cursoAulaID) {
-    // Consulta para verificar si el profesor tiene acceso al curso aula a través de sus asignaciones
-    $query = "
+    public function hasAccessToCourse($DNI_Profesor, $cursoAulaID)
+    {
+        // Consulta para verificar si el profesor tiene acceso al curso aula a través de sus asignaciones
+        $query = "
         SELECT COUNT(*) as count 
         FROM T_Asignaciones a
         JOIN T_Horario_Curso_Aula hca ON a.Id_Horario_Curso_Aula = hca.Id_Horario_Curso_Aula
         JOIN T_Cursos_Aula ca ON hca.Id_Curso_Aula = ca.Id_Curso_Aula
         WHERE a.DNI_Profesor = ? AND ca.Id_Curso_Aula = ?
     ";
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute([$DNI_Profesor, $cursoAulaID]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$DNI_Profesor, $cursoAulaID]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return $result['count'] > 0;
-}
-
-
-
-    public function update($dni, $userId) {
-        $stmt = $this->conn->prepare("UPDATE T_Profesores SET Id_Usuario = :userId WHERE DNI_Profesor = :dni");
-        return $stmt->execute(['dni' => $dni, 'userId' => $userId]);        
+        return $result['count'] > 0;
     }
 
-    public function delete($dni) {
+
+
+    public function update($dni, $userId)
+    {
+        $stmt = $this->conn->prepare("UPDATE T_Profesores SET Id_Usuario = :userId WHERE DNI_Profesor = :dni");
+        return $stmt->execute(['dni' => $dni, 'userId' => $userId]);
+    }
+
+    public function delete($dni)
+    {
         $stmt = $this->conn->prepare("DELETE FROM T_Profesores WHERE DNI_Profesor = :dni");
         return $stmt->execute(['dni' => $dni]);
-        
     }
 
-    public function getCursosByDNI($DNI_Profesor) 
-{
-    $stmt = $this->conn->prepare("
+    public function getCursosByDNI($DNI_Profesor)
+    {
+        $stmt = $this->conn->prepare("
         SELECT DISTINCT 
             CA.Id_Curso_Aula, 
             C.Nombre AS Nombre_Curso, 
@@ -329,18 +338,7 @@ class Profesor{
         WHERE 
             P.DNI_Profesor = :DNI_Profesor
     ");
-    $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-
-    public function getAsignacionesByDNI($DNI_Profesor)
-    {
-        $stmt = $this->conn->prepare("SELECT A.*, C.Nombre AS Nombre_Curso, CA.Id_Curso_Aula, AU.Grado, AU.Seccion, HCA.Id_Horario_Curso_Aula, HCA.Dia_Semana, HCA.Hora_Inicio, HCA.Cant_Horas_Academicas   FROM T_Asignaciones AS A INNER JOIN T_Horario_Curso_Aula AS HCA ON A.Id_Horario_Curso_Aula = HCA.Id_Horario_Curso_Aula INNER JOIN T_Cursos_Aula AS CA ON HCA.Id_Curso_Aula = CA.Id_Curso_Aula INNER JOIN T_Cursos AS C ON CA.Id_Curso = C.Id_Curso INNER JOIN T_Aulas AS AU ON CA.Id_Aula = AU.Id_Aula INNER JOIN T_Profesores AS P ON A.DNI_Profesor = P.DNI_Profesor WHERE P.DNI_Profesor = :DNI_Profesor");
-        
         $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }
-?>

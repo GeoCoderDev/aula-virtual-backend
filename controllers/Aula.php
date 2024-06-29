@@ -10,7 +10,7 @@ class AulaController
         $this->aulaModel = new Aula();
     }
 
-    public function getAll()
+    public function getAll($grado, $section)
     {
         $aulas = $this->aulaModel->getAll();
         return $aulas;
