@@ -46,11 +46,10 @@ class RecursoTemaController
         }
     }
 
-    public function create()
+    public function create($idTema)
     {
         $requestData = Flight::request()->data;
-
-        $idTema = $requestData->Id_Tema;
+        
         $titulo = $requestData->Titulo;
         $descripcion = $requestData->Descripcion_Recurso;
         $imagenKeyS3 = $requestData->Imagen_Key_S3 ?? null;
@@ -183,7 +182,7 @@ class RecursoTemaController
                 $data['Grado'],
                 $data['Seccion'],
                 $data['Nombre_Curso'],
-                $data['Id_Tema'],
+                $topicId,
                 $nombreImagenDescripcion,
                 $extensionImagenDescripcion
             );

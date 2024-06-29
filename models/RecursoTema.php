@@ -127,7 +127,7 @@ class RecursoTema
             $stmtTarea->execute();
 
             $idTarea = $this->conn->lastInsertId();
-            error_log($idTarea);
+
             return $idTarea;
         } catch (Exception $e) {
             return false;

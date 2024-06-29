@@ -135,5 +135,3 @@ class Tarea
         $this->conn->rollBack();
     }
 }
-
-?>
