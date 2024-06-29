@@ -233,6 +233,16 @@ class RecursoTemaController
                     $extension
                 );
 
+                $idArchivoTarea = $this->archivoTareaModel->create($nombreArchivo, $extension, $archivoKeyS3, $tareaId);
+
+                if (!$idArchivoTarea) {
+                    error_log('Error al asociar archivos adjuntos con la tarea');
+                    $this->recursoTemaModel->rollBack();
+                    Flight::json(['message' => 'Error al asociar archivos adjuntos con la tarea'], 500);
+                    return;
+                }
+
+
                 $tempFilePath = $archivo['tmp_name'];
                 $uploadResult = $s3Manager->uploadFile($tempFilePath, $archivoKeyS3);
 
@@ -240,24 +250,6 @@ class RecursoTemaController
                     error_log('Error al subir archivos adjuntos a S3');
                     $this->recursoTemaModel->rollBack();
                     Flight::json(['message' => 'Error al subir archivos adjuntos a S3'], 500);
-                    return;
-                }
-
-                $idArchivo = $this->archivoModel->create($nombreArchivo, $extension, $archivoKeyS3);
-
-                if (!$idArchivo) {
-                    error_log('Error al crear archivos adjuntos en la base de datos');
-                    Flight::json(['message' => 'Error al crear archivos adjuntos en la base de datos'], 500);
-                    $this->recursoTemaModel->rollBack();
-                    return;
-                }
-
-                $idArchivoTarea = $this->archivoTareaModel->create($idArchivo, $tareaId);
-
-                if (!$idArchivoTarea) {
-                    error_log('Error al asociar archivos adjuntos con la tarea');
-                    $this->recursoTemaModel->rollBack();
-                    Flight::json(['message' => 'Error al asociar archivos adjuntos con la tarea'], 500);
                     return;
                 }
             }

@@ -30,9 +30,8 @@ class Archivo
         $stmt->bindParam(':archivoKeyS3', $archivoKeyS3, PDO::PARAM_STR);
 
         $stmt->execute();
-        $idArchivo = $this->conn->query("SELECT MAX(Id_Archivo) FROM T_Archivos")->fetchColumn();
-        error_log("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAA" . $idArchivo);
-        return $idArchivo;
+        return $this->conn->lastInsertId();
+        
     }
 
 
