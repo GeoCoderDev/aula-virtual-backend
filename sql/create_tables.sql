@@ -88,15 +88,22 @@ CREATE TABLE IF NOT EXISTS T_Cursos_Aula (
 -- |             ASIGNACION POR CURSO Y SECCION               |
 -- ============================================================
 
--- Tabla de Horario de Curso-Aula
-CREATE TABLE IF NOT EXISTS T_Horario_Curso_Aula (
-    Id_Horario_Curso_Aula INT PRIMARY KEY AUTO_INCREMENT,
-    Id_Curso_Aula INT,
-    Dia_Semana VARCHAR(20) NOT NULL,
-    Hora_Inicio TIME NOT NULL,
-    Cant_Horas_Academicas INT NOT NULL,
-    FOREIGN KEY (Id_Curso_Aula) REFERENCES T_Cursos_Aula(Id_Curso_Aula)
+CREATE TABLE T_Horas_Academicas (
+    Id_Hora_Academica INT PRIMARY KEY,
+    Valor TIME NOT NULL
 );
+
+-- Tabla de Horario de Curso-Aula
+CREATE TABLE T_Horario_Curso_Aula (
+    Id_Horario_Curso_Aula INT AUTO_INCREMENT PRIMARY KEY,
+    Id_Curso_Aula INT NOT NULL,
+    Dia_Semana ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo') NOT NULL,
+    Id_Hora_Academica INT NOT NULL,
+    Cant_Horas_Academicas INT NOT NULL,
+    FOREIGN KEY (Id_Curso_Aula) REFERENCES T_Cursos_Aula(Id_Curso_Aula),
+    FOREIGN KEY (Id_Hora_Academica) REFERENCES T_Horas_Academicas(Id_Hora_Academica)
+);
+
 
 -- Tabla de Asignaciones
 CREATE TABLE IF NOT EXISTS T_Asignaciones (

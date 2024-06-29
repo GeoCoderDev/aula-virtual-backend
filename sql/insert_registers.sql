@@ -153,6 +153,16 @@ VALUES
 ('Continente Americano', 5, 1),
 ('Europa', 5, 2);
 
+
+-- Insertar valores de ejemplo
+INSERT INTO T_Horas_Academicas (Id_Hora_Academica, Valor) VALUES
+(1, '07:30'),
+(2, '08:15'),
+(3, '09:00'),
+(4, '09:45'),
+(5, '10:30');
+
+
 -- Registros para la tabla T_Horario_Curso_Aula
 INSERT INTO T_Horario_Curso_Aula (Id_Curso_Aula, Dia_Semana, Hora_Inicio, Cant_Horas_Academicas)
 VALUES 

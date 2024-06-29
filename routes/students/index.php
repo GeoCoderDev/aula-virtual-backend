@@ -11,12 +11,12 @@ Flight::group("/api/students",  function(){
         // Obtener los parámetros de consulta de la URL
         $startFrom = Flight::request()->query['startFrom'] ?? 0;
         $limit = Flight::request()->query['limit'] ?? 200;
-        $dni = Flight::request()->query['dni'] ?? null;
-        $nombre = Flight::request()->query['nombre'] ?? null;
-        $apellidos = Flight::request()->query['apellidos'] ?? null;
-        $grado = Flight::request()->query['grado'] ?? null;
-        $seccion = Flight::request()->query['seccion'] ?? null;
-        $estado = Flight::request()->query['estado'] ?? null; // Nuevo parámetro de consulta
+        $dni = Flight::request()->query['DNI'] ?? null;
+        $nombre = Flight::request()->query['Nombre'] ?? null;
+        $apellidos = Flight::request()->query['Apellidos'] ?? null;
+        $grado = Flight::request()->query['Grado'] ?? null;
+        $seccion = Flight::request()->query['Seccion'] ?? null;
+        $estado = Flight::request()->query['Estado'] ?? null; // Nuevo parámetro de consulta
 
         // Convertir a entero si es una cadena
         $startFrom = intval($startFrom);
