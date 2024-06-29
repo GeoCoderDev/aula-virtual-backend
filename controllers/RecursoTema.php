@@ -26,7 +26,6 @@ class RecursoTemaController
         $this->archivoModel = new Archivo();
         $this->archivoTareaModel = new ArchivosTarea();
         $this->temaModel = new Tema();
-
     }
 
     public function getByTopicId($id)
@@ -239,8 +238,9 @@ class RecursoTemaController
 
                 if (!$uploadResult) {
                     error_log('Error al subir archivos adjuntos a S3');
+                    $this->recursoTemaModel->rollBack();
                     Flight::json(['message' => 'Error al subir archivos adjuntos a S3'], 500);
-                    return false;
+                    return;
                 }
 
                 $idArchivo = $this->archivoModel->create($nombreArchivo, $extension, $archivoKeyS3);
@@ -248,15 +248,17 @@ class RecursoTemaController
                 if (!$idArchivo) {
                     error_log('Error al crear archivos adjuntos en la base de datos');
                     Flight::json(['message' => 'Error al crear archivos adjuntos en la base de datos'], 500);
-                    return false;
+                    $this->recursoTemaModel->rollBack();
+                    return;
                 }
 
                 $idArchivoTarea = $this->archivoTareaModel->create($idArchivo, $tareaId);
 
                 if (!$idArchivoTarea) {
                     error_log('Error al asociar archivos adjuntos con la tarea');
+                    $this->recursoTemaModel->rollBack();
                     Flight::json(['message' => 'Error al asociar archivos adjuntos con la tarea'], 500);
-                    return false;
+                    return;
                 }
             }
         }
