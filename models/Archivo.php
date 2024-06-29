@@ -29,11 +29,10 @@ class Archivo
         $stmt->bindParam(':extension', $extension, PDO::PARAM_STR);
         $stmt->bindParam(':archivoKeyS3', $archivoKeyS3, PDO::PARAM_STR);
 
-        if ($stmt->execute()) {
-            return $this->conn->lastInsertId();
-        } else {
-            return false;
-        }
+        $stmt->execute();
+        $idArchivo =  $this->conn->lastInsertId();
+        error_log("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAA" . $idArchivo);
+        return $idArchivo;
     }
 
 
