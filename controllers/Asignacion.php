@@ -19,10 +19,14 @@ class AsignacionController
     public function getAsignationsByAula($Grado, $Seccion)
     {
         try {
+            if (!$Seccion) {
+                Flight::json([], 200);
+            }
+
             $aula = $this->aulaModel->getByGradoSeccion($Grado, $Seccion);
             if ($aula) {
                 $Id_Aula = $aula['Id_Aula'];
-                $asignaciones = $this->asignacionesModel->getAsignationsByAula($Id_Aula);
+                $asignaciones = $this->asignacionesModel->getAsignationsByAula($Id_Aula) ?? [];
                 $horasAcademicas = $this->horaAcademicaModel->getAll();
                 $response = [
                     'Asignaciones' => $asignaciones,
@@ -40,7 +44,7 @@ class AsignacionController
     public function getAsignationsByTeacher($DNI_Profesor)
     {
         try {
-            $asignaciones = $this->asignacionesModel->getAsignationsByTeacher($DNI_Profesor);
+            $asignaciones = $this->asignacionesModel->getAsignationsByTeacher($DNI_Profesor) ?? [];
             $horasAcademicas = $this->horaAcademicaModel->getAll();
             $response = [
                 'Asignaciones' => $asignaciones,
@@ -52,4 +56,3 @@ class AsignacionController
         }
     }
 }
-?>
