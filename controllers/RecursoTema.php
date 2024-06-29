@@ -6,7 +6,7 @@ use Config\S3Manager;
 require_once __DIR__ . '/../models/RecursoTema.php';
 require_once __DIR__ . '/../models/Archivo.php';
 require_once __DIR__ . '/../models/Tema.php';
-require_once __DIR__ . '/../models/Tarea.php';
+require_once __DIR__ . '/../models/ArchivoTarea.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateResourceDescriptionImageKeyS3.php';
@@ -15,15 +15,17 @@ class RecursoTemaController
 {
     private $recursoTemaModel;
     private $archivoModel;
+    private $archivoTareaModel;
     private $temaModel;
-    private $tareaModel;
+
 
     public function __construct()
     {
         $this->recursoTemaModel = new RecursoTema();
         $this->archivoModel = new Archivo();
+        $this->archivoTareaModel = new ArchivosTarea();
         $this->temaModel = new Tema();
-        $this->tareaModel = new Tarea();
+
     }
 
     public function getByTopicId($id)
@@ -49,7 +51,7 @@ class RecursoTemaController
     public function create($idTema)
     {
         $requestData = Flight::request()->data;
-        
+
         $titulo = $requestData->Titulo;
         $descripcion = $requestData->Descripcion_Recurso;
         $imagenKeyS3 = $requestData->Imagen_Key_S3 ?? null;
@@ -201,13 +203,62 @@ class RecursoTemaController
         $fechaLimite = $data['Fecha_hora_limite'];
         $puntajeMax = $data['Puntaje_Max'];
 
+        $tareaId = $this->recursoTemaModel->addHomeworkToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo, $fechaApertura, $fechaLimite, $puntajeMax);
 
-        if (!$this->recursoTemaModel->addHomeworkToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo,$fechaApertura, $fechaLimite, $puntajeMax)) {
+        if (!$tareaId) {
             Flight::json(['message' => 'Error al crear la tarea'], 500);
             $this->recursoTemaModel->rollBack();
             return;
         }
 
+        if (isset($data['Nombre_Archivos'])) {
+            $s3Manager = new S3Manager();
+            foreach ($data['Nombre_Archivos'] as $index => $nombreArchivo) {
+                if (!isset($_FILES["Archivo_$index"]) || $_FILES["Archivo_$index"]['error'] !== UPLOAD_ERR_OK) {
+                    $this->recursoTemaModel->rollBack();
+                    Flight::json(['message' => 'Error al recibir archivos adjuntos'], 400);
+                    return false;
+                }
+
+                $archivo = $_FILES["Archivo_$index"];
+                $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+
+                $archivoKeyS3 = generateTopicHomeworkFileKeyS3(
+                    $data['Grado'],
+                    $data['Seccion'],
+                    $data['Nombre_Curso'],
+                    $topicId,
+                    $tareaId,
+                    $nombreArchivo,
+                    $extension
+                );
+
+                $tempFilePath = $archivo['tmp_name'];
+                $uploadResult = $s3Manager->uploadFile($tempFilePath, $archivoKeyS3);
+
+                if (!$uploadResult) {
+                    error_log('Error al subir archivos adjuntos a S3');
+                    Flight::json(['message' => 'Error al subir archivos adjuntos a S3'], 500);
+                    return false;
+                }
+
+                $idArchivo = $this->archivoModel->create($nombreArchivo, $extension, $archivoKeyS3);
+
+                if (!$idArchivo) {
+                    error_log('Error al crear archivos adjuntos en la base de datos');
+                    Flight::json(['message' => 'Error al crear archivos adjuntos en la base de datos'], 500);
+                    return false;
+                }
+
+                $idArchivoTarea = $this->archivoTareaModel->create($idArchivo, $tareaId);
+
+                if (!$idArchivoTarea) {
+                    error_log('Error al asociar archivos adjuntos con la tarea');
+                    Flight::json(['message' => 'Error al asociar archivos adjuntos con la tarea'], 500);
+                    return false;
+                }
+            }
+        }
 
         $this->recursoTemaModel->commit();
         Flight::json(['message' => 'Tarea añadida al Tema exitosamente'], 201);
