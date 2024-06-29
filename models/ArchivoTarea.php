@@ -35,9 +35,7 @@ class ArchivosTarea
 
     public function create($idArchivo, $idTarea)
     {
-
         
-
         $query = "INSERT INTO T_Archivos_Tarea (Id_Archivo, Id_Tarea) VALUES (:idArchivo, :idTarea)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':idArchivo', $idArchivo, PDO::PARAM_INT);
