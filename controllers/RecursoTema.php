@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/Tema.php';
 require_once __DIR__ . '/../models/ArchivoTarea.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
+require_once __DIR__ . '/../lib/helpers/functions/generateTopicHomeworkFileKeyS3.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateResourceDescriptionImageKeyS3.php';
 
 class RecursoTemaController
