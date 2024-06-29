@@ -155,12 +155,23 @@ VALUES
 
 
 -- Insertar valores de ejemplo
-INSERT INTO T_Horas_Academicas (Id_Hora_Academica, Valor) VALUES
-(1, '07:30'),
-(2, '08:15'),
-(3, '09:00'),
-(4, '09:45'),
-(5, '10:30');
+INSERT INTO T_Horas_Academicas (Id_Hora_Academica, Valor)
+VALUES
+(1, '07:30:00'),
+(2, '08:15:00'),
+(3, '09:00:00'),
+(4, '09:45:00'),
+(5, '10:30:00'),
+(6, '11:15:00'),
+(7, '12:00:00'),
+(8, '12:45:00'),
+(9, '13:30:00'),
+(10, '14:15:00'),
+(11, '15:00:00'),
+(12, '15:45:00'),
+(13, '16:30:00'),
+(14, '17:15:00'),
+(15, '18:00:00');
 
 
 -- Registros para la tabla T_Horario_Curso_Aula

@@ -19,7 +19,7 @@ class AsignacionController
     public function getAsignationsByAula($Grado, $Seccion)
     {
         try {
-            if (!$Seccion) {
+            if (!$Grado || !$Seccion) {
                 Flight::json([], 200);
                 return;
             }
