@@ -1,8 +1,8 @@
 <?php
 
-use Config\Database;
 
 require_once __DIR__ . '/../config/Database.php';
+use Config\Database;
 
 class ArchivosTarea
 {
@@ -39,9 +39,8 @@ class ArchivosTarea
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':idArchivo', $idArchivo, PDO::PARAM_INT);
         $stmt->bindParam(':idTarea', $idTarea, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->conn->lastInsertId();
+        return $stmt->execute();
+         
     }
 
     public function update($idArchivosTarea, $idArchivo, $idTarea)
