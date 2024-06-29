@@ -21,6 +21,7 @@ class AsignacionController
         try {
             if (!$Seccion) {
                 Flight::json([], 200);
+                return;
             }
 
             $aula = $this->aulaModel->getByGradoSeccion($Grado, $Seccion);
