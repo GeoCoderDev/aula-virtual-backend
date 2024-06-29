@@ -114,7 +114,7 @@ class RecursoTema
             $stmtRecurso->bindParam(':tipo', $tipo, PDO::PARAM_INT);
             $stmtRecurso->execute();
 
-            $idRecursoTema = $this->conn->lastInsertId();
+            $idRecursoTema = $this->conn->query("SELECT MAX(Id_Recurso_Tema) FROM T_Recursos_Tema")->fetchColumn();
 
             $queryTarea = "INSERT INTO T_Tarea (Id_Recurso_Tema, Fecha_hora_apertura, Fecha_hora_limite, Puntaje_Max) 
                   VALUES (:idRecursoTema, :fechaApertura, :fechaLimite, :puntajeMax)";
@@ -126,7 +126,7 @@ class RecursoTema
 
             $stmtTarea->execute();
 
-            $idTarea = $this->conn->lastInsertId();
+            $idTarea = $this->conn->query("SELECT MAX(Id_Tarea) FROM T_Tarea;")->fetchColumn();
 
             return $idTarea;
         } catch (Exception $e) {
