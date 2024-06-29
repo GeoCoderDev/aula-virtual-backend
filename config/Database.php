@@ -1,12 +1,17 @@
 <?php
 
 namespace Config;
+
 use PDO;
 use PDOException;
 
-class Database {
+class Database
+{
+    private static $instance = null;
+    private $conn;
 
-    public static function getConnection() {
+    private function __construct()
+    {
         $host = $_ENV["MYSQL_DB_HOST"];
         $port = $_ENV["MYSQL_DB_PORT"];
         $dbname = $_ENV["MYSQL_DB_NAME"];
@@ -14,14 +19,20 @@ class Database {
         $password = $_ENV["MYSQL_DB_PASSWORD"];
 
         try {
-            $conn = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
+            $this->conn = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
             // Configura PDO para que lance excepciones en caso de errores
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $conn;
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             die("Error de conexión: " . $e->getMessage());
         }
     }
 
-    
+    public static function getConnection()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance->conn;
+    }
 }

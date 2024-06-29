@@ -103,8 +103,6 @@ class RecursoTema
     public function addHomeworkToTopic($idTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo, $fechaApertura, $fechaLimite, $puntajeMax)
     {
         try {
-
-
             $queryRecurso = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) VALUES (:idTema, :titulo, :descripcion, :imagenKeyS3, :tipo)";
             $stmtRecurso = $this->conn->prepare($queryRecurso);
             $stmtRecurso->bindParam(':idTema', $idTema, PDO::PARAM_INT);
