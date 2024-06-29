@@ -20,12 +20,10 @@ Flight::group("/api/asignations",  function () {
 
     Flight::route("GET /byTeacher", function () {
 
-        $grado = Flight::request()->query['Grado'] ?? null;
-        $seccion = Flight::request()->query['Seccion'] ?? null;
+        $DNI_Profesor = Flight::request()->query['DNI'] ?? null;
+
 
         $controller = new AsignacionController();
-        $controller->getAsignationsByAula($grado, $seccion);
+        $controller->getAsignationsByTeacher($DNI_Profesor);
     });
-
-
 }, [new NotSQLInjection(), new AdminAuthenticated(true), new SuperadminAuthenticated()]);
