@@ -69,6 +69,10 @@ class ProfesorController
         Flight::json($response, 200);
     }
 
+    public function getSchedule($DNI_Profesor){
+
+    }
+
 
     public function validateDNIAndUsername($data)
     {

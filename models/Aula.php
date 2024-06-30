@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
+
 use Config\Database;
 
 class Aula
@@ -27,8 +28,9 @@ class Aula
         $stmt->execute($grados);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    public function getGradosByCurso($Id_Curso) {
+
+    public function getGradosByCurso($Id_Curso)
+    {
         $stmt = $this->conn->prepare("SELECT DISTINCT A.Grado FROM T_Cursos_Aula AS CA INNER JOIN T_Aulas AS A ON CA.Id_Aula = A.Id_Aula WHERE CA.Id_Curso = :Id_Curso");
         $stmt->execute(['Id_Curso' => $Id_Curso]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -128,7 +130,7 @@ class Aula
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['Seccion'] : ''; // Devuelve la última sección o cadena vacía si no hay secciones
     }
-    
+
     public function getStudentsCountByGradoSeccion($Grado, $Seccion)
     {
         $stmt = $this->conn->prepare("SELECT COUNT(*) AS Total FROM T_Estudiantes WHERE Id_Aula IN (SELECT Id_Aula FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion)");
@@ -144,7 +146,16 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-
+    public function getByDNIEstudiante($DNI_Estudiante)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT A.* FROM T_Aulas AS A
+            INNER JOIN T_Estudiantes AS E ON A.Id_Aula = E.Id_Aula
+            WHERE E.DNI_Estudiante = :DNI_Estudiante
+        ");
+        $stmt->execute(['DNI_Estudiante' => $DNI_Estudiante]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function addSection($Grado, $Seccion)
     {
@@ -189,13 +200,10 @@ class Aula
         );
         $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
     }
-    
+
     public function deleteSection($Grado, $Seccion)
     {
         $stmt = $this->conn->prepare("DELETE FROM T_Aulas WHERE Grado = :Grado AND Seccion = :Seccion");
         $stmt->execute(['Grado' => $Grado, 'Seccion' => $Seccion]);
     }
-
-
-
 }

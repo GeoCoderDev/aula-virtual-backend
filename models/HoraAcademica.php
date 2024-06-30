@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
+
 use Config\Database;
 
 class HoraAcademica
@@ -77,5 +78,20 @@ class HoraAcademica
         $stmt = $this->conn->query("SELECT * FROM T_Horas_Academicas ORDER BY Id_Hora_Academica DESC LIMIT 1");
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getByRange($start, $end)
+    {
+
+        $startDef = $start - 3 > 0 ? $start - 3 : 0;
+
+        $endDef = $end - $startDef >= 7 ? $end : $end + (7 - ($end - $startDef));
+
+        $stmt = $this->conn->prepare("
+            SELECT * FROM T_Horas_Academicas
+            WHERE Id_Hora_Academica BETWEEN :start AND :end
+            ORDER BY Id_Hora_Academica
+        ");
+        $stmt->execute(['start' => $startDef, 'end' => $endDef]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
-?>
