@@ -150,7 +150,8 @@ class EstudianteController
             // Estructura de la respuesta
             $response = [
                 'Horas_Academicas' => $horasAcademicas,
-                'Horario' => $horario
+                'Horario' => $horario,
+                'isTeacher' => false
             ];
 
             Flight::json($response, 200);

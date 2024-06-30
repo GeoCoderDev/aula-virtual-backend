@@ -72,7 +72,6 @@ class ProfesorController
     public function getSchedule($DNI_Profesor)
     {
         try {
-            $aulaModel = new Aula();
             $horarioModel = new HorarioCursoAula();
             $horaAcademicaModel = new HoraAcademica();
 
@@ -97,7 +96,8 @@ class ProfesorController
             // Estructura de la respuesta
             $response = [
                 'Horas_Academicas' => $horasAcademicas,
-                'Horario' => $horarioSinProfesor
+                'Horario' => $horarioSinProfesor,
+                'isTeacher' => true
             ];
 
             Flight::json($response, 200);
