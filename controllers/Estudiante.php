@@ -143,9 +143,9 @@ class EstudianteController
 
             $horaAcademicaModel = new HoraAcademica();
 
-            list($idHorarioMenor, $idHorarioMayor, $cantHorasMayor) = $this->obtenerIdsYHorasAcademicas($horario);
+            list($idHoraAcademicaMenor, $idHoraAcademicaMayor, $cantHorasMayor) = $this->obtenerIdsYHorasAcademicas($horario);
 
-            $horasAcademicas = $horaAcademicaModel->getByRange($idHorarioMenor, $idHorarioMayor + $cantHorasMayor);
+            $horasAcademicas = $horaAcademicaModel->getByRange($idHoraAcademicaMenor, $idHoraAcademicaMayor + $cantHorasMayor);
 
             // Estructura de la respuesta
             $response = [
@@ -170,24 +170,24 @@ class EstudianteController
             return [0, 0, 0];
         }
 
-        $idHorarioMenor = null;
-        $idHorarioMayor = null;
+        $idHoraAcademicaMenor = null;
+        $idHoraAcademicaMayor = null;
         $cantHorasMayor = 0;
 
         foreach ($horarios as $horario) {
             $idHorario = $horario['Id_Hora_Academica'];
 
-            if (is_null($idHorarioMenor) || $idHorario < $idHorarioMenor) {
-                $idHorarioMenor = $idHorario;
+            if (is_null($idHoraAcademicaMenor) || $idHorario < $idHoraAcademicaMenor) {
+                $idHoraAcademicaMenor = $idHorario;
             }
 
-            if (is_null($idHorarioMayor) || $idHorario > $idHorarioMayor) {
-                $idHorarioMayor = $idHorario;
+            if (is_null($idHoraAcademicaMayor) || $idHorario > $idHoraAcademicaMayor) {
+                $idHoraAcademicaMayor = $idHorario;
                 $cantHorasMayor = $horario['Cant_Horas_Academicas'];
             }
         }
 
-        return [$idHorarioMenor, $idHorarioMayor, $cantHorasMayor];
+        return [$idHoraAcademicaMenor, $idHoraAcademicaMayor, $cantHorasMayor];
     }
 
     public function create($data)

@@ -69,10 +69,73 @@ class ProfesorController
         Flight::json($response, 200);
     }
 
-    public function getSchedule($DNI_Profesor){
+    public function getSchedule($DNI_Profesor)
+    {
+        try {
+            $aulaModel = new Aula();
+            $horarioModel = new HorarioCursoAula();
+            $horaAcademicaModel = new HoraAcademica();
 
+            // Obtener el horario del profesor
+            $horario = $horarioModel->getByDNIProfesor($DNI_Profesor);
+            $horario = $horario ? $horario : [];
+
+            // Obtener el rango de horas académicas
+            list($idHoraAcademicaMenor, $idHoraAcademicaMayor, $cantHorasMayor) = $this->obtenerIdsYHorasAcademicas($horario);
+
+            // Obtener las horas académicas en el rango
+            $horasAcademicas = $horaAcademicaModel->getByRange($idHoraAcademicaMenor, $idHoraAcademicaMayor + $cantHorasMayor);
+
+            // Eliminar los datos del profesor del horario
+            $horarioSinProfesor = array_map(function ($horario) {
+                unset($horario['DNI_Profesor']);
+                unset($horario['Nombre_Profesor']);
+                unset($horario['Apellido_Profesor']);
+                return $horario;
+            }, $horario);
+
+            // Estructura de la respuesta
+            $response = [
+                'Horas_Academicas' => $horasAcademicas,
+                'Horario' => $horarioSinProfesor
+            ];
+
+            Flight::json($response, 200);
+            return;
+        } catch (Exception $e) {
+            Flight::json([
+                'message' => 'Ocurrió un error al obtener el horario',
+            ], 500);
+            error_log($e->getMessage());
+            return;
+        }
     }
 
+    private function obtenerIdsYHorasAcademicas($horarios)
+    {
+        if (empty($horarios)) {
+            return [0, 0, 0];
+        }
+
+        $idHoraAcademicaMenor = null;
+        $idHoraAcademicaMayor = null;
+        $cantHorasMayor = 0;
+
+        foreach ($horarios as $horario) {
+            $idHorario = $horario['Id_Hora_Academica'];
+
+            if (is_null($idHoraAcademicaMenor) || $idHorario < $idHoraAcademicaMenor) {
+                $idHoraAcademicaMenor = $idHorario;
+            }
+
+            if (is_null($idHoraAcademicaMayor) || $idHorario > $idHoraAcademicaMayor) {
+                $idHoraAcademicaMayor = $idHorario;
+                $cantHorasMayor = $horario['Cant_Horas_Academicas'];
+            }
+        }
+
+        return [$idHoraAcademicaMenor, $idHoraAcademicaMayor, $cantHorasMayor];
+    }
 
     public function validateDNIAndUsername($data)
     {
