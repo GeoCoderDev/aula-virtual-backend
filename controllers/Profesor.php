@@ -74,6 +74,7 @@ class ProfesorController
         try {
             $horarioModel = new HorarioCursoAula();
             $horaAcademicaModel = new HoraAcademica();
+            $profesorModel = new Profesor();
 
             // Obtener el horario del profesor
             $horario = $horarioModel->getByDNIProfesor($DNI_Profesor);
@@ -84,6 +85,14 @@ class ProfesorController
 
             // Obtener las horas académicas en el rango
             $horasAcademicas = $horaAcademicaModel->getByRange($idHoraAcademicaMenor, $idHoraAcademicaMayor + $cantHorasMayor);
+
+            // Obtener el nombre y apellido del profesor
+            $profesor = $profesorModel->getNameAndSurnameByDNI($DNI_Profesor);
+
+            if (!$profesor) {
+                Flight::json(['message' => 'No se encontró el profesor'], 404);
+                return;
+            }
 
             // Eliminar los datos del profesor del horario
             $horarioSinProfesor = array_map(function ($horario) {
@@ -97,6 +106,8 @@ class ProfesorController
             $response = [
                 'Horas_Academicas' => $horasAcademicas,
                 'Horario' => $horarioSinProfesor,
+                'Nombre_Profesor' => $profesor['Nombre_Profesor'],
+                'Apellido_Profesor' => $profesor['Apellido_Profesor'],
                 'isTeacher' => true
             ];
 
@@ -110,7 +121,6 @@ class ProfesorController
             return;
         }
     }
-
     private function obtenerIdsYHorasAcademicas($horarios)
     {
         if (empty($horarios)) {

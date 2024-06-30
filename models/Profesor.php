@@ -155,6 +155,19 @@ class Profesor
         return $professor;
     }
 
+    public function getNameAndSurnameByDNI($DNI_Profesor)
+    {
+        $sql = "SELECT u.Nombres AS Nombre_Profesor, u.Apellidos AS Apellido_Profesor 
+            FROM T_Profesores p
+            JOIN T_Usuarios u ON p.Id_Usuario = u.Id_Usuario
+            WHERE p.DNI_Profesor = :dni";
+        $query = $this->conn->prepare($sql);
+        $query->bindParam(':dni', $DNI_Profesor, PDO::PARAM_STR);
+        $query->execute();
+        return $query->fetch(PDO::FETCH_ASSOC);
+    }
+
+
     public function getByDNI($dni, $includePassword = false)
     {
         if ($includePassword) {
