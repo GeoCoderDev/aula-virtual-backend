@@ -19,8 +19,6 @@ class Asignacion
             "SELECT A.*, 
        C.Nombre AS Nombre_Curso, 
        CA.Id_Curso_Aula, 
-       AU.Grado, 
-       AU.Seccion, 
        HCA.Id_Horario_Curso_Aula, 
        HCA.Dia_Semana, 
        HA.Id_Hora_Academica, 
