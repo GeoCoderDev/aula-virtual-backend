@@ -158,8 +158,8 @@ class EstudianteController
         } catch (Exception $e) {
             Flight::json([
                 'message' => 'Ocurrio un error al obtener el horario',
-
             ], 500);
+            error_log($e->getMessage());
             return;
         }
     }
