@@ -139,7 +139,7 @@ class EstudianteController
 
             // Obtener el horario del aula
             $horario = $horarioModel->getByAula($aula['Id_Aula']);
-            $horario = $horario[0] ?? [];
+            $horario = $horario ? $horario : [];
 
             $horaAcademicaModel = new HoraAcademica();
 
