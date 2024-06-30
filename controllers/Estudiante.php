@@ -175,7 +175,7 @@ class EstudianteController
         $cantHorasMayor = 0;
 
         foreach ($horarios as $horario) {
-            $idHorario = $horario['Id_Horario_Curso_Aula'];
+            $idHorario = $horario['Id_Hora_Academica'];
 
             if (is_null($idHorarioMenor) || $idHorario < $idHorarioMenor) {
                 $idHorarioMenor = $idHorario;
