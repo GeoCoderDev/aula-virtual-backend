@@ -36,7 +36,6 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-
     public function removeCursoFromAulas($idCurso)
     {
         $stmt = $this->conn->prepare("DELETE FROM T_Cursos_Aula WHERE Id_Curso = :idCurso");

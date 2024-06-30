@@ -127,7 +127,7 @@ class EstudianteController
             $aulaModel = new Aula();
             $horarioModel = new HorarioCursoAula();
 
-            // Obtener el aula del estudiante
+            // Obtener el aula del estudiante junto con el grado y la sección
             $aula = $aulaModel->getByDNIEstudiante($DNI_Estudiante);
 
             if (!$aula) {
@@ -151,6 +151,8 @@ class EstudianteController
             $response = [
                 'Horas_Academicas' => $horasAcademicas,
                 'Horario' => $horario,
+                'Grado' => $aula['Grado'],
+                'Seccion' => $aula['Seccion'],
                 'isTeacher' => false
             ];
 
@@ -158,7 +160,7 @@ class EstudianteController
             return;
         } catch (Exception $e) {
             Flight::json([
-                'message' => 'Ocurrio un error al obtener el horario',
+                'message' => 'Ocurrió un error al obtener el horario',
             ], 500);
             error_log($e->getMessage());
             return;
