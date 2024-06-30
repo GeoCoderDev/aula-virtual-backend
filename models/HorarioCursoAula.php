@@ -21,8 +21,6 @@ class HorarioCursoAula
             HA.Id_Hora_Academica,
             HCA.Cant_Horas_Academicas,
             C.Nombre AS Nombre_Curso,
-            AU.Grado,
-            AU.Seccion,
             A.DNI_Profesor,
             U.Nombres AS Nombre_Profesor,
             U.Apellidos AS Apellido_Profesor
@@ -43,8 +41,7 @@ class HorarioCursoAula
             LEFT JOIN 
                 T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario
             WHERE 
-                AU.Id_Aula = :Id_Aula
-        ");
+                AU.Id_Aula = :Id_Aula");
 
         $stmt->execute(['Id_Aula' => $Id_Aula]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
