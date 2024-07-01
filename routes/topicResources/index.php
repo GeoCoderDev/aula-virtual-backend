@@ -23,4 +23,11 @@ Flight::group('/api/topicResources', function () {
         $controller = new RecursoTemaController();
         $controller->addHomeworkToTopic($topicId, $data);
     });
+
+
+    Flight::route("POST /@topicId/addForum", function ($topicId) {
+        $data = Flight::request()->data->getData();
+        $controller = new RecursoTemaController();
+        $controller->addForumToTopic($topicId, $data);
+    });
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);
