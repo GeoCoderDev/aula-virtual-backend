@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/Tema.php';
 require_once __DIR__ . '/../models/Aula.php';
 require_once __DIR__ . '/../models/Curso.php';
 require_once __DIR__ . '/../models/Foro.php';
+require_once __DIR__ . '/../models/URL.php';
 require_once __DIR__ . '/../models/ArchivoTarea.php';
 require_once __DIR__ . '/../config/S3Manager.php';
 require_once __DIR__ . '/../lib/helpers/functions/generateTopicFileKeyS3.php';
@@ -22,8 +23,9 @@ class RecursoTemaController
     private $archivoTareaModel;
     private $temaModel;
     private $aulaModel;
-    private $cursoModel;
     private $foroModel;
+    private $cursoModel;
+    private $urlModel;
 
 
     public function __construct()
@@ -32,9 +34,10 @@ class RecursoTemaController
         $this->archivoModel = new Archivo();
         $this->archivoTareaModel = new ArchivosTarea();
         $this->temaModel = new Tema();
-        $this->aulaModel = new Aula(); // Instancia del modelo Aula
-        $this->cursoModel = new Curso(); // Instancia del modelo Aula
-        $this->foroModel = new Foro(); // Instancia del modelo Aula
+        $this->aulaModel = new Aula();
+        $this->cursoModel = new Curso();
+        $this->foroModel = new Foro();
+        $this->urlModel = new URL();
     }
 
     public function getByTopicId($id)
@@ -169,6 +172,109 @@ class RecursoTemaController
         Flight::json(['message' => 'Archivo añadido al Tema exitosamente'], 201);
     }
 
+
+    public function addForumToTopic($topicId, $data)
+    {
+        if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso'])) {
+            Flight::json(['message' => 'Todos los campos son requeridos'], 400);
+            return;
+        }
+
+        $grado = $data['Grado'];
+        $seccion = $data['Seccion'];
+        $nombreCurso = $data['Nombre_Curso'];
+        $tipo = 1; // Tipo 1 para foros
+        $titulo = $data['Titulo'];
+        $descripcionRecurso = $data['Descripcion_Recurso'] ?? null;
+        //Validaciones
+
+        if (!$this->temaModel->getById($topicId)) {
+            Flight::json(['message' => 'No existe el tema'], 404);
+            return;
+        }
+
+
+        if (!$this->cursoModel->getByNombre($nombreCurso)) {
+            Flight::json(['message' => "No existe el curso con el nombre " . $nombreCurso], 404);
+            return;
+        }
+
+
+        if (!$this->aulaModel->getByGradoSeccion($grado, $seccion)) {
+            Flight::json(['message' => 'Ya no existe el aula del tema'], 404);
+            return;
+        }
+
+
+        if ($this->recursoTemaModel->existsWithTitleAndType($topicId, $titulo, $tipo)) {
+            Flight::json(['message' => 'Ya existe un archivo con el mismo título en el tema especificado'], 409);
+            return;
+        }
+
+        $this->recursoTemaModel->beginTransaction();
+        $s3Manager = new S3Manager();
+
+        if ($this->recursoTemaModel->existsWithTitleAndType($topicId, $titulo, $tipo)) {
+            Flight::json(['message' => 'Ya existe un foro con el mismo título en el tema especificado'], 409);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+
+        $imagenDescripcionKeyS3 = null;
+        if (isset($_FILES['Imagen_Descripcion']) && $_FILES['Imagen_Descripcion']['error'] === UPLOAD_ERR_OK) {
+            $imagenDescripcion = $_FILES['Imagen_Descripcion'];
+            $extensionImagenDescripcion = pathinfo($imagenDescripcion['name'], PATHINFO_EXTENSION);
+            $nombreImagenDescripcion = $data['Imagen_Descripcion_Nombre'];
+
+            if (!$nombreImagenDescripcion) {
+                Flight::json(["message" => "Falta el campo: Imagen_Descripcion_Nombre"], 400);
+                return;
+            }
+
+            $imagenDescripcionKeyS3 = generateResourceDescriptionImageKeyS3(
+                $grado,
+                $seccion,
+                $nombreCurso,
+                $topicId,
+                $nombreImagenDescripcion,
+                $extensionImagenDescripcion,
+                $tipo
+            );
+
+            $tempImagenDescripcionPath = $imagenDescripcion['tmp_name'];
+            $uploadImagenDescripcionResult = $s3Manager->uploadFile($tempImagenDescripcionPath, $imagenDescripcionKeyS3);
+
+            if (!$uploadImagenDescripcionResult) {
+                $this->recursoTemaModel->rollBack();
+                Flight::json(['message' => 'Error al subir la imagen de descripción a S3'], 500);
+                return;
+            }
+        }
+
+        $idRecursoTema = $this->recursoTemaModel->addForumToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo);
+
+
+
+        if (!$idRecursoTema) {
+            Flight::json(['message' => 'Error al crear el foro'], 500);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+
+        $idForo = $this->foroModel->create($idRecursoTema);
+
+        if (!$idForo) {
+            Flight::json(['message' => 'Error al crear el foro'], 500);
+            $this->recursoTemaModel->rollBack();
+            return;
+        }
+
+        $this->recursoTemaModel->commit();
+        Flight::json(['message' => 'Foro añadido al Tema exitosamente', "Id" => $idForo], 201);
+    }
+
+
+
     public function addHomeworkToTopic($topicId, $data)
     {
 
@@ -301,104 +407,62 @@ class RecursoTemaController
         Flight::json(['message' => 'Tarea añadida al Tema exitosamente'], 201);
     }
 
-    public function addForumToTopic($topicId, $data)
+
+    public function addURLToTopic($topicId, $data)
     {
-        if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso'])) {
-            Flight::json(['message' => 'Todos los campos son requeridos'], 400);
+        if (!areFieldsComplete($data, ['Titulo', 'Grado', 'Seccion', 'Nombre_Curso', 'URL'])) {
             return;
         }
 
         $grado = $data['Grado'];
         $seccion = $data['Seccion'];
         $nombreCurso = $data['Nombre_Curso'];
-        $tipo = 1; // Tipo 1 para foros
+        $tipo = 3; // Tipo 3 para URLs
         $titulo = $data['Titulo'];
-        $descripcionRecurso = $data['Descripcion_Recurso'] ?? null;
-        //Validaciones
+        $url = $data['URL'];
+
+        // Validaciones
 
         if (!$this->temaModel->getById($topicId)) {
             Flight::json(['message' => 'No existe el tema'], 404);
             return;
         }
 
-
         if (!$this->cursoModel->getByNombre($nombreCurso)) {
             Flight::json(['message' => "No existe el curso con el nombre " . $nombreCurso], 404);
             return;
         }
-
 
         if (!$this->aulaModel->getByGradoSeccion($grado, $seccion)) {
             Flight::json(['message' => 'Ya no existe el aula del tema'], 404);
             return;
         }
 
-
         if ($this->recursoTemaModel->existsWithTitleAndType($topicId, $titulo, $tipo)) {
-            Flight::json(['message' => 'Ya existe un archivo con el mismo título en el tema especificado'], 409);
+            Flight::json(['message' => 'Ya existe una URL con el mismo título en el tema especificado'], 409);
             return;
         }
 
         $this->recursoTemaModel->beginTransaction();
-        $s3Manager = new S3Manager();
 
-        if ($this->recursoTemaModel->existsWithTitleAndType($topicId, $titulo, $tipo)) {
-            Flight::json(['message' => 'Ya existe un foro con el mismo título en el tema especificado'], 409);
-            $this->recursoTemaModel->rollBack();
-            return;
-        }
-
-        $imagenDescripcionKeyS3 = null;
-        if (isset($_FILES['Imagen_Descripcion']) && $_FILES['Imagen_Descripcion']['error'] === UPLOAD_ERR_OK) {
-            $imagenDescripcion = $_FILES['Imagen_Descripcion'];
-            $extensionImagenDescripcion = pathinfo($imagenDescripcion['name'], PATHINFO_EXTENSION);
-            $nombreImagenDescripcion = $data['Imagen_Descripcion_Nombre'];
-
-            if (!$nombreImagenDescripcion) {
-                Flight::json(["message" => "Falta el campo: Imagen_Descripcion_Nombre"], 400);
-                return;
-            }
-
-            $imagenDescripcionKeyS3 = generateResourceDescriptionImageKeyS3(
-                $grado,
-                $seccion,
-                $nombreCurso,
-                $topicId,
-                $nombreImagenDescripcion,
-                $extensionImagenDescripcion,
-                $tipo
-            );
-
-            $tempImagenDescripcionPath = $imagenDescripcion['tmp_name'];
-            $uploadImagenDescripcionResult = $s3Manager->uploadFile($tempImagenDescripcionPath, $imagenDescripcionKeyS3);
-
-            if (!$uploadImagenDescripcionResult) {
-                $this->recursoTemaModel->rollBack();
-                Flight::json(['message' => 'Error al subir la imagen de descripción a S3'], 500);
-                return;
-            }
-        }
-
-        $idRecursoTema = $this->recursoTemaModel->addForumToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo);
-
-
+        $idRecursoTema = $this->recursoTemaModel->addURLToTopic($topicId, $titulo, $url, $tipo);
 
         if (!$idRecursoTema) {
-            Flight::json(['message' => 'Error al crear el foro'], 500);
+            Flight::json(['message' => 'Error al crear la URL'], 500);
             $this->recursoTemaModel->rollBack();
             return;
         }
 
-        $idForo = $this->foroModel->create($idRecursoTema);
+        $idURL = $this->urlModel->create($idRecursoTema, $url);
 
-        if (!$idForo) {
-            Flight::json(['message' => 'Error al crear el foro'], 500);
+        if (!$idURL) {
+            Flight::json(['message' => 'Error al crear la URL'], 500);
             $this->recursoTemaModel->rollBack();
             return;
         }
 
         $this->recursoTemaModel->commit();
-        Flight::json(['message' => 'Foro añadido al Tema exitosamente', "Id" => $idForo], 201);
+        Flight::json(['message' => 'URL añadida al Tema exitosamente', "Id" => $idURL], 201);
     }
 
 

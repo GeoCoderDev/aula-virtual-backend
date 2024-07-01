@@ -18,16 +18,21 @@ Flight::group('/api/topicResources', function () {
         $controller->addFileToTopic($topicId, $data);
     });
 
+    Flight::route("POST /@topicId/addForum", function ($topicId) {
+        $data = Flight::request()->data->getData();
+        $controller = new RecursoTemaController();
+        $controller->addForumToTopic($topicId, $data);
+    });
+
     Flight::route("POST /@topicId/addHomework", function ($topicId) {
         $data = Flight::request()->data->getData();
         $controller = new RecursoTemaController();
         $controller->addHomeworkToTopic($topicId, $data);
     });
 
-
-    Flight::route("POST /@topicId/addForum", function ($topicId) {
+    Flight::route("POST /@topicId/addURL", function ($topicId) {
         $data = Flight::request()->data->getData();
         $controller = new RecursoTemaController();
-        $controller->addForumToTopic($topicId, $data);
+        $controller->addURLToTopic($topicId, $data);
     });
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);

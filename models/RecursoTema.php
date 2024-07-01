@@ -100,6 +100,20 @@ class RecursoTema
         }
     }
 
+    public function addForumToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo)
+    {
+        $sql = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) 
+            VALUES (:topicId, :titulo, :descripcionRecurso, :imagenDescripcionKeyS3, :tipo)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':topicId', $topicId, PDO::PARAM_INT);
+        $stmt->bindParam(':titulo', $titulo, PDO::PARAM_STR);
+        $stmt->bindParam(':descripcionRecurso', $descripcionRecurso, $descripcionRecurso ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindParam(':imagenDescripcionKeyS3', $imagenDescripcionKeyS3, $imagenDescripcionKeyS3 ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_INT);
+        $stmt->execute();
+        return $this->conn->lastInsertId();
+    }
+
     public function addHomeworkToTopic($idTema, $titulo, $descripcion, $imagenKeyS3 = null, $tipo, $fechaApertura, $fechaLimite, $puntajeMax)
     {
         try {
@@ -132,18 +146,26 @@ class RecursoTema
         }
     }
 
-    public function addForumToTopic($topicId, $titulo, $descripcionRecurso, $imagenDescripcionKeyS3, $tipo)
+
+
+    public function addURLToTopic($topicId, $titulo, $url, $tipo)
     {
-        $sql = "INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo) 
-            VALUES (:topicId, :titulo, :descripcionRecurso, :imagenDescripcionKeyS3, :tipo)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':topicId', $topicId, PDO::PARAM_INT);
-        $stmt->bindParam(':titulo', $titulo, PDO::PARAM_STR);
-        $stmt->bindParam(':descripcionRecurso', $descripcionRecurso, $descripcionRecurso ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindParam(':imagenDescripcionKeyS3', $imagenDescripcionKeyS3, $imagenDescripcionKeyS3 ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_INT);
-        $stmt->execute();
-        return $this->conn->lastInsertId();
+        try {
+            $stmt = $this->conn->prepare("
+            INSERT INTO T_Recursos_Tema (Id_Tema, Titulo, Tipo)
+            VALUES (:Id_Tema, :Titulo, :Tipo)
+        ");
+
+            $stmt->bindParam(':Id_Tema', $topicId);
+            $stmt->bindParam(':Titulo', $titulo);
+            $stmt->bindParam(':Tipo', $tipo);
+
+            $stmt->execute();
+            return $this->conn->lastInsertId();
+        } catch (PDOException $e) {
+            error_log('Error en addURLToTopic: ' . $e->getMessage());
+            return false;
+        }
     }
 
 
