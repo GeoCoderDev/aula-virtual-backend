@@ -2,15 +2,18 @@
 
 require_once __DIR__ . '/../models/Configuracion.php';
 
-class ConfiguracionController {
+class ConfiguracionController
+{
 
-    public function getAll($limit = 200, $startFrom = 0) {
+    public function getAll($limit = 200, $startFrom = 0)
+    {
         $configuracionModel = new Configuracion();
         $configuraciones = $configuracionModel->getAll($limit, $startFrom);
         return $configuraciones;
     }
 
-    public function getByName($nombreConf) {
+    public function getByName($nombreConf)
+    {
         $configuracionModel = new Configuracion();
         $configuracion = $configuracionModel->getByName($nombreConf);
         if (!$configuracion) {
@@ -20,7 +23,23 @@ class ConfiguracionController {
         }
     }
 
-    public function create($data) {
+    public function getValueByName($nombreConf)
+    {
+        $configuracionModel = new Configuracion();
+        $configuracion = $configuracionModel->getValueByName($nombreConf);
+        if (!$configuracion) {
+            Flight::json(["message" => "No existe la configuración con nombre $nombreConf"], 404);
+        } else {
+            Flight::json($configuracion, 200);
+        }
+    }
+
+
+
+
+
+    public function create($data)
+    {
         $nombreConf = $data['Nombre_Conf'] ?? null;
         $valor = $data['Valor'] ?? null;
         $descripcion = $data['Descripcion'] ?? null;
@@ -44,7 +63,8 @@ class ConfiguracionController {
         }
     }
 
-    public function update($nombreConf, $data) {
+    public function update($nombreConf, $data)
+    {
         $valor = $data['Valor'] ?? null;
         $descripcion = $data['Descripcion'] ?? null;
 
@@ -62,7 +82,8 @@ class ConfiguracionController {
         }
     }
 
-    public function delete($nombreConf) {
+    public function delete($nombreConf)
+    {
         $configuracionModel = new Configuracion();
         $rowCount = $configuracionModel->delete($nombreConf);
 
@@ -73,4 +94,3 @@ class ConfiguracionController {
         }
     }
 }
-?>
