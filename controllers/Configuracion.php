@@ -35,9 +35,6 @@ class ConfiguracionController
     }
 
 
-
-
-
     public function create($data)
     {
         $nombreConf = $data['Nombre_Conf'] ?? null;

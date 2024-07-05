@@ -21,4 +21,13 @@ Flight::group("/api/configurations", function () {
 
         $controller->getByName($name);
     });
+
+    Flight::route("POST /interfazColor", function () {
+
+        $controller = new ConfiguracionController();
+
+        $data = Flight::request()->data->getData();
+
+        $controller->update("Color_Interfaz", $data);
+    });
 }, [new NotSQLInjection(), new SuperadminAuthenticated()]);
