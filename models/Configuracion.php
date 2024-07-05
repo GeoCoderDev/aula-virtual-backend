@@ -44,11 +44,10 @@ class Configuracion
         return $this->conn->lastInsertId();
     }
 
-    public function update($nombreConf, $valor, $descripcion = null)
+    public function update($nombreConf, $valor)
     {
-        $stmt = $this->conn->prepare("UPDATE T_Configuraciones SET Valor = :valor, Descripcion = :descripcion, Ultima_Actualizacion = CURRENT_TIMESTAMP WHERE Nombre_Conf = :nombreConf");
-        $stmt->execute(['nombreConf' => $nombreConf, 'valor' => $valor, 'descripcion' => $descripcion]);
-        return $stmt->rowCount();
+        $stmt = $this->conn->prepare("UPDATE T_Configuraciones SET Valor = :valor, Ult_Actualizacion = CURRENT_TIMESTAMP WHERE Nombre_Conf = :nombreConf");
+        return $stmt->execute(['nombreConf' => $nombreConf, 'valor' => $valor]);
     }
 
     public function delete($nombreConf)

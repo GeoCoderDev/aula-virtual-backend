@@ -63,14 +63,13 @@ class ConfiguracionController
     public function update($nombreConf, $data)
     {
         $valor = $data['Valor'] ?? null;
-        $descripcion = $data['Descripcion'] ?? null;
 
         if (!$valor) {
             return Flight::json(["message" => "El valor es obligatorio"], 400);
         }
 
         $configuracionModel = new Configuracion();
-        $updateSuccess = $configuracionModel->update($nombreConf, $valor, $descripcion);
+        $updateSuccess = $configuracionModel->update($nombreConf, $valor);
 
         if ($updateSuccess) {
             return Flight::json(["message" => "Configuración actualizada"], 200);
