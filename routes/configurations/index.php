@@ -30,4 +30,5 @@ Flight::group("/api/configurations", function () {
 
         $controller->update("Color_Interfaz", $data);
     });
+    
 }, [new NotSQLInjection(), new SuperadminAuthenticated()]);

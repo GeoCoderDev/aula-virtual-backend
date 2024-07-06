@@ -145,6 +145,19 @@ class Aula
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    public function getCursosAulaById($Id_Aula)
+    {
+        $stmt = $this->conn->prepare("
+        SELECT CA.Id_Curso_Aula, C.Nombre
+        FROM T_Cursos_Aula CA
+        INNER JOIN T_Cursos C ON CA.Id_Curso = C.Id_Curso
+        WHERE CA.Id_Aula = :Id_Aula
+    ");
+        $stmt->execute([':Id_Aula' => $Id_Aula]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     public function getByDNIEstudiante($DNI_Estudiante)
     {
         $stmt = $this->conn->prepare("
