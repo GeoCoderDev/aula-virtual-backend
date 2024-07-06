@@ -98,12 +98,12 @@ class AsignacionController
                 'Id_Horario_Curso_Aula' => $idHorarioCursoAula,
             ];
 
-            $success = $this->asignacionesModel->create($asignacionData);
+            $asignationID = $this->asignacionesModel->create($asignacionData);
 
-            if ($success) {
+            if ($asignationID) {
                 // Confirmar la transacción
                 $this->asignacionesModel->commit();
-                Flight::json(['message' => 'Asignación creada exitosamente'], 201);
+                Flight::json(['message' => 'Asignación creada exitosamente', "Id" => $asignationID, "Id2" => $idHorarioCursoAula], 201);
             } else {
                 // Revertir la transacción
                 $this->asignacionesModel->rollBack();
@@ -116,4 +116,3 @@ class AsignacionController
         }
     }
 }
-?>
