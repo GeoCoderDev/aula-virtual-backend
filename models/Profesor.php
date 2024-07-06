@@ -20,7 +20,7 @@ class Profesor
         $this->s3Manager = new S3Manager(); // Inicializa el S3Manager en el constructor
     }
 
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
+    /*public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
     {
         if ($includePassword) {
             $query = "SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Fecha_Nacimiento, U.Nombre_Usuario, U.Contraseña_Usuario, U.Direccion_Domicilio, U.Nombre_Contacto_Emergencia, U.Parentezco_Contacto_Emergencia, U.Telefono_Contacto_Emergencia, U.Telefono, U.Foto_Perfil_Key_S3, U.Estado FROM T_Profesores AS P INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario WHERE 1=1";
@@ -76,7 +76,68 @@ class Profesor
         }
 
         return $professors;
+    }*/
+
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
+    {
+        $query = "SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Estado, U.Foto_Perfil_Key_S3 
+              FROM T_Profesores AS P 
+              INNER JOIN T_Usuarios AS U ON P.Id_Usuario = U.Id_Usuario 
+              WHERE 1=1";
+
+        // Agregar condiciones según los parámetros de búsqueda
+        if ($dni !== null) {
+            $query .= " AND P.DNI_Profesor LIKE :dni";
+        }
+        if ($nombre !== null) {
+            $query .= " AND U.Nombres LIKE :nombre";
+        }
+        if ($apellidos !== null) {
+            $query .= " AND U.Apellidos LIKE :apellidos";
+        }
+        if ($estado !== null) {
+            $query .= " AND U.Estado = :estado";
+        }
+
+        // Agregar límite y offset
+        $query .= " LIMIT :startFrom, :limit";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Vincular los parámetros
+        if ($dni !== null) {
+            $stmt->bindValue(':dni', $dni . '%', PDO::PARAM_STR);
+        }
+        if ($nombre !== null) {
+            $stmt->bindValue(':nombre', '%' . $nombre . '%', PDO::PARAM_STR);
+        }
+        if ($apellidos !== null) {
+            $stmt->bindValue(':apellidos', '%' . $apellidos . '%', PDO::PARAM_STR);
+        }
+        if ($estado !== null) {
+            $stmt->bindValue(':estado', $estado, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':startFrom', $startFrom, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $professors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Agregar la URL del objeto S3 al resultado
+        foreach ($professors as &$professor) {
+            // Verificar si Foto_Perfil_Key_S3 no es null antes de agregar la URL
+            if ($professor['Foto_Perfil_Key_S3'] !== null) {
+                $professor['Foto_Perfil_URL'] = $this->s3Manager->getObjectUrl($professor['Foto_Perfil_Key_S3'], DURATION_PERFIL_PHOTO_TEACHER);
+            }
+            // Eliminar el campo Foto_Perfil_Key_S3 ya que no es necesario en el resultado final
+            unset($professor['Foto_Perfil_Key_S3']);
+        }
+
+        return $professors;
     }
+
+
 
     public function getProfessorCount($dni = null, $nombre = null, $apellidos = null, $estado = null)
     {

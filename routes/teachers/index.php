@@ -32,6 +32,8 @@ Flight::group("/api/teachers",  function(){
 
     });
 
+    
+
     Flight::route("GET /@DNI", function($DNI){
         $controller = new ProfesorController();
         $controller->getByDNI($DNI);
