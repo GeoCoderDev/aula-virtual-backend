@@ -1,19 +1,23 @@
 <?php
+
 require_once __DIR__ . '/../models/Asignacion.php';
 require_once __DIR__ . '/../models/Aula.php';
 require_once __DIR__ . '/../models/HoraAcademica.php';
+require_once __DIR__ . '/../models/HorarioCursoAula.php';
 
 class AsignacionController
 {
     private $asignacionesModel;
     private $aulaModel;
     private $horaAcademicaModel;
+    private $horarioCursoAulaModel;
 
     public function __construct()
     {
         $this->asignacionesModel = new Asignacion();
         $this->aulaModel = new Aula();
         $this->horaAcademicaModel = new HoraAcademica();
+        $this->horarioCursoAulaModel = new HorarioCursoAula();
     }
 
     public function getAsignationsByAula($Grado, $Seccion)
@@ -56,4 +60,60 @@ class AsignacionController
             Flight::json(['message' => 'Ocurrió un error al obtener las asignaciones del profesor.'], 500);
         }
     }
+
+    public function createAsignacion($data)
+    {
+        try {
+            // Verificar si todos los campos requeridos están presentes en $data
+            if (!areFieldsComplete($data, ['DNI_Profesor', 'Id_Curso_Aula', 'Dia_Semana', 'Id_Hora_Academica_Inicio', 'Cant_Horas_Academicas'])) return;
+
+            // Verificar disponibilidad
+            $isAvailable = $this->asignacionesModel->checkAvailability(
+                $data['DNI_Profesor'],
+                $data['Dia_Semana'],
+                $data['Id_Hora_Academica_Inicio'],
+                $data['Cant_Horas_Academicas']
+            );
+
+            if (!$isAvailable) {
+                Flight::json(['message' => 'Conflicto de horario'], 409);
+                return;
+            }
+
+            // Iniciar la transacción
+            $this->asignacionesModel->beginTransaction();
+
+            // Crear el horario del curso aula
+            $idHorarioCursoAula = $this->horarioCursoAulaModel->create($data);
+
+            if (!$idHorarioCursoAula) {
+                $this->asignacionesModel->rollBack();
+                Flight::json(['message' => 'Error al crear el horario del curso aula'], 500);
+                return;
+            }
+
+            // Crear la asignación con el ID del horario del curso aula
+            $asignacionData = [
+                'DNI_Profesor' => $data['DNI_Profesor'],
+                'Id_Horario_Curso_Aula' => $idHorarioCursoAula,
+            ];
+
+            $success = $this->asignacionesModel->create($asignacionData);
+
+            if ($success) {
+                // Confirmar la transacción
+                $this->asignacionesModel->commit();
+                Flight::json(['message' => 'Asignación creada exitosamente'], 201);
+            } else {
+                // Revertir la transacción
+                $this->asignacionesModel->rollBack();
+                Flight::json(['message' => 'Error al crear la asignación'], 500);
+            }
+        } catch (Exception $e) {
+            // Revertir la transacción en caso de excepción
+            $this->asignacionesModel->rollBack();
+            Flight::json(['message' => 'Ocurrió un error al crear la asignación.'], 500);
+        }
+    }
 }
+?>

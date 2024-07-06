@@ -76,4 +76,21 @@ class HorarioCursoAula
         $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function create($data)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO T_Horario_Curso_Aula (Dia_Semana, Id_Hora_Academica, Cant_Horas_Academicas, Id_Curso_Aula) 
+             VALUES (:Dia_Semana, :Id_Hora_Academica, :Cant_Horas_Academicas, :Id_Curso_Aula)"
+        );
+
+        $stmt->execute([
+            'Dia_Semana' => $data['Dia_Semana'],
+            'Id_Hora_Academica' => $data['Id_Hora_Academica_Inicio'],
+            'Cant_Horas_Academicas' => $data['Cant_Horas_Academicas'],
+            'Id_Curso_Aula' => $data['Id_Curso_Aula'],
+        ]);
+
+        return $this->conn->lastInsertId();
+    }
 }

@@ -26,4 +26,13 @@ Flight::group("/api/asignations",  function () {
         $controller = new AsignacionController();
         $controller->getAsignationsByTeacher($DNI_Profesor);
     });
+
+    Flight::route("POST ", function () {
+
+        $data = Flight::request()->data->getData();
+
+        $controller = new AsignacionController();
+        $controller->createAsignacion($data);
+
+    });
 }, [new NotSQLInjection(), new AdminAuthenticated(true), new SuperadminAuthenticated()]);
