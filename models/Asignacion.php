@@ -70,14 +70,13 @@ class Asignacion
         $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function checkAvailability($DNI_Profesor, $Dia_Semana, $Id_Hora_Academica_Inicio, $Cant_Horas_Academicas)
+    public function checkAvailability($Dia_Semana, $Id_Hora_Academica_Inicio, $Cant_Horas_Academicas)
     {
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS conflict 
              FROM T_Asignaciones AS A
              INNER JOIN T_Horario_Curso_Aula AS HCA ON A.Id_Horario_Curso_Aula = HCA.Id_Horario_Curso_Aula 
-             WHERE A.DNI_Profesor = :DNI_Profesor 
-             AND HCA.Dia_Semana = :Dia_Semana
+             WHERE HCA.Dia_Semana = :Dia_Semana
              AND (
                 (HCA.Id_Hora_Academica <= :Id_Hora_Academica_Inicio 
                 AND (HCA.Id_Hora_Academica + HCA.Cant_Horas_Academicas) > :Id_Hora_Academica_Inicio)
@@ -87,7 +86,6 @@ class Asignacion
         );
 
         $stmt->execute([
-            'DNI_Profesor' => $DNI_Profesor,
             'Dia_Semana' => $Dia_Semana,
             'Id_Hora_Academica_Inicio' => $Id_Hora_Academica_Inicio,
             'Cant_Horas_Academicas' => $Cant_Horas_Academicas,
