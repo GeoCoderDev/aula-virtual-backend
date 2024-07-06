@@ -78,7 +78,7 @@ class Profesor
         return $professors;
     }*/
 
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
+    public function getAll($includePassword=false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null, $disyuncion = true)
     {
         $query = "SELECT P.DNI_Profesor, P.Id_Usuario, U.Nombres, U.Apellidos, U.Estado, U.Foto_Perfil_Key_S3 
               FROM T_Profesores AS P 
@@ -90,13 +90,13 @@ class Profesor
             $query .= " AND P.DNI_Profesor LIKE :dni";
         }
         if ($nombre !== null) {
-            $query .= " AND U.Nombres LIKE :nombre";
+            $query .= ($disyuncion ? " AND " : " OR ") . "U.Nombres LIKE :nombre";
         }
         if ($apellidos !== null) {
-            $query .= " AND U.Apellidos LIKE :apellidos";
+            $query .= ($disyuncion ? " AND " : " OR ") . "U.Apellidos LIKE :apellidos";
         }
         if ($estado !== null) {
-            $query .= " AND U.Estado = :estado";
+            $query .= ($disyuncion ? " AND " : " OR ") . "U.Estado = :estado";
         }
 
         // Agregar límite y offset

@@ -12,10 +12,10 @@ require_once __DIR__ . '/../lib/helpers/functions/extractExtension.php';
 class ProfesorController
 {
 
-    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null)
+    public function getAll($includePassword = false, $limit = 200, $startFrom = 0, $dni = null, $nombre = null, $apellidos = null, $estado = null, $disyuncion = null)
     {
         $profesorModel = new Profesor();
-        $profesores = $profesorModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $estado);
+        $profesores = $profesorModel->getAll($includePassword, $limit, $startFrom, $dni, $nombre, $apellidos, $estado, $disyuncion);
         return $profesores;
     }
 
