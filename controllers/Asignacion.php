@@ -67,11 +67,17 @@ class AsignacionController
             // Verificar si todos los campos requeridos están presentes en $data
             if (!areFieldsComplete($data, ['DNI_Profesor', 'Id_Curso_Aula', 'Dia_Semana', 'Id_Hora_Academica_Inicio', 'Cant_Horas_Academicas'])) return;
 
+            $DNI_Profesor = $data['DNI_Profesor'];
+            $Id_Curso_Aula = $data['Id_Curso_Aula'];
+            $Dia_Semana = $data['Dia_Semana'];
+            $Id_Hora_Academica_Inicio = $data['Id_Hora_Academica_Inicio'];
+            $Cant_Horas_Academicas = $data['Cant_Horas_Academicas'];
+
             // Verificar disponibilidad
             $isAvailable = $this->asignacionesModel->checkAvailability(
-                $data['Dia_Semana'],
-                $data['Id_Hora_Academica_Inicio'],
-                $data['Cant_Horas_Academicas']
+                $Dia_Semana,
+                $Id_Hora_Academica_Inicio,
+                $Cant_Horas_Academicas
             );
 
             if (!$isAvailable) {
@@ -83,7 +89,7 @@ class AsignacionController
             $this->asignacionesModel->beginTransaction();
 
             // Crear el horario del curso aula
-            $idHorarioCursoAula = $this->horarioCursoAulaModel->create($data);
+            $idHorarioCursoAula = $this->horarioCursoAulaModel->create($Dia_Semana, $Id_Hora_Academica_Inicio, $Cant_Horas_Academicas, $Id_Curso_Aula);
 
             if (!$idHorarioCursoAula) {
                 $this->asignacionesModel->rollBack();
@@ -92,12 +98,7 @@ class AsignacionController
             }
 
             // Crear la asignación con el ID del horario del curso aula
-            $asignacionData = [
-                'DNI_Profesor' => $data['DNI_Profesor'],
-                'Id_Horario_Curso_Aula' => $idHorarioCursoAula,
-            ];
-
-            $asignationID = $this->asignacionesModel->create($asignacionData);
+            $asignationID = $this->asignacionesModel->create($DNI_Profesor, $idHorarioCursoAula);
 
             if ($asignationID) {
                 // Confirmar la transacción

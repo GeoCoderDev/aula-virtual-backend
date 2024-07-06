@@ -95,20 +95,20 @@ class Asignacion
         return $result['conflict'] == 0;
     }
 
-    public function create($data)
+    public function create($DNI_Profesor, $Id_Horario_Curso_Aula)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO T_Asignaciones (DNI_Profesor, Id_Horario_Curso_Aula)  VALUES (:DNI_Profesor, :Id_Horario_Curso_Aula)"
+            "INSERT INTO T_Asignaciones (DNI_Profesor, Id_Horario_Curso_Aula) 
+             VALUES (:DNI_Profesor, :Id_Horario_Curso_Aula)"
         );
 
         $stmt->execute([
-            'DNI_Profesor' => $data['DNI_Profesor'],
-            'Id_Horario_Curso_Aula' => $data['Id_Horario_Curso_Aula'],
+            'DNI_Profesor' => $DNI_Profesor,
+            'Id_Horario_Curso_Aula' => $Id_Horario_Curso_Aula
         ]);
 
         return $this->conn->lastInsertId();
     }
-
 
     public function beginTransaction()
     {
