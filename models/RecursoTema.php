@@ -50,7 +50,7 @@ class RecursoTema
                 if ($archivo) {
                     $resource['Recurso_URL'] = $s3Manager->getObjectUrl($archivo['Key_S3'], DURATION_TOPIC_RESOURCE_FILE);
                 }
-            } elseif ($resource['Tipo'] == 1) {
+            } elseif ($resource['Tipo'] == 3) {
                 // Obtener URL
                 $queryURL = "SELECT URL FROM T_URLs WHERE Id_Recurso_Tema = :idRecursoTema";
                 $stmtURL = $this->conn->prepare($queryURL);
