@@ -45,14 +45,14 @@ class Foro
 
     public function getForumDetails($Id_Foro)
     {
-        $sql = "SELECT f.Id_Foro, rt.Titulo, rt.Descripcion_Recurso, rt.Imagen_Key_S3, a.Grado, a.Seccion, c.Nombre AS Nombre_Curso
-                FROM T_Foro f
-                JOIN T_Recursos_Tema rt ON f.Id_Recurso_Tema = rt.Id_Recurso_Tema
-                JOIN T_Temas t ON rt.Id_Tema = t.Id_Tema
-                JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula
-                JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula
-                JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso
-                WHERE f.Id_Foro = ?";
+        $sql = "SELECT f.Id_Foro, rt.Titulo, rt.Descripcion_Recurso, rt.Imagen_Key_S3, t.Nombre_Tema AS Nombre_Tema, a.Grado, a.Seccion, c.Nombre AS Nombre_Curso 
+            FROM T_Foro f 
+            JOIN T_Recursos_Tema rt ON f.Id_Recurso_Tema = rt.Id_Recurso_Tema 
+            JOIN T_Temas t ON rt.Id_Tema = t.Id_Tema 
+            JOIN T_Cursos_Aula ca ON t.Id_Curso_Aula = ca.Id_Curso_Aula 
+            JOIN T_Aulas a ON ca.Id_Aula = a.Id_Aula 
+            JOIN T_Cursos c ON ca.Id_Curso = c.Id_Curso 
+            WHERE f.Id_Foro = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$Id_Foro]);
         $forumDetails = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -65,6 +65,7 @@ class Foro
 
         return $forumDetails;
     }
+
 
     public function getStudentsWhoRespondedByForumId($Id_Foro)
     {

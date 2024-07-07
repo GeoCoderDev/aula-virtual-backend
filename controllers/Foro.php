@@ -56,6 +56,7 @@ class ForoController
             "Grado" => $foroDetails['Grado'],
             "Seccion" => $foroDetails['Seccion'],
             "Nombre_Curso" => $foroDetails['Nombre_Curso'],
+            "Nombre_Tema" => $foroDetails['Nombre_Tema'],
             "Id_Foro" => $foroDetails['Id_Foro'],
             "Titulo" => $foroDetails['Titulo'],
             "Descripcion_Imagen_URL" => $foroDetails['Descripcion_Imagen_URL'] ?? null,
