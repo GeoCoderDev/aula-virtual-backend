@@ -75,6 +75,8 @@ class AsignacionController
 
             // Verificar disponibilidad
             $isAvailable = $this->asignacionesModel->checkAvailability(
+                $DNI_Profesor,
+                $Id_Curso_Aula,
                 $Dia_Semana,
                 $Id_Hora_Academica_Inicio,
                 $Cant_Horas_Academicas

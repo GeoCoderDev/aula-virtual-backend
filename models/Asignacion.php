@@ -70,22 +70,28 @@ class Asignacion
         $stmt->execute(['DNI_Profesor' => $DNI_Profesor]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function checkAvailability($Dia_Semana, $Id_Hora_Academica_Inicio, $Cant_Horas_Academicas)
+    public function checkAvailability($DNI_Profesor, $Id_Curso_Aula, $Dia_Semana, $Id_Hora_Academica_Inicio, $Cant_Horas_Academicas)
     {
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS conflict 
-             FROM T_Asignaciones AS A
-             INNER JOIN T_Horario_Curso_Aula AS HCA ON A.Id_Horario_Curso_Aula = HCA.Id_Horario_Curso_Aula 
-             WHERE HCA.Dia_Semana = :Dia_Semana
-             AND (
-                (HCA.Id_Hora_Academica <= :Id_Hora_Academica_Inicio 
-                AND (HCA.Id_Hora_Academica + HCA.Cant_Horas_Academicas) > :Id_Hora_Academica_Inicio)
-                OR (:Id_Hora_Academica_Inicio <= HCA.Id_Hora_Academica 
-                AND (:Id_Hora_Academica_Inicio + :Cant_Horas_Academicas) > HCA.Id_Hora_Academica)
-             )"
+         FROM T_Horario_Curso_Aula AS HCA
+         LEFT JOIN T_Asignaciones AS A ON HCA.Id_Horario_Curso_Aula = A.Id_Horario_Curso_Aula
+         LEFT JOIN T_Cursos_Aula AS CA ON HCA.Id_Curso_Aula = CA.Id_Curso_Aula
+         WHERE (A.DNI_Profesor = :DNI_Profesor OR HCA.Id_Curso_Aula = :Id_Curso_Aula)
+         AND HCA.Dia_Semana = :Dia_Semana
+         AND (
+            (HCA.Id_Hora_Academica >= :Id_Hora_Academica_Inicio 
+            AND HCA.Id_Hora_Academica < :Id_Hora_Academica_Inicio + :Cant_Horas_Academicas)
+            OR (HCA.Id_Hora_Academica + HCA.Cant_Horas_Academicas > :Id_Hora_Academica_Inicio 
+            AND HCA.Id_Hora_Academica + HCA.Cant_Horas_Academicas <= :Id_Hora_Academica_Inicio + :Cant_Horas_Academicas)
+            OR (HCA.Id_Hora_Academica <= :Id_Hora_Academica_Inicio 
+            AND HCA.Id_Hora_Academica + HCA.Cant_Horas_Academicas >= :Id_Hora_Academica_Inicio + :Cant_Horas_Academicas)
+         )"
         );
 
         $stmt->execute([
+            'DNI_Profesor' => $DNI_Profesor,
+            'Id_Curso_Aula' => $Id_Curso_Aula,
             'Dia_Semana' => $Dia_Semana,
             'Id_Hora_Academica_Inicio' => $Id_Hora_Academica_Inicio,
             'Cant_Horas_Academicas' => $Cant_Horas_Academicas,
