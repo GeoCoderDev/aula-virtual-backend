@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../controllers/Foro.php";
 
 Flight::group("/api/forum",  function () {
 
-    Flight::route("GET /forum/@id/data", function ($id) {
+    Flight::route("GET /@id/data", function ($id) {
 
         $data = Flight::request()->data->getData();
 
