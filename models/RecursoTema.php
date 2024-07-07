@@ -18,54 +18,87 @@ class RecursoTema
     }
 
     public function getByTopicId($idTema)
-    {
-        $query = "SELECT Id_Recurso_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo FROM T_Recursos_Tema WHERE Id_Tema = :idTema";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':idTema', $idTema, PDO::PARAM_INT);
-        $stmt->execute();
+{
+    $query = "SELECT Id_Recurso_Tema, Titulo, Descripcion_Recurso, Imagen_Key_S3, Tipo FROM T_Recursos_Tema WHERE Id_Tema = :idTema";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':idTema', $idTema, PDO::PARAM_INT);
+    $stmt->execute();
 
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Convertir Imagen_Key_S3 a URL utilizando S3Manager
-        $s3Manager = new S3Manager();
+    // Convertir Imagen_Key_S3 a URL utilizando S3Manager
+    $s3Manager = new S3Manager();
 
-        foreach ($result as &$resource) {
-            if ($resource['Imagen_Key_S3'] !== null) {
-                $resource['Descripcion_Imagen_URL'] = $s3Manager->getObjectUrl($resource['Imagen_Key_S3'], DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION);
-            }
-
-            unset($resource['Imagen_Key_S3']);
-
-            // Obtener URL adicional para tipos 0 (Archivo_tema) y 1 (URL)
-            if ($resource['Tipo'] == 0) {
-                // Obtener URL del archivo
-                $queryArchivo = "SELECT a.Key_S3 FROM T_Archivos a 
-                             INNER JOIN T_Archivos_Tema at ON a.Id_Archivo = at.Id_Archivo
-                             WHERE at.Id_Recurso_Tema = :idRecursoTema";
-                $stmtArchivo = $this->conn->prepare($queryArchivo);
-                $stmtArchivo->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
-                $stmtArchivo->execute();
-                $archivo = $stmtArchivo->fetch(PDO::FETCH_ASSOC);
-
-                if ($archivo) {
-                    $resource['Recurso_URL'] = $s3Manager->getObjectUrl($archivo['Key_S3'], DURATION_TOPIC_RESOURCE_FILE);
-                }
-            } elseif ($resource['Tipo'] == 3) {
-                // Obtener URL
-                $queryURL = "SELECT URL FROM T_URLs WHERE Id_Recurso_Tema = :idRecursoTema";
-                $stmtURL = $this->conn->prepare($queryURL);
-                $stmtURL->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
-                $stmtURL->execute();
-                $url = $stmtURL->fetch(PDO::FETCH_ASSOC);
-
-                if ($url) {
-                    $resource['Recurso_URL'] = $url['URL'];
-                }
-            }
+    foreach ($result as &$resource) {
+        if ($resource['Imagen_Key_S3'] !== null) {
+            $resource['Descripcion_Imagen_URL'] = $s3Manager->getObjectUrl($resource['Imagen_Key_S3'], DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION);
         }
 
-        return $result;
+        unset($resource['Imagen_Key_S3']);
+
+        // Obtener datos adicionales según el tipo de recurso
+        if ($resource['Tipo'] == 0) {
+            // Obtener URL del archivo
+            $queryArchivo = "SELECT a.Key_S3 FROM T_Archivos a 
+                             INNER JOIN T_Archivos_Tema at ON a.Id_Archivo = at.Id_Archivo
+                             WHERE at.Id_Recurso_Tema = :idRecursoTema";
+            $stmtArchivo = $this->conn->prepare($queryArchivo);
+            $stmtArchivo->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+            $stmtArchivo->execute();
+            $archivo = $stmtArchivo->fetch(PDO::FETCH_ASSOC);
+
+            if ($archivo) {
+                $resource['Recurso_URL'] = $s3Manager->getObjectUrl($archivo['Key_S3'], DURATION_TOPIC_RESOURCE_FILE);
+            }
+        } elseif ($resource['Tipo'] == 1) {
+            // Obtener URL
+            $queryURL = "SELECT URL FROM T_URLs WHERE Id_Recurso_Tema = :idRecursoTema";
+            $stmtURL = $this->conn->prepare($queryURL);
+            $stmtURL->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+            $stmtURL->execute();
+            $url = $stmtURL->fetch(PDO::FETCH_ASSOC);
+
+            if ($url) {
+                $resource['Recurso_URL'] = $url['URL'];
+            }
+            
+            // Obtener Id_Foro
+            $queryForo = "SELECT Id_Foro FROM T_Foro WHERE Id_Recurso_Tema = :idRecursoTema";
+            $stmtForo = $this->conn->prepare($queryForo);
+            $stmtForo->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+            $stmtForo->execute();
+            $foro = $stmtForo->fetch(PDO::FETCH_ASSOC);
+
+            if ($foro) {
+                $resource['Id_Foro'] = $foro['Id_Foro'];
+            }
+        } elseif ($resource['Tipo'] == 2) {
+            // Obtener Id_Tarea
+            $queryTarea = "SELECT Id_Tarea FROM T_Tarea WHERE Id_Recurso_Tema = :idRecursoTema";
+            $stmtTarea = $this->conn->prepare($queryTarea);
+            $stmtTarea->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+            $stmtTarea->execute();
+            $tarea = $stmtTarea->fetch(PDO::FETCH_ASSOC);
+
+            if ($tarea) {
+                $resource['Id_Tarea'] = $tarea['Id_Tarea'];
+            }
+        } elseif ($resource['Tipo'] == 4) {
+            // Obtener Id_Cuestionario
+            $queryCuestionario = "SELECT Id_Cuestionario FROM T_Cuestionario WHERE Id_Recurso_Tema = :idRecursoTema";
+            $stmtCuestionario = $this->conn->prepare($queryCuestionario);
+            $stmtCuestionario->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+            $stmtCuestionario->execute();
+            $cuestionario = $stmtCuestionario->fetch(PDO::FETCH_ASSOC);
+
+            if ($cuestionario) {
+                $resource['Id_Cuestionario'] = $cuestionario['Id_Cuestionario'];
+            }
+        }
     }
+
+    return $result;
+}
 
 
 
