@@ -1,8 +1,11 @@
 <?php
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../config/S3Manager.php';
 
 use Config\Database;
+use Config\S3Manager;
 
-require_once __DIR__ . '/../config/Database.php';
+define("DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION", totalTimeInSeconds(1, 0, 0, 0));
 
 class RecursoTema
 {
@@ -20,8 +23,25 @@ class RecursoTema
         $stmt->bindParam(':idTema', $idTema, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Convertir Imagen_Key_S3 a URL utilizando S3Manager
+        $s3Manager = new S3Manager();
+
+
+        foreach ($result as &$resource) {
+
+            if ($resource['Imagen_Key_S3'] !== null) {
+
+                $resource['Descripcion_Imagen_URL'] = $s3Manager->getObjectUrl($resource['Imagen_Key_S3'], DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION);
+            }
+
+            unset($resource['Imagen_Key_S3']);
+        }
+
+        return $result;
     }
+
 
     public function getById($idRecursoTema)
     {
