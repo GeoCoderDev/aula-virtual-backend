@@ -6,6 +6,7 @@ use Config\Database;
 use Config\S3Manager;
 
 define("DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION", totalTimeInSeconds(1, 0, 0, 0));
+define("DURATION_TOPIC_RESOURCE_FILE", totalTimeInSeconds(1, 0, 0, 0));
 
 class RecursoTema
 {
@@ -28,19 +29,44 @@ class RecursoTema
         // Convertir Imagen_Key_S3 a URL utilizando S3Manager
         $s3Manager = new S3Manager();
 
-
         foreach ($result as &$resource) {
-
             if ($resource['Imagen_Key_S3'] !== null) {
-
                 $resource['Descripcion_Imagen_URL'] = $s3Manager->getObjectUrl($resource['Imagen_Key_S3'], DURATION_TOPIC_RESOURCE_PHOTO_DESCRIPTION);
             }
 
             unset($resource['Imagen_Key_S3']);
+
+            // Obtener URL adicional para tipos 0 (Archivo_tema) y 1 (URL)
+            if ($resource['Tipo'] == 0) {
+                // Obtener URL del archivo
+                $queryArchivo = "SELECT a.Key_S3 FROM T_Archivos a 
+                             INNER JOIN T_Archivos_Tema at ON a.Id_Archivo = at.Id_Archivo
+                             WHERE at.Id_Recurso_Tema = :idRecursoTema";
+                $stmtArchivo = $this->conn->prepare($queryArchivo);
+                $stmtArchivo->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+                $stmtArchivo->execute();
+                $archivo = $stmtArchivo->fetch(PDO::FETCH_ASSOC);
+
+                if ($archivo) {
+                    $resource['Recurso_URL'] = $s3Manager->getObjectUrl($archivo['Key_S3'], DURATION_TOPIC_RESOURCE_FILE);
+                }
+            } elseif ($resource['Tipo'] == 1) {
+                // Obtener URL
+                $queryURL = "SELECT URL FROM T_URLs WHERE Id_Recurso_Tema = :idRecursoTema";
+                $stmtURL = $this->conn->prepare($queryURL);
+                $stmtURL->bindParam(':idRecursoTema', $resource['Id_Recurso_Tema'], PDO::PARAM_INT);
+                $stmtURL->execute();
+                $url = $stmtURL->fetch(PDO::FETCH_ASSOC);
+
+                if ($url) {
+                    $resource['Recurso_URL'] = $url['URL'];
+                }
+            }
         }
 
         return $result;
     }
+
 
 
     public function getById($idRecursoTema)
