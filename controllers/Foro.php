@@ -40,7 +40,7 @@ class ForoController
         foreach ($responses as $response) {
             $formattedResponses[] = [
                 "Id_Respuesta_Foro" => $response['Id_Respuesta_Foro'],
-                "Respuesta" => $response['Contenido_Respuesta'],
+                "Contenido_Respuesta" => $response['Contenido_Respuesta'],
                 "Estudiante" => [
                     "DNI_Estudiante" => $response['DNI_Estudiante'],
                     "Id_Usuario" => $response['Id_Usuario'],
