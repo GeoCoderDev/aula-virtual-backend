@@ -15,6 +15,23 @@ class Foro
         $this->conn = Database::getConnection();
     }
 
+    public function addResponse($Id_Foro, $DNI_Estudiante, $Contenido_Respuesta)
+    {
+        $query = "INSERT INTO T_Respuestas_Foro (Id_Foro, DNI_Estudiante, Contenido_Respuesta) 
+              VALUES (:Id_Foro, :DNI_Estudiante, :Contenido_Respuesta)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':Id_Foro', $Id_Foro, PDO::PARAM_INT);
+        $stmt->bindValue(':DNI_Estudiante', $DNI_Estudiante, PDO::PARAM_STR);
+        $stmt->bindValue(':Contenido_Respuesta', $Contenido_Respuesta, PDO::PARAM_STR);
+
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        } else {
+            return false;
+        }
+    }
+
     public function create($Id_Recurso_Tema)
     {
         $query = "INSERT INTO T_Foro (Id_Recurso_Tema) VALUES (:Id_Recurso_Tema)";

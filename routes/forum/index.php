@@ -18,6 +18,14 @@ Flight::group("/api/forum",  function () {
 
 
         $controller->getForumData($id, $DNI_Profesor, $DNI_Estudiante);
+    });
 
+    Flight::route("POST /@id/addResponse", function ($id) {
+
+        $data = Flight::request()->data->getData();
+
+        $controller = new ForoController();
+
+        $controller->addResponse($id, $data);
     });
 }, [new NotSQLInjection(), new StudentAuthenticated(true), new TeacherAuthenticated()]);

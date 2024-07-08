@@ -68,4 +68,31 @@ class ForoController
 
         Flight::json($response);
     }
+
+    public function addResponse($Id_Foro, $data)
+    {
+        // Validar que los datos necesarios estén presentes
+
+        if (!areFieldsComplete($data,  ['DNI_Estudiante', 'Contenido_Respuesta'])) return;
+
+        $DNI_Estudiante = $data['DNI_Estudiante'];
+        $Contenido_Respuesta = $data['Contenido_Respuesta'];
+
+        // Validar que el foro existe
+        $foroFinded = $this->foroModel->getById($Id_Foro);
+        if (!$foroFinded) {
+            Flight::json(["message" => "Foro no encontrado"], 404);
+            return;
+        }
+
+        // Añadir la respuesta
+        $Id_Respuesta_Foro = $this->foroModel->addResponse($Id_Foro, $DNI_Estudiante, $Contenido_Respuesta);
+
+        if ($Id_Respuesta_Foro) {
+
+            Flight::json(["message" => "Respuesta agregada al foro", "Id" => $Id_Respuesta_Foro], 201);
+        } else {
+            Flight::json(["message" => "Error al añadir la respuesta"], 500);
+        }
+    }
 }
